@@ -124,6 +124,9 @@ function App() {
                   ))}
                 </tbody>
               </table>
+              <button className="mx-4 mt-4 rounded-lg bg-red-600 px-6 py-1 font-semibold text-white shadow-md transition-all hover:bg-red-650 hover:shadow-lg active:scale-95">
+                Submit
+              </button>
             </div>
           ))}
         </div>
