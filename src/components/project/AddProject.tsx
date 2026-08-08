@@ -448,7 +448,7 @@ const AddProject = () => {
                                     </label>
 
                                     {/* Native Details Dropdown container that snaps shut on click-outside */}
-                                    <details className="dropdown w-full">
+                                    <details className="dropdown w-full relative">
                                       <summary className="btn btn-sm btn-outline border-base-300 bg-base-100 text-base-content justify-between w-full font-medium rounded-md normal-case list-none h-9 px-3">
                                         {currentSignee ? (
                                           <span className="text-sm font-semibold truncate text-neutral">
@@ -476,7 +476,7 @@ const AddProject = () => {
                                       />
 
                                       {/* Dropdown Content Box */}
-                                      <div className="dropdown-content menu p-2 shadow-xl bg-base-100 border border-base-200 rounded-lg w-full min-w-[240px] mt-1 space-y-2 z-20 relative">
+                                      <div className="dropdown-content menu p-2 shadow-xl bg-base-100 border border-base-200 rounded-lg w-full min-w-[240px] mt-1 space-y-2 z-20 absolute left-0 top-full">
                                         <input
                                           type="text"
                                           placeholder="Search by name or Employee ID..."
