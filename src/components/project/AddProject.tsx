@@ -34,7 +34,7 @@ const AddProject = () => {
 
   // 2. Add these state hooks to your form states
   const [selectedDeps, setSelectedDeps] = useState<string[]>([]);
-  const [hierarchyCount, setHierarchyCount] = useState<number>(0);
+  const [hierarchyCount, setHierarchyCount] = useState<number | null>(null);
   const [approvers, setApprovers] = useState<
     Record<string, { id: string; name: string }>
   >({});
@@ -42,15 +42,24 @@ const AddProject = () => {
     {},
   );
 
-  const handleHierarchyCountChange = (value: number) => {
-    const normalizedValue = Math.max(0, value);
+  const handleHierarchyCountChange = (value: string) => {
+    const parsedValue = value === "" ? null : Number(value);
+    if (parsedValue === null || Number.isNaN(parsedValue)) {
+      setHierarchyCount(null);
+      setApprovers({});
+      setEmpSearchTerms({});
+      return;
+    }
 
-    if (normalizedValue < hierarchyCount) {
+    const normalizedValue = Math.max(0, parsedValue);
+    const previousCount = hierarchyCount ?? 0;
+
+    if (normalizedValue < previousCount) {
       const updatedApprovers = { ...approvers };
       const updatedSearchTerms = { ...empSearchTerms };
 
       selectedDeps.forEach((dept) => {
-        for (let level = normalizedValue + 1; level <= hierarchyCount; level += 1) {
+        for (let level = normalizedValue + 1; level <= previousCount; level += 1) {
           const key = `${dept}-Level ${level}`;
           delete updatedApprovers[key];
           delete updatedSearchTerms[key];
@@ -76,12 +85,12 @@ const AddProject = () => {
 
   // Track sequential levels loop dynamically based on hierarchyCount input integer
   const hierarchyLevels = Array.from(
-    { length: Math.max(0, hierarchyCount) },
+    { length: Math.max(0, hierarchyCount ?? 0) },
     (_, i) => i + 1,
   );
 
   const totalAssignedApprovers = Object.keys(approvers).length;
-  const totalExpectedApprovers = selectedDeps.length * hierarchyCount;
+  const totalExpectedApprovers = selectedDeps.length * (hierarchyCount ?? 0);
 
   // 3. Selection handler function
   const handleSelectDepartment = (deptName: string) => {
@@ -361,10 +370,8 @@ const AddProject = () => {
                       <input
                         type="number"
                         min={0}
-                        value={hierarchyCount}
-                        onChange={(e) =>
-                          handleHierarchyCountChange(Number(e.target.value))
-                        }
+                        value={hierarchyCount ?? ""}
+                        onChange={(e) => handleHierarchyCountChange(e.target.value)}
                         className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
                         placeholder="Enter number of approval levels"
                       />
@@ -379,7 +386,7 @@ const AddProject = () => {
                         </span>
                       </label>
                       <div className="input input-bordered w-full bg-base-200/30 text-base-content/70 h-11 flex items-center px-3">
-                        {selectedDeps.length * hierarchyCount}
+                        {selectedDeps.length * (hierarchyCount ?? 0)}
                       </div>
                       <p className="text-xs text-base-content/50 mt-1">
                         Based on selected departments and hierarchy count.
