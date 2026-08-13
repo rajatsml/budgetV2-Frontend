@@ -1,137 +1,90 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import ProtectedRoute from "./ProtectedRoute";
+import NavBar from "./components/NavBar";
+import Footer from "./components/Footer";
+import AddProject from "./components/project/AddProject";
+import AllProjects from "./components/project/AllProjects";
+import NewPD from "./components/pd/NewPD";
+import NonNewPD from "./components/nonpd/NonNewPD";
+import PDProject from "./components/pd/PDProject";
 
 function App() {
-  const [projectType, setProjectType] = useState("PD");
-
-  const fiscalYears = ["FY27", "FY28", "FY29", "FY30", "FY31"];
-  const rows = ["Capex", "DRE", "H1", "H2"];
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-100 bg-red-600 p-4">
-          Budget Portal V2
-        </h1>
-      </header>
+    <BrowserRouter basename="/budgetV2">
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
 
-      <div className="mx-auto rounded-lg bg-white p-8 shadow">
-        {/* Project Type */}
-        <div className="mb-8">
-          <label className="block mb-2 text-sm font-semibold text-gray-700">
-            Type of Project
-          </label>
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <Home />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
 
-          <div className="flex gap-4">
-            {["PD", "Non PD", "IT"].map((type) => (
-              <label
-                key={type}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  name="projectType"
-                  value={type}
-                  checked={projectType === type}
-                  onChange={(e) => setProjectType(e.target.value)}
-                  className="h-4 w-4 text-blue-600"
-                />
-                <span className="text-gray-700">{type}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+        <Route
+          path="/allprojects"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <AllProjects />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Budget Table */}
+        <Route
+          path="/addproject"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <AddProject />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
 
-        <div className="overflow-x-auto rounded-lg border border-gray-300 bg-white shadow">
-          {["1", "2", "3", "4", "5"].map((tableIndex) => (
-            <div className="py-4">
-              <h5 className="mb-4 border-l-4 border-red-600 pl-3 text-lg font-semibold text-gray-800">
-                Department {tableIndex}
-              </h5>
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr>
-                    <th
-                      rowSpan={2}
-                      className="border border-gray-300 bg-gray-100 px-4 py-2"
-                    >
-                      Category
-                    </th>
+        <Route
+          path="/pd"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <NewPD />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pd2"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <PDProject />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
 
-                    {fiscalYears.map((year) => (
-                      <th
-                        key={year}
-                        colSpan={2}
-                        className="border border-gray-300 bg-gray-100 px-4 py-2 text-center"
-                      >
-                        {year}
-                      </th>
-                    ))}
-                  </tr>
+        <Route
+          path="/nonpd"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <NonNewPD />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
 
-                  <tr>
-                    {fiscalYears.map((year) => (
-                      <>
-                        <th
-                          key={`${year}-pr`}
-                          className="border border-gray-300 bg-gray-50 px-3 py-2"
-                        >
-                          PR
-                        </th>
-                        <th
-                          key={`${year}-pf`}
-                          className="border border-gray-300 bg-gray-50 px-3 py-2"
-                        >
-                          PF
-                        </th>
-                      </>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={row}>
-                      <td className="border border-gray-300 px-4 py-2 font-medium bg-gray-50">
-                        {row}
-                      </td>
-
-                      {fiscalYears.map((year) => (
-                        <>
-                          <td
-                            key={`${row}-${year}-pr`}
-                            className="border border-gray-300 p-1"
-                          >
-                            <input
-                              type="number"
-                              className="w-full rounded border border-gray-200 px-2 py-1 focus:border-blue-500 focus:outline-none"
-                            />
-                          </td>
-
-                          <td
-                            key={`${row}-${year}-pf`}
-                            className="border border-gray-300 p-1"
-                          >
-                            <input
-                              type="number"
-                              className="w-full rounded border border-gray-200 px-2 py-1 focus:border-blue-500 focus:outline-none"
-                            />
-                          </td>
-                        </>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <button className="mx-4 mt-4 rounded-lg bg-red-600 px-6 py-1 font-semibold text-white shadow-md transition-all hover:bg-red-650 hover:shadow-lg active:scale-95">
-                Submit
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+        <Route path="*" element={<Navigate to="/home" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

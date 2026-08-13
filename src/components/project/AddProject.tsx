@@ -38,9 +38,24 @@ const AddProject = () => {
   const [approvers, setApprovers] = useState<
     Record<string, { id: string; name: string }>
   >({});
+  const [makers, setMakers] = useState<
+    Record<string, { id: string; name: string }>
+  >({});
   const [empSearchTerms, setEmpSearchTerms] = useState<Record<string, string>>(
     {},
   );
+  const [makerSearchTerms, setMakerSearchTerms] = useState<
+    Record<string, string>
+  >({});
+
+  // Financial Year options and selected state
+  const AVAILABLE_FINANCIAL_YEARS = [
+    "2023-24",
+    "2024-25",
+    "2025-26",
+    "2026-27",
+  ];
+  const [financialYear, setFinancialYear] = useState<string>("");
 
   const handleHierarchyCountChange = (value: string) => {
     const parsedValue = value === "" ? null : Number(value);
@@ -59,7 +74,11 @@ const AddProject = () => {
       const updatedSearchTerms = { ...empSearchTerms };
 
       selectedDeps.forEach((dept) => {
-        for (let level = normalizedValue + 1; level <= previousCount; level += 1) {
+        for (
+          let level = normalizedValue + 1;
+          level <= previousCount;
+          level += 1
+        ) {
           const key = `${dept}-Level ${level}`;
           delete updatedApprovers[key];
           delete updatedSearchTerms[key];
@@ -89,8 +108,10 @@ const AddProject = () => {
     (_, i) => i + 1,
   );
 
-  const totalAssignedApprovers = Object.keys(approvers).length;
-  const totalExpectedApprovers = selectedDeps.length * (hierarchyCount ?? 0);
+  const totalAssignedApprovers =
+    Object.keys(approvers).length + Object.keys(makers).length;
+  const totalExpectedApprovers =
+    selectedDeps.length * (hierarchyCount ?? 0) + selectedDeps.length;
 
   // 3. Selection handler function
   const handleSelectDepartment = (deptName: string) => {
@@ -114,6 +135,14 @@ const AddProject = () => {
       if (key.startsWith(`${dept}-`)) delete updatedApprovers[key];
     });
     setApprovers(updatedApprovers);
+
+    const updatedMakers = { ...makers };
+    delete updatedMakers[dept];
+    setMakers(updatedMakers);
+
+    const updatedMakerSearchTerms = { ...makerSearchTerms };
+    delete updatedMakerSearchTerms[dept];
+    setMakerSearchTerms(updatedMakerSearchTerms);
   };
 
   return (
@@ -147,9 +176,9 @@ const AddProject = () => {
                   </h2>
                 </div>
 
-                {/* Form Control: Project Name */}
-                <div className="flex gap-x-4 ">
-                  <div className="form-control w-1/2">
+                {/* Form Control: Project Name, Project Type, Financial Year */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4">
+                  <div className="form-control w-full">
                     <label className="label py-1">
                       <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
                         Project Name
@@ -161,22 +190,42 @@ const AddProject = () => {
                       className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
                     />
                   </div>
-                  <div className="form-control w-1/2">
+
+                  <div className="form-control w-full">
                     <label className="label py-1">
                       <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
                         Project Type
                       </span>
                     </label>
-                    <select
-                      defaultValue="Pick a color"
-                      className="select w-full"
-                    >
-                      <option disabled={true} defaultValue={""}>
+                    <select defaultValue="" className="select w-full">
+                      <option disabled={true} value={""}>
                         Project Type
                       </option>
                       <option>PD</option>
                       <option>Non PD</option>
                       <option>IT</option>
+                    </select>
+                  </div>
+
+                  <div className="form-control w-full">
+                    <label className="label py-1">
+                      <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
+                        Financial Year
+                      </span>
+                    </label>
+                    <select
+                      value={financialYear}
+                      onChange={(e) => setFinancialYear(e.target.value)}
+                      className="select w-full"
+                    >
+                      <option disabled={true} value={""}>
+                        Select Financial Year
+                      </option>
+                      {AVAILABLE_FINANCIAL_YEARS.map((fy) => (
+                        <option key={fy} value={fy}>
+                          {fy}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -359,7 +408,7 @@ const AddProject = () => {
                       )}
                     </div>
                   </div>
- 
+
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="form-control w-full">
                       <label className="label py-1">
@@ -371,12 +420,15 @@ const AddProject = () => {
                         type="number"
                         min={0}
                         value={hierarchyCount ?? ""}
-                        onChange={(e) => handleHierarchyCountChange(e.target.value)}
+                        onChange={(e) =>
+                          handleHierarchyCountChange(e.target.value)
+                        }
                         className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
                         placeholder="Enter number of approval levels"
                       />
                       <p className="text-xs text-base-content/50 mt-1">
-                        Add the number of approval levels for each selected department.
+                        Add the number of approval levels for each selected
+                        department.
                       </p>
                     </div>
                     <div className="form-control w-full">
@@ -386,15 +438,17 @@ const AddProject = () => {
                         </span>
                       </label>
                       <div className="input input-bordered w-full bg-base-200/30 text-base-content/70 h-11 flex items-center px-3">
-                        {selectedDeps.length * (hierarchyCount ?? 0)}
+                        {selectedDeps.length * (hierarchyCount ?? 0) +
+                          selectedDeps.length}
                       </div>
                       <p className="text-xs text-base-content/50 mt-1">
-                        Based on selected departments and hierarchy count.
+                        Based on selected departments, makers and hierarchy
+                        count.
                       </p>
                     </div>
                   </div>
                 </div>
- 
+
                 {/* Dynamic Generated Approver Assignments Module Matrix */}
                 {selectedDeps.length > 0 && hierarchyLevels.length > 0 && (
                   <div className="card bg-base-100 shadow-sm border border-base-300">
@@ -420,9 +474,142 @@ const AddProject = () => {
                             key={dept}
                             className="bg-base-200/20 border border-base-200 rounded-xl p-4 space-y-4"
                           >
-                            <h3 className="font-bold text-sm text-base-content tracking-wide border-b border-base-200/60 pb-2">
-                              {dept} Approval Chain
-                            </h3>
+                            <div className="flex items-center justify-between gap-3 border-b border-base-200/60 pb-2">
+                              <h3 className="font-bold text-sm text-base-content tracking-wide">
+                                {dept} Approval Chain
+                              </h3>
+                              <div className="text-[10px] uppercase tracking-[0.14em] text-base-content/50">
+                                1 Maker + {hierarchyCount ?? 0} Levels
+                              </div>
+                            </div>
+
+                            <div className="form-control w-full max-w-md">
+                              <label className="label py-0">
+                                <span className="label-text text-xs font-semibold text-base-content/70">
+                                  Maker ID
+                                </span>
+                              </label>
+
+                              <details className="dropdown w-full relative">
+                                <summary className="btn btn-sm btn-outline border-base-300 bg-base-100 text-base-content justify-between w-full font-medium rounded-md normal-case list-none h-9 px-3">
+                                  {makers[dept] ? (
+                                    <span className="text-sm font-semibold truncate text-neutral">
+                                      {makers[dept].id} — {makers[dept].name}
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs text-base-content/40 font-normal">
+                                      Select Maker ID...
+                                    </span>
+                                  )}
+                                  <span className="text-xs text-base-content/40">
+                                    ▼
+                                  </span>
+                                </summary>
+
+                                <span
+                                  className="fixed inset-0 z-10 cursor-default"
+                                  onClick={(e) =>
+                                    e.currentTarget.parentElement?.removeAttribute(
+                                      "open",
+                                    )
+                                  }
+                                />
+
+                                <div className="dropdown-content menu p-2 shadow-xl bg-base-100 border border-base-200 rounded-lg w-full min-w-60 mt-1 space-y-2 z-20 absolute left-0 top-full">
+                                  <input
+                                    type="text"
+                                    placeholder="Search by name or Employee ID..."
+                                    value={makerSearchTerms[dept] || ""}
+                                    onChange={(e) =>
+                                      setMakerSearchTerms({
+                                        ...makerSearchTerms,
+                                        [dept]: e.target.value,
+                                      })
+                                    }
+                                    className="input input-xs input-bordered w-full bg-base-200/40 text-xs h-8 pl-2"
+                                  />
+
+                                  <div className="max-h-36 overflow-y-auto space-y-0.5">
+                                    {EMPLOYEE_REGISTRY.filter(
+                                      (emp) =>
+                                        emp.name
+                                          .toLowerCase()
+                                          .includes(
+                                            (
+                                              makerSearchTerms[dept] || ""
+                                            ).toLowerCase(),
+                                          ) ||
+                                        emp.id
+                                          .toLowerCase()
+                                          .includes(
+                                            (
+                                              makerSearchTerms[dept] || ""
+                                            ).toLowerCase(),
+                                          ),
+                                    ).length === 0 ? (
+                                      <span className="text-xs text-base-content/40 p-2 block text-center">
+                                        No employee records match
+                                      </span>
+                                    ) : (
+                                      EMPLOYEE_REGISTRY.filter(
+                                        (emp) =>
+                                          emp.name
+                                            .toLowerCase()
+                                            .includes(
+                                              (
+                                                makerSearchTerms[dept] || ""
+                                              ).toLowerCase(),
+                                            ) ||
+                                          emp.id
+                                            .toLowerCase()
+                                            .includes(
+                                              (
+                                                makerSearchTerms[dept] || ""
+                                              ).toLowerCase(),
+                                            ),
+                                      ).map((emp) => (
+                                        <button
+                                          key={emp.id}
+                                          type="button"
+                                          onClick={(
+                                            event: MouseEvent<HTMLButtonElement>,
+                                          ) => {
+                                            setMakers({
+                                              ...makers,
+                                              [dept]: {
+                                                id: emp.id,
+                                                name: emp.name,
+                                              },
+                                            });
+                                            setMakerSearchTerms({
+                                              ...makerSearchTerms,
+                                              [dept]: "",
+                                            });
+                                            (
+                                              document.activeElement as HTMLElement
+                                            )?.blur();
+                                            const detailsElement = (
+                                              event.currentTarget as HTMLElement
+                                            ).closest("details");
+                                            detailsElement?.removeAttribute(
+                                              "open",
+                                            );
+                                          }}
+                                          className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-base-200 flex justify-between text-base-content"
+                                        >
+                                          <span className="font-medium">
+                                            {emp.name}
+                                          </span>
+                                          <span className="text-base-content/50 font-mono text-[10px]">
+                                            {emp.id}
+                                          </span>
+                                        </button>
+                                      ))
+                                    )}
+                                  </div>
+                                </div>
+                              </details>
+                            </div>
 
                             {/* Grid loops through your hierarchy levels count integer */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -483,7 +670,7 @@ const AddProject = () => {
                                       />
 
                                       {/* Dropdown Content Box */}
-                                      <div className="dropdown-content menu p-2 shadow-xl bg-base-100 border border-base-200 rounded-lg w-full min-w-[240px] mt-1 space-y-2 z-20 absolute left-0 top-full">
+                                      <div className="dropdown-content menu p-2 shadow-xl bg-base-100 border border-base-200 rounded-lg w-full min-w-60 mt-1 space-y-2 z-20 absolute left-0 top-full">
                                         <input
                                           type="text"
                                           placeholder="Search by name or Employee ID..."
@@ -507,7 +694,9 @@ const AddProject = () => {
                                               <button
                                                 key={emp.id}
                                                 type="button"
-                                                onClick={(event: MouseEvent<HTMLButtonElement>) => {
+                                                onClick={(
+                                                  event: MouseEvent<HTMLButtonElement>,
+                                                ) => {
                                                   setApprovers({
                                                     ...approvers,
                                                     [uniqueKey]: {
@@ -522,10 +711,12 @@ const AddProject = () => {
                                                   (
                                                     document.activeElement as HTMLElement
                                                   )?.blur();
-                                                  const detailsElement = (event.currentTarget as HTMLElement).closest(
-                                                    "details",
+                                                  const detailsElement = (
+                                                    event.currentTarget as HTMLElement
+                                                  ).closest("details");
+                                                  detailsElement?.removeAttribute(
+                                                    "open",
                                                   );
-                                                  detailsElement?.removeAttribute("open");
                                                 }}
                                                 className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-base-200 flex justify-between text-base-content"
                                               >
