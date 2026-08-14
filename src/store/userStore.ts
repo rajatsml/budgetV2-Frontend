@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 type AuthUser = {
   token: string;
@@ -12,12 +12,16 @@ type AuthUser = {
 
 interface UserState {
   user: AuthUser;
-  login: (usernameOrId: string, password: string, type?: number) => Promise<AuthUser>;
+  login: (
+    usernameOrId: string,
+    password: string,
+    type?: number,
+  ) => Promise<AuthUser>;
   logout: () => void;
   isAuthenticated: () => boolean;
 }
 
-const STORAGE_KEY = 'capex_auth';
+const STORAGE_KEY = "capex_auth";
 
 const loadFromStorage = (): AuthUser => {
   try {
@@ -37,7 +41,7 @@ const useUserStore = create<UserState>((set, get) => ({
   user: loadFromStorage(),
 
   login: async (usernameOrId: string, password: string, type?: number) => {
-    const url = 'http://localhost:5024/api/Auth/login';
+    const url = "http://localhost:5024/api/Auth/login";
     try {
       let body: any;
 
@@ -49,15 +53,15 @@ const useUserStore = create<UserState>((set, get) => ({
       }
 
       const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: '*/*' },
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "*/*" },
         body: JSON.stringify(body),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        const msg = data?.message || 'Invalid username or password';
+        const msg = data?.message || "Invalid username or password";
         throw new Error(msg);
       }
 
@@ -86,7 +90,7 @@ const useUserStore = create<UserState>((set, get) => ({
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj));
       } catch (e) {
-        console.warn('Failed to persist auth', e);
+        console.warn("Failed to persist auth", e);
       }
 
       return userObj;

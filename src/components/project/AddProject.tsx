@@ -1,35 +1,14 @@
 import { FileText, X } from "lucide-react";
-import { type MouseEvent, useState } from "react";
+import { type MouseEvent, useEffect, useState } from "react";
+import { FetchDropDownData } from "../../../server/master";
 
 const AddProject = () => {
-  // 1. Array fed into the HTML <datalist> block
-  const AVAILABLE_DEPARTMENTS = [
-    "Finance",
-    "Engineering",
-    "HR",
-    "Operations",
-    "Marketing",
-    "Supply Chain",
-    "Quality Assurance",
-    "IT",
-    "Legal",
-    "Sales",
-    "Customer Support",
-    "Research & Development",
-    "Procurement",
-    "Logistics",
-    "Production",
-    "Maintenance",
-    "Safety",
-    "Training",
-  ];
-
-  const EMPLOYEE_REGISTRY = [
-    { id: "EMP101", name: "Amit Sharma" },
-    { id: "EMP102", name: "Priya Patel" },
-    { id: "EMP103", name: "Rahul Verma" },
-    { id: "EMP104", name: "Sneha Reddy" },
-    { id: "EMP105", name: "Vikram Malhotra" },
+  // Financial Year options and selected state
+  const AVAILABLE_FINANCIAL_YEARS = [
+    "2023-24",
+    "2024-25",
+    "2025-26",
+    "2026-27",
   ];
 
   // 2. Add these state hooks to your form states
@@ -47,15 +26,13 @@ const AddProject = () => {
   const [makerSearchTerms, setMakerSearchTerms] = useState<
     Record<string, string>
   >({});
-
-  // Financial Year options and selected state
-  const AVAILABLE_FINANCIAL_YEARS = [
-    "2023-24",
-    "2024-25",
-    "2025-26",
-    "2026-27",
-  ];
   const [financialYear, setFinancialYear] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [projectTypes, setProjectTypes] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
 
   const handleHierarchyCountChange = (value: string) => {
     const parsedValue = value === "" ? null : Number(value);
@@ -92,14 +69,11 @@ const AddProject = () => {
     setHierarchyCount(normalizedValue);
   };
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-
   // Filter departments by search input, excluding already selected ones
-  const filteredDeps = AVAILABLE_DEPARTMENTS.filter(
+  const filteredDeps = departments.filter(
     (dept) =>
-      dept.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !selectedDeps.includes(dept),
+      dept.text.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !selectedDeps.includes(dept.text),
   );
 
   // Track sequential levels loop dynamically based on hierarchyCount input integer
@@ -116,10 +90,7 @@ const AddProject = () => {
   // 3. Selection handler function
   const handleSelectDepartment = (deptName: string) => {
     const trimmed = deptName.trim();
-    if (
-      AVAILABLE_DEPARTMENTS.includes(trimmed) &&
-      !selectedDeps.includes(trimmed)
-    ) {
+    if (!selectedDeps.includes(trimmed)) {
       setSelectedDeps([...selectedDeps, trimmed]);
     }
     setSearchTerm(""); // Clears search query input text field
@@ -144,6 +115,61 @@ const AddProject = () => {
     delete updatedMakerSearchTerms[dept];
     setMakerSearchTerms(updatedMakerSearchTerms);
   };
+
+  const GetProjectTypes = async () => {
+    try {
+      const data = await FetchDropDownData(
+        `${import.meta.env.VITE_API_URL}/api/Dropdowns/1`,
+      );
+
+      setProjectTypes(data || []);
+    } catch (error) {
+      console.error("Error fetching project types:", error);
+    }
+  };
+
+  const GetDepartments = async () => {
+    try {
+      const data = await FetchDropDownData(
+        `${import.meta.env.VITE_API_URL}/api/Dropdowns/3`,
+      );
+
+      setDepartments(data || []);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    }
+  };
+
+  const GetEmployees = async (search = "") => {
+    try {
+      const data = await FetchDropDownData(
+        `${import.meta.env.VITE_API_URL}/api/Dropdowns/2?search=${search}&page=1&pageSize=50`,
+      );
+      console.log("GETEMPLOYEES DATA", data);
+
+      setEmployees(data || []);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  };
+
+  useEffect(() => {
+    GetProjectTypes();
+    GetDepartments();
+    GetEmployees();
+  }, []);
+
+  useEffect(() => {
+    const makerSearch =
+      Object.values(makerSearchTerms).find((x) => x?.trim()) || "";
+
+    const approverSearch =
+      Object.values(empSearchTerms).find((x) => x?.trim()) || "";
+
+    const search = makerSearch || approverSearch;
+
+    GetEmployees(search);
+  }, [empSearchTerms, makerSearchTerms]);
 
   return (
     <div className="min-h-screen bg-base-200/50 py-10 px-4 sm:px-6 lg:px-8">
@@ -198,12 +224,15 @@ const AddProject = () => {
                       </span>
                     </label>
                     <select defaultValue="" className="select w-full">
-                      <option disabled={true} value={""}>
+                      <option disabled value="">
                         Project Type
                       </option>
-                      <option>PD</option>
-                      <option>Non PD</option>
-                      <option>IT</option>
+
+                      {projectTypes.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.text}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -390,16 +419,16 @@ const AddProject = () => {
                             ) : (
                               filteredDeps.map((dept) => (
                                 <button
-                                  key={dept}
+                                  key={dept.value}
                                   type="button"
                                   onClick={() => {
-                                    handleSelectDepartment(dept);
+                                    handleSelectDepartment(dept.text);
                                     setSearchTerm("");
-                                    setIsOpen(false); // Close popover
+                                    setIsOpen(false);
                                   }}
                                   className="w-full text-left px-2 py-1.5 text-sm rounded-md hover:bg-base-200 text-base-content"
                                 >
-                                  {dept}
+                                  {dept.text}
                                 </button>
                               ))
                             )}
@@ -530,16 +559,16 @@ const AddProject = () => {
                                   />
 
                                   <div className="max-h-36 overflow-y-auto space-y-0.5">
-                                    {EMPLOYEE_REGISTRY.filter(
+                                    {employees.filter(
                                       (emp) =>
-                                        emp.name
+                                        emp.text
                                           .toLowerCase()
                                           .includes(
                                             (
                                               makerSearchTerms[dept] || ""
                                             ).toLowerCase(),
                                           ) ||
-                                        emp.id
+                                        emp.text
                                           .toLowerCase()
                                           .includes(
                                             (
@@ -551,60 +580,62 @@ const AddProject = () => {
                                         No employee records match
                                       </span>
                                     ) : (
-                                      EMPLOYEE_REGISTRY.filter(
-                                        (emp) =>
-                                          emp.name
-                                            .toLowerCase()
-                                            .includes(
+                                      employees
+                                        .filter(
+                                          (emp) =>
+                                            emp.text
+                                              .toLowerCase()
+                                              .includes(
+                                                (
+                                                  makerSearchTerms[dept] || ""
+                                                ).toLowerCase(),
+                                              ) ||
+                                            emp.text
+                                              .toLowerCase()
+                                              .includes(
+                                                (
+                                                  makerSearchTerms[dept] || ""
+                                                ).toLowerCase(),
+                                              ),
+                                        )
+                                        .map((emp) => (
+                                          <button
+                                            key={emp.value}
+                                            type="button"
+                                            onClick={(
+                                              event: MouseEvent<HTMLButtonElement>,
+                                            ) => {
+                                              setMakers({
+                                                ...makers,
+                                                [dept]: {
+                                                  id: emp.value,
+                                                  name: emp.text,
+                                                },
+                                              });
+                                              setMakerSearchTerms({
+                                                ...makerSearchTerms,
+                                                [dept]: "",
+                                              });
                                               (
-                                                makerSearchTerms[dept] || ""
-                                              ).toLowerCase(),
-                                            ) ||
-                                          emp.id
-                                            .toLowerCase()
-                                            .includes(
-                                              (
-                                                makerSearchTerms[dept] || ""
-                                              ).toLowerCase(),
-                                            ),
-                                      ).map((emp) => (
-                                        <button
-                                          key={emp.id}
-                                          type="button"
-                                          onClick={(
-                                            event: MouseEvent<HTMLButtonElement>,
-                                          ) => {
-                                            setMakers({
-                                              ...makers,
-                                              [dept]: {
-                                                id: emp.id,
-                                                name: emp.name,
-                                              },
-                                            });
-                                            setMakerSearchTerms({
-                                              ...makerSearchTerms,
-                                              [dept]: "",
-                                            });
-                                            (
-                                              document.activeElement as HTMLElement
-                                            )?.blur();
-                                            const detailsElement = (
-                                              event.currentTarget as HTMLElement
-                                            ).closest("details");
-                                            detailsElement?.removeAttribute(
-                                              "open",
-                                            );
-                                          }}
-                                          className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-base-200 flex justify-between text-base-content"
-                                        >
-                                          <span className="font-medium">
-                                            {emp.name}
-                                          </span>
-                                          <span className="text-base-content/50 font-mono text-[10px]">
-                                            {emp.id}
-                                          </span>
-                                        </button>
-                                      ))
+                                                document.activeElement as HTMLElement
+                                              )?.blur();
+                                              const detailsElement = (
+                                                event.currentTarget as HTMLElement
+                                              ).closest("details");
+                                              detailsElement?.removeAttribute(
+                                                "open",
+                                              );
+                                            }}
+                                            className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-base-200 flex justify-between text-base-content"
+                                          >
+                                            <span className="font-medium">
+                                              {emp.text}
+                                            </span>
+                                            <span className="text-base-content/50 font-mono text-[10px]">
+                                              {emp.value}
+                                            </span>
+                                          </button>
+                                        ))
                                     )}
                                   </div>
                                 </div>
@@ -620,12 +651,12 @@ const AddProject = () => {
                                 const currentSignee = approvers[uniqueKey];
 
                                 // Filter employee lookup list based on typed query values
-                                const filteredEmps = EMPLOYEE_REGISTRY.filter(
+                                const filteredEmps = employees.filter(
                                   (emp) =>
-                                    emp.name
+                                    emp.text
                                       .toLowerCase()
                                       .includes(currentSearch.toLowerCase()) ||
-                                    emp.id
+                                    emp.text
                                       .toLowerCase()
                                       .includes(currentSearch.toLowerCase()),
                                 );
@@ -692,7 +723,7 @@ const AddProject = () => {
                                           ) : (
                                             filteredEmps.map((emp) => (
                                               <button
-                                                key={emp.id}
+                                                key={emp.value}
                                                 type="button"
                                                 onClick={(
                                                   event: MouseEvent<HTMLButtonElement>,
@@ -700,8 +731,8 @@ const AddProject = () => {
                                                   setApprovers({
                                                     ...approvers,
                                                     [uniqueKey]: {
-                                                      id: emp.id,
-                                                      name: emp.name,
+                                                      id: emp.value,
+                                                      name: emp.text,
                                                     },
                                                   });
                                                   setEmpSearchTerms({
@@ -721,10 +752,10 @@ const AddProject = () => {
                                                 className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-base-200 flex justify-between text-base-content"
                                               >
                                                 <span className="font-medium">
-                                                  {emp.name}
+                                                  {emp.text}
                                                 </span>
                                                 <span className="text-base-content/50 font-mono text-[10px]">
-                                                  {emp.id}
+                                                  {emp.value}
                                                 </span>
                                               </button>
                                             ))
