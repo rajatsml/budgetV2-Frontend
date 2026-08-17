@@ -276,18 +276,14 @@ const NonPD2 = () => {
     (acc, row) => {
       numericFieldKeys.forEach((key) => {
         const value = Number(row[key]);
-
         acc[key] += Number.isFinite(value) ? value : 0;
       });
 
       return acc;
     },
     numericFieldKeys.reduce(
-      (acc, key) => {
-        acc[key] = 0;
-        return acc;
-      },
-      {} as Record<string, number>,
+      (acc, key) => ({ ...acc, [key]: 0 }),
+      {} as Record<NonPDFieldKey, number>,
     ),
   );
 
@@ -370,18 +366,14 @@ const NonPD2 = () => {
 
                 <th className="bg-rose-600">Financial</th>
 
-                <th colSpan={7} className="bg-cyan-700">
-                  Project Owner
-                </th>
+                <th className="bg-cyan-700">Project Owner</th>
 
                 <th className="bg-cyan-600">Capex/Revex</th>
                 <th className="bg-cyan-500">Template Category</th>
                 <th className="bg-cyan-400 text-slate-900">Project Name</th>
                 <th className="bg-cyan-300 text-slate-900">Qnty</th>
 
-                <th colSpan={7} className="bg-indigo-700">
-                  Unit of Measure
-                </th>
+                <th className="bg-indigo-700">Unit of Measure</th>
                 <th className="bg-sky-600">Unit Rate</th>
                 <th className="bg-sky-600">Currency</th>
                 <th className="bg-sky-600">Exchange Rate</th>
@@ -433,47 +425,45 @@ const NonPD2 = () => {
                 <th className="bg-green-600">FY 30 H2</th>
                 <th className="bg-green-600">FY 31 H1</th>
                 <th className="bg-green-600">FY 31 H2</th>
+                <th className="bg-slate-700">Action</th>
               </tr>
             </thead>
 
             <tbody>
               <tr className="bg-slate-50">
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    {NON_PD_ROW_FIELDS.map((field) => (
-                      <td key={field.key}>{row[field.key]}</td>
-                    ))}
-
-                    <td className={actionCellClass}>
-                      <div className="flex flex-nowrap items-center gap-2 justify-center">
-                        <button
-                          type="button"
-                          className="btn btn-warning btn-sm"
-                          onClick={() => handleEditRow(row.id)}
-                        >
-                          <Pencil size={14} />
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          className="btn btn-error btn-sm"
-                          onClick={() => handleDeleteRow(row.id)}
-                        >
-                          <Trash2 size={14} />
-                          Delete
-                        </button>
-                      </div>
+                {NON_PD_ROW_FIELDS.map((field) => {
+                  const value = currentEntry[field.key];
+                  return (
+                    <td key={field.key} className={rowCellClass}>
+                      {field.inputType === "textarea" ? (
+                        <textarea
+                          className={textInput}
+                          value={value}
+                          placeholder={field.placeholder}
+                          onChange={(event) =>
+                            handleEntryChange(field.key, event.target.value)
+                          }
+                        />
+                      ) : (
+                        <input
+                          type="number"
+                          className={numberInput}
+                          value={value}
+                          placeholder={field.placeholder}
+                          onChange={(event) =>
+                            handleEntryChange(field.key, event.target.value)
+                          }
+                        />
+                      )}
                     </td>
-                  </tr>
-                ))}
+                  );
+                })}
+
                 <td className={actionCellClass}>
                   <div className="flex flex-nowrap items-center justify-center gap-2">
                     <button
                       type="button"
-                      className={`${actionButtonClass} ${
-                        isEditing ? "btn-primary" : "btn-success"
-                      }`}
+                      className={`${actionButtonClass} ${isEditing ? "btn-primary" : "btn-success"}`}
                       onClick={handleSaveRow}
                     >
                       <PlusSquare size={16} />
@@ -494,6 +484,103 @@ const NonPD2 = () => {
             </tbody>
           </table>
         </div>
+
+        {rows.length > 0 && (
+          <div className="mt-6 overflow-hidden border border-base-200 bg-base-100">
+            <div className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between border-b border-base-200">
+              <div>
+                <h3 className="text-xl font-semibold text-base-content">
+                  Added entries overview
+                </h3>
+              </div>
+              <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700">
+                {rows.length} item{rows.length === 1 ? "" : "s"}
+              </div>
+            </div>
+
+            <div className="overflow-x-auto px-6 pb-6 pt-4">
+              <div className=" border border-base-200 bg-white">
+                <table className="table w-full min-w-max text-sm border-separate border border-slate-200">
+                  <thead>
+                    <tr className="bg-slate-50 text-left text-xs uppercase tracking-[0.18em] text-slate-500">
+                      {NON_PD_ROW_FIELDS.map((field) => (
+                        <th
+                          key={field.key}
+                          className="border border-slate-200 bg-slate-50/80 whitespace-nowrap px-3 py-2"
+                        >
+                          {String(field.key)
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/^./, (char) => char.toUpperCase())
+                            .replace(/Fy/g, "FY")
+                            .replace(/H1/g, "H1")
+                            .replace(/H2/g, "H2")}
+                        </th>
+                      ))}
+                      <th className="border border-slate-200 bg-slate-50/80 px-3 py-2 text-center">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        className="transition-colors hover:bg-slate-50"
+                      >
+                        {NON_PD_ROW_FIELDS.map((field) => (
+                          <td
+                            key={`${row.id}-${String(field.key)}`}
+                            className={`${rowCellClass} whitespace-pre border border-slate-200 px-3 py-2`}
+                          >
+                            {row[field.key] || "—"}
+                          </td>
+                        ))}
+
+                        <td className="py-3 align-middle border border-slate-200 bg-slate-50/40">
+                          <div className="flex flex-nowrap items-center justify-center gap-2">
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline btn-primary min-w-22.5"
+                              onClick={() => handleEditRow(row.id)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline btn-error min-w-22.5"
+                              onClick={() => handleDeleteRow(row.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+
+                  <tfoot>
+                    <tr className="bg-slate-100 font-semibold text-slate-700">
+                      {NON_PD_ROW_FIELDS.map((field, index) => (
+                        <td
+                          key={`total-${String(field.key)}`}
+                          className={`${rowCellClass} whitespace-pre border border-slate-200 px-3 py-2`}
+                        >
+                          {field.inputType === "number"
+                            ? (totals[field.key] ?? 0).toLocaleString()
+                            : index === 0
+                              ? "Total"
+                              : ""}
+                        </td>
+                      ))}
+                      <td className="border border-slate-200 bg-slate-100 px-3 py-2" />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
