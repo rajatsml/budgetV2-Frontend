@@ -1,58 +1,43 @@
-import React, { useState, useMemo, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { GetProjects } from "../../service/projectmaster";
 
 // 1. Interface matching the form fields from your image and list requirements
-interface ProjectItem {
-  id: string; // e.g., "PRJ-2026-001"
-  name: string;
-  type: "PD" | "R&D" | "Ops" | "CapEx"; // PD matches your dropdown default
-  fiscalYear: string; // e.g., "FY26"
-  targetStartDate: string;
-  targetEndDate: string;
-  departments: string[];
-  hierarchyCount: number;
-  expectedApprovers: number;
-  status: "Draft" | "Pending Approval" | "Approved" | "Rejected";
+
+export interface ProjectItem {
+  projectId: string;
+  projectName: string;
+  projectType: string;
+  financialYear: string;
+
+  projectScope: string;
+  keyAssumptions: string;
+
+  startDate?: string;
+  endDate?: string;
+
+  createdAt?: string;
+  updatedAt?: string;
+
+  createdBy: string;
+
+  status: string;
+
+  departments: ProjectDepartment[];
 }
 
-// Mock database containing fields matching your creation form
-const MOCK_PROJECTS: ProjectItem[] = [
-  {
-    id: "PRJ-2026-001",
-    name: "Q3 Infrastructure Upgrade",
-    type: "PD",
-    fiscalYear: "FY26",
-    targetStartDate: "2026-09-01",
-    targetEndDate: "2026-12-31",
-    departments: ["IT", "Operations"],
-    hierarchyCount: 3,
-    expectedApprovers: 3,
-    status: "Pending Approval",
-  },
-  {
-    id: "PRJ-2026-002",
-    name: "Marketing Automation Sync",
-    type: "PD",
-    fiscalYear: "FY26",
-    targetStartDate: "2026-10-15",
-    targetEndDate: "2027-02-15",
-    departments: ["Marketing"],
-    hierarchyCount: 1,
-    expectedApprovers: 1,
-    status: "Draft",
-  },
-  {
-    id: "PRJ-2025-089",
-    name: "SaaS Licensing Audit",
-    type: "Ops",
-    fiscalYear: "FY25",
-    targetStartDate: "2025-06-01",
-    targetEndDate: "2025-08-30",
-    departments: ["Finance", "Legal"],
-    hierarchyCount: 2,
-    expectedApprovers: 2,
-    status: "Approved",
-  },
-];
+export interface ProjectDepartment {
+  departmentId: number;
+  departmentName: string;
+
+  hierarchy: ProjectHierarchy;
+}
+
+export interface ProjectHierarchy {
+  makerId: string;
+  approver1: string;
+  approver2: string;
+  approver3: string;
+}
 
 interface ProjectListProps {
   onEdit?: (projectId: string) => void;
@@ -62,23 +47,28 @@ interface ProjectListProps {
 const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
   const [search, setSearch] = useState<string>("");
   const [fyFilter, setFyFilter] = useState<string>("All");
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Get dynamic fiscal years for filter dropdown
   const fiscalYears = useMemo<string[]>(() => {
-    const years = MOCK_PROJECTS.map((p) => p.fiscalYear);
+    const years = projects.map((p) => p.financialYear);
     return ["All", ...Array.from(new Set(years))];
-  }, []);
+  }, [projects]);
 
   // Filter projects by search string (ID/Name) and Fiscal Year
   const filteredProjects = useMemo<ProjectItem[]>(() => {
-    return MOCK_PROJECTS.filter((project) => {
+    return projects.filter((project) => {
       const matchesSearch =
-        project.id.toLowerCase().includes(search.toLowerCase()) ||
-        project.name.toLowerCase().includes(search.toLowerCase());
-      const matchesFY = fyFilter === "All" || project.fiscalYear === fyFilter;
+        project.projectId?.toLowerCase().includes(search.toLowerCase()) ||
+        project.projectName?.toLowerCase().includes(search.toLowerCase());
+
+      const matchesFY =
+        fyFilter === "All" || project.financialYear === fyFilter;
+
       return matchesSearch && matchesFY;
     });
-  }, [search, fyFilter]);
+  }, [projects, search, fyFilter]);
 
   // Status badge styling helper
   const getStatusStyle = (status: ProjectItem["status"]): string => {
@@ -93,6 +83,24 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
         return "bg-red-50 text-red-700 border-red-200";
       default:
         return "bg-gray-50 text-gray-600";
+    }
+  };
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+
+      const data = await GetProjects();
+
+      console.log("Projects API Response:", data);
+
+      setProjects(data);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -153,37 +161,47 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
               ) : (
                 filteredProjects.map((project) => (
                   <tr
-                    key={project.id}
+                    key={project?.projectId}
                     className="hover:bg-gray-50/70 transition-colors"
                   >
                     {/* Project ID */}
                     <td className="py-4 px-6 font-mono text-xs font-bold text-gray-900">
-                      {project.id}
+                      {project?.projectId}
                     </td>
 
                     {/* Project Name and Timeline */}
                     <td className="py-4 px-6 max-w-xs">
                       <div
                         className="font-semibold text-gray-900 truncate mb-1"
-                        title={project.name}
+                        title={project?.projectName}
                       >
-                        {project.name}
+                        {project?.projectName}
                       </div>
                       <div className="text-xs text-gray-400">
-                        {project.targetStartDate} to {project.targetEndDate}
+                        {project?.startDate
+                          ? new Date(project.startDate).toLocaleDateString(
+                              "en-GB",
+                            )
+                          : "-"}{" "}
+                        to{" "}
+                        {project?.endDate
+                          ? new Date(project.endDate).toLocaleDateString(
+                              "en-GB",
+                            )
+                          : "-"}
                       </div>
                     </td>
 
                     {/* Project Type */}
                     <td className="py-4 px-6 text-center">
                       <span className="px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-md">
-                        {project.type}
+                        {project.projectType}
                       </span>
                     </td>
 
                     {/* Fiscal Year */}
-                    <td className="py-4 px-6 text-center font-medium text-gray-600">
-                      {project.fiscalYear}
+                    <td className="py-4 px-6 text-center font-xs text-gray-600">
+                      {project.financialYear}
                     </td>
 
                     {/* Custom Status Tag */}
@@ -199,13 +217,13 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
                     <td className="py-4 px-6 text-right whitespace-nowrap">
                       <div className="inline-flex gap-2">
                         <button
-                          onClick={() => onView?.(project.id)}
+                          onClick={() => onView?.(project.projectId)}
                           className="px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                         >
                           View
                         </button>
                         <button
-                          onClick={() => onEdit?.(project.id)}
+                          onClick={() => onEdit?.(project.projectId)}
                           className="px-2.5 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
                         >
                           Edit

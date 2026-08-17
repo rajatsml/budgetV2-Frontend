@@ -24,4 +24,79 @@ const CreateProject = async (payload: any) => {
   }
 };
 
-export { FetchAllAdminProjects, CreateProject };
+/**
+ * Get projects based on logged-in user.
+ * Backend will automatically:
+ * - return all projects for bp_admin
+ * - return assigned projects for Makers/Approvers
+ */
+const GetProjects = async () => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/Projects`,
+    );
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    return [];
+  }
+};
+
+/**
+ * Get single project details
+ */
+const GetProjectById = async (projectId: string) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/Projects/${projectId}`,
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching project ${projectId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Update Project
+ */
+const UpdateProject = async (projectId: string, payload: any) => {
+  try {
+    const response = await api.put(
+      `${import.meta.env.VITE_API_URL}/api/Projects/${projectId}`,
+      payload,
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating project:", error);
+    throw error;
+  }
+};
+
+/**
+ * Delete Project
+ */
+const DeleteProject = async (projectId: string) => {
+  try {
+    const response = await api.delete(
+      `${import.meta.env.VITE_API_URL}/api/Projects/${projectId}`,
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    throw error;
+  }
+};
+
+export {
+  FetchAllAdminProjects,
+  CreateProject,
+  GetProjects,
+  GetProjectById,
+  UpdateProject,
+  DeleteProject,
+};
