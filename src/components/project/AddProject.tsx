@@ -1,6 +1,8 @@
 import { FileText, X } from "lucide-react";
 import { type MouseEvent, useEffect, useState } from "react";
 import { FetchDropDownData } from "../../service/master";
+import { CreateProject } from "../../service/projectmaster";
+import useUserStore from "../../store/userStore";
 
 const AddProject = () => {
   // Financial Year options and selected state
@@ -33,6 +35,78 @@ const AddProject = () => {
   const [projectTypes, setProjectTypes] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
+
+  const [projectName, setProjectName] = useState("");
+  const [projectType, setProjectType] = useState("");
+  const [projectScope, setProjectScope] = useState("");
+  const [keyAssumptions, setKeyAssumptions] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [loading, setLoading] = useState(false);
+  const user = useUserStore((s: any) => s.user);
+
+  const buildDepartmentsPayload = () => {
+    return selectedDeps.map((dept) => {
+      const deptObj = departments.find((x) => x.text === dept);
+
+      const hierarchy: any = {
+        makerId: makers[dept]?.id?.split(" - ").pop() || "",
+      };
+
+      hierarchyLevels.forEach((level) => {
+        const key = `${dept}-Level ${level}`;
+
+        hierarchy[`approver${level}`] =
+          approvers[key]?.id?.split(" - ").pop() || "";
+      });
+
+      return {
+        departmentId: Number(deptObj?.value ?? 0),
+        departmentName: dept,
+        hierarchy,
+      };
+    });
+  };
+
+  const handleCreateProject = async (status: "Draft" | "Posted") => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        projectId: crypto.randomUUID(),
+        projectName,
+        projectType,
+        financialYear,
+        projectScope,
+        keyAssumptions,
+
+        startDate: new Date(startDate).toISOString(),
+        endDate: new Date(endDate).toISOString(),
+
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+
+        createdBy: user?.userId,
+        status: status,
+        isDeleted: false,
+
+        departments: buildDepartmentsPayload(),
+      };
+
+      console.log("PROJECT PAYLOAD", payload);
+
+      const response = await CreateProject(payload);
+
+      console.log("PROJECT CREATED", response);
+
+      alert("Project created successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create project");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleHierarchyCountChange = (value: string) => {
     const parsedValue = value === "" ? null : Number(value);
@@ -212,6 +286,7 @@ const AddProject = () => {
                     </label>
                     <input
                       type="text"
+                      onChange={(e) => setProjectName(e.target.value)}
                       placeholder="e.g., Q3 Infrastructure Upgrade"
                       className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
                     />
@@ -223,7 +298,11 @@ const AddProject = () => {
                         Project Type
                       </span>
                     </label>
-                    <select defaultValue="" className="select w-full">
+                    <select
+                      onChange={(e) => setProjectType(e.target.value)}
+                      defaultValue=""
+                      className="select w-full"
+                    >
                       <option disabled value="">
                         Project Type
                       </option>
@@ -267,6 +346,7 @@ const AddProject = () => {
                     </span>
                   </label>
                   <textarea
+                    onChange={(e) => setProjectScope(e.target.value)}
                     rows={4}
                     placeholder="Define the primary objectives and boundaries of this initiative..."
                     className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
@@ -281,6 +361,7 @@ const AddProject = () => {
                     </span>
                   </label>
                   <textarea
+                    onChange={(e) => setKeyAssumptions(e.target.value)}
                     rows={3}
                     placeholder="List financial or operational dependencies..."
                     className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
@@ -311,6 +392,7 @@ const AddProject = () => {
                     </label>
                     <div className="relative">
                       <input
+                        onChange={(e) => setStartDate(e.target.value)}
                         type="date"
                         className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
                       />
@@ -326,6 +408,7 @@ const AddProject = () => {
                     </label>
                     <div className="relative">
                       <input
+                        onChange={(e) => setEndDate(e.target.value)}
                         type="date"
                         className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
                       />
@@ -448,6 +531,7 @@ const AddProject = () => {
                       <input
                         type="number"
                         min={0}
+                        max={3}
                         value={hierarchyCount ?? ""}
                         onChange={(e) =>
                           handleHierarchyCountChange(e.target.value)
@@ -817,19 +901,25 @@ const AddProject = () => {
                 </div>
 
                 <div className="card-actions flex-col gap-2 mt-4 w-full">
-                  <button
-                    type="submit"
-                    className="btn btn-neutral w-full gap-2 rounded-xl normal-case"
-                  >
-                    <FileText size={16} />
-                    Initialize Project
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm w-full normal-case text-base-content/70 hover:text-base-content"
-                  >
-                    Save as Draft
-                  </button>
+                  <div className="card-actions flex-col gap-2 mt-4 w-full">
+                    <button
+                      type="button"
+                      onClick={() => handleCreateProject("Posted")}
+                      className="btn btn-neutral w-full gap-2 rounded-xl normal-case"
+                    >
+                      <FileText size={16} />
+                      {loading ? "Creating..." : "Initialize Project"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleCreateProject("Draft")}
+                      className="btn btn-ghost btn-sm w-full normal-case text-base-content/70 hover:text-base-content"
+                    >
+                      <FileText size={16} />
+                      {loading ? "Saving..." : "Save as Draft"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -20,8 +20,9 @@ const Login = () => {
     return null;
   };
 
-  const handleLogin = async (_role: "admin" | "user") => {
+  const handleLogin = async () => {
     const clientValidation = validateInputs(userId, password);
+
     if (clientValidation) {
       setError(clientValidation);
       return;
@@ -31,47 +32,26 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Build payload: if numeric userId => use { userId, password, type }
-      const trimmed = userId.trim();
-      let payload: any;
-      if (/^\d+$/.test(trimmed)) {
-        payload = {
-          userId: Number(trimmed),
-          password,
-          type: _role === "admin" ? 1 : 2,
-        };
-      } else {
-        // fallback to username-based payload
-        payload = { username: trimmed, password };
-      }
+      const payload = {
+        userId: userId.trim(),
+        password,
+      };
 
       const res = await axios.post(
         "http://localhost:5024/api/Auth/login",
         payload,
         {
-          headers: { "Content-Type": "application/json", Accept: "*/*" },
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+          },
         },
       );
 
       const data = res.data;
 
-      // Validate response minimal shape
-      if (!data || !data.token) {
-        throw new Error("Invalid response from server");
-      }
-
-      // If admin tab clicked, ensure returned role is admin
-      if (_role === "admin") {
-        const roleVal = (data?.role || "").toString().toLowerCase();
-        if (roleVal !== "admin") {
-          // clear any stored auth and show message
-          try {
-            (useUserStore as any).setState({ user: null });
-            localStorage.removeItem("capex_auth");
-          } catch (e) {}
-          setError("Not an admin user");
-          return;
-        }
+      if (!data?.isSuccess) {
+        throw new Error(data?.message || "Invalid credentials");
       }
 
       const userObj = {
@@ -79,24 +59,26 @@ const Login = () => {
         tokenType: data.tokenType,
         expiresAt: Date.now() + (Number(data.expiresInSeconds) || 3600) * 1000,
         expiresInSeconds: Number(data.expiresInSeconds) || 3600,
+
         userId: data.userId,
-        username: data.username,
+        employeeName: data.employeeName,
+        deptCode: data.deptCode,
+        deptNameShort: data.deptNameShort,
+        gradeCode: data.gradeCode,
         role: data.role,
       };
 
-      // Persist to zustand store and localStorage
-      try {
-        (useUserStore as any).setState({ user: userObj });
-        localStorage.setItem("capex_auth", JSON.stringify(userObj));
-      } catch (e) {
-        console.warn("Failed to save auth", e);
-      }
+      useUserStore.setState({
+        user: userObj,
+      });
+
+      localStorage.setItem("capex_auth", JSON.stringify(userObj));
 
       navigate("/home");
     } catch (err: any) {
-      // axios error handling
       const msg =
         err?.response?.data?.message || err?.message || "Login failed";
+
       setError(msg);
     } finally {
       setLoading(false);
@@ -138,140 +120,62 @@ const Login = () => {
               </div>
             )}
 
-            {/* DaisyUI Tabs */}
-            <div className="tabs tabs-lift w-full">
-              {/* Admin Login Tab */}
-              <input
-                type="radio"
-                name="login_tabs"
-                className="tab"
-                aria-label="Admin Login"
-                defaultChecked
-              />
+            <div className=" border-base-300 bg-base-100 p-6 rounded-box">
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold text-gray-800">
+                  User Login
+                </h3>
 
-              <div className="tab-content border-base-300 bg-base-100 p-6 rounded-box">
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    Administrator Login
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Access project creation, approvals and administration.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="label">
-                      <span className="label-text font-medium">User ID</span>
-                    </label>
-
-                    <input
-                      type="text"
-                      value={userId}
-                      onChange={(e) => {
-                        setUserId(e.target.value);
-                        if (error) setError(null);
-                      }}
-                      placeholder="Enter User ID"
-                      className={`input input-bordered w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="label">
-                      <span className="label-text font-medium">Password</span>
-                    </label>
-
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        if (error) setError(null);
-                      }}
-                      placeholder="Enter Password"
-                      className={`input input-bordered w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <button
-                    onClick={() => handleLogin("admin")}
-                    className={`btn bg-red-500 text-white w-full mt-4 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                    disabled={loading}
-                    aria-busy={loading}
-                  >
-                    Sign In as Admin
-                  </button>
-                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Access project information and approval requests.
+                </p>
               </div>
 
-              {/* User Login Tab */}
-              <input
-                type="radio"
-                name="login_tabs"
-                className="tab"
-                aria-label="User Login"
-              />
+              <div className="space-y-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">User ID</span>
+                  </label>
 
-              <div className="tab-content border-base-300 bg-base-100 p-6 rounded-box">
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    User Login
-                  </h3>
-
-                  <p className="text-sm text-gray-500 mt-1">
-                    Access project information and approval requests.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="label">
-                      <span className="label-text font-medium">User ID</span>
-                    </label>
-
-                    <input
-                      type="text"
-                      value={userId}
-                      onChange={(e) => {
-                        setUserId(e.target.value);
-                        if (error) setError(null);
-                      }}
-                      placeholder="Enter User ID"
-                      className={`input input-bordered w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="label">
-                      <span className="label-text font-medium">Password</span>
-                    </label>
-
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        if (error) setError(null);
-                      }}
-                      placeholder="Enter Password"
-                      className={`input input-bordered w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <button
-                    onClick={() => handleLogin("user")}
-                    className={`btn bg-red-500 text-white w-full mt-4 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  <input
+                    type="text"
+                    value={userId}
+                    onChange={(e) => {
+                      setUserId(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    placeholder="Enter User ID"
+                    className={`input input-bordered w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                     disabled={loading}
-                    aria-busy={loading}
-                  >
-                    Sign In as User
-                  </button>
+                  />
                 </div>
+
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Password</span>
+                  </label>
+
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError(null);
+                    }}
+                    placeholder="Enter Password"
+                    className={`input input-bordered w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={loading}
+                  />
+                </div>
+
+                <button
+                  onClick={handleLogin}
+                  className={`btn bg-red-500 text-white w-full mt-4 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={loading}
+                  aria-busy={loading}
+                >
+                  Sign In as User
+                </button>
               </div>
             </div>
 
