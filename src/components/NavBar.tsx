@@ -32,7 +32,7 @@ const NavBar = () => {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <div className="mx-auto flex h-16 max-w-8xl items-center justify-between px-6">
         {/* Left Section */}
         <div className="flex items-center gap-8">
           <Link
@@ -71,6 +71,10 @@ const NavBar = () => {
               <PlusSquare size={16} />
               PD 2
             </Link>
+            <Link to="/nonpd2" className={navLinkClass("/nonpd2")}>
+              <PlusSquare size={16} />
+              Non PD 2
+            </Link>
           </div>
         </div>
 
@@ -82,11 +86,11 @@ const NavBar = () => {
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-slate-800 max-w-30 truncate">
-                  {user?.username || 'Guest'}
+                  {user?.username || "Guest"}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-1.5 py-0.5 text-[10px] font-medium text-rose-600 border border-rose-100">
                   <ShieldCheck size={10} />
-                  {user?.role || 'User'}
+                  {user?.role || "User"}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-xs text-slate-500">

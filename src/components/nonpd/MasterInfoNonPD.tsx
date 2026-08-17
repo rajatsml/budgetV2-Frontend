@@ -1,4 +1,4 @@
-const ProjectMasterInfo = () => {
+const MasterInfoNonPD = () => {
   const inputStyle =
     "w-full h-10 px-3 text-sm bg-slate-50 border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
   return (
@@ -59,9 +59,31 @@ const ProjectMasterInfo = () => {
 
           <input placeholder="FY Year" className={inputStyle} />
         </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            Group
+          </label>
+
+          <input placeholder="FY Year" className={inputStyle} />
+        </div>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            Location
+          </label>
+
+          <input placeholder="FY Year" className={inputStyle} />
+        </div>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            Project Unit
+          </label>
+
+          <input placeholder="FY Year" className={inputStyle} />
+        </div>
       </div>
     </div>
   );
 };
 
-export default ProjectMasterInfo;
+export default MasterInfoNonPD;

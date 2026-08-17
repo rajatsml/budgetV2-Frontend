@@ -1,6 +1,6 @@
 import { FileText, X } from "lucide-react";
 import { type MouseEvent, useEffect, useState } from "react";
-import { FetchDropDownData } from "../../../server/master";
+import { FetchDropDownData } from "../../service/master";
 
 const AddProject = () => {
   // Financial Year options and selected state

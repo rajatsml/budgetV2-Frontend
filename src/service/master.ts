@@ -1,8 +1,8 @@
-import axios from "axios";
+import api from "./axios";
 
 const FetchDropDownData = async (url: string) => {
   try {
-    const response = await axios.get(url);
+    const response = await api.get(url);
     console.log(url);
     console.log(response.data.items);
     return response.data?.items || [];

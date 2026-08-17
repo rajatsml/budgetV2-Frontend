@@ -9,6 +9,7 @@ import AllProjects from "./components/project/AllProjects";
 import NewPD from "./components/pd/NewPD";
 import NonNewPD from "./components/nonpd/NonNewPD";
 import PDProject from "./components/pd/PDProject";
+import NonPD2 from "./components/nonpd/NonPD2";
 
 function App() {
   return (
@@ -77,6 +78,16 @@ function App() {
             <ProtectedRoute>
               <NavBar />
               <NonNewPD />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/nonpd2"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <NonPD2 />
               <Footer />
             </ProtectedRoute>
           }

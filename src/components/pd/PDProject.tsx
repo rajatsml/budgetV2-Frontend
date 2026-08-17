@@ -1,6 +1,6 @@
 import { PlusSquare } from "lucide-react";
 import { useState } from "react";
-import ProjectMasterInfo from "./ProjectMasterInfo";
+import MasterInfoPD from "./MasterInfoPD";
 
 type PDRow = {
   pdInfo: string;
@@ -182,7 +182,7 @@ const PDProject = () => {
     <>
       <div className="min-h-screen bg-slate-100 p-6">
         <div className="mx-auto max-w-[1700px] bg-white rounded-2xl shadow-sm p-8">
-          <ProjectMasterInfo />
+          <MasterInfoPD />
 
           <div className="overflow-x-auto mt-6">
             <table className="table table-zebra w-full">
