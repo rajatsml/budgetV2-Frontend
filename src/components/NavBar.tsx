@@ -7,6 +7,7 @@ import {
   LogOut,
   UserCircle2,
   Building2,
+  Form,
   ShieldCheck,
 } from "lucide-react";
 
@@ -57,7 +58,7 @@ const NavBar = () => {
               <PlusSquare size={16} />
               Add Project
             </Link>
-
+            {/* 
             <Link to="/pd" className={navLinkClass("/pd")}>
               <PlusSquare size={16} />
               PD
@@ -66,14 +67,23 @@ const NavBar = () => {
             <Link to="/nonpd" className={navLinkClass("/nonpd")}>
               <PlusSquare size={16} />
               Non PD
-            </Link>
+            </Link> */}
             <Link to="/pd2" className={navLinkClass("/pd2")}>
               <PlusSquare size={16} />
               PD 2
             </Link>
-            <Link to="/nonpd2" className={navLinkClass("/nonpd2")}>
+            {/* <Link to="/nonpd2" className={navLinkClass("/nonpd2")}>
               <PlusSquare size={16} />
               Non PD 2
+            </Link> */}
+
+            <Link to="/pdform" className={navLinkClass("/pdform")}>
+              <Form size={16} />
+              PD
+            </Link>
+            <Link to="/pdform" className={navLinkClass("/nonpdform")}>
+              <Form size={16} />
+              Non PD
             </Link>
           </div>
         </div>

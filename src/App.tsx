@@ -10,6 +10,7 @@ import NewPD from "./components/pd/NewPD";
 import NonNewPD from "./components/nonpd/NonNewPD";
 import PDProject from "./components/pd/PDProject";
 import NonPD2 from "./components/nonpd/NonPD2";
+import PDForm from "./components/pd/PDForm";
 
 function App() {
   return (
@@ -84,6 +85,26 @@ function App() {
         />
         <Route
           path="/nonpd2"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <NonPD2 />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pdform"
+          element={
+            <ProtectedRoute>
+              <NavBar />
+              <PDForm />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/nonpdform"
           element={
             <ProtectedRoute>
               <NavBar />
