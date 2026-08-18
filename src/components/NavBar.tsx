@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import useUserStore from "../store/userStore";
 import {
   LayoutDashboard,
@@ -15,6 +16,9 @@ const NavBar = () => {
   const logout = useUserStore((s: any) => s.logout);
   const user = useUserStore((s: any) => s.user);
   const department = useUserStore((s: any) => s.department);
+
+  const isAdmin = user?.role === "Admin";
+  const isUser = user?.role === "User";
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,42 +53,29 @@ const NavBar = () => {
               Dashboard
             </Link>
 
-            <Link to="/allprojects" className={navLinkClass("/allprojects")}>
-              <FolderKanban size={16} />
-              All Projects
-            </Link>
+            {isAdmin && (
+              <>
+                <Link
+                  to="/allprojects"
+                  className={navLinkClass("/allprojects")}
+                >
+                  <FolderKanban size={16} />
+                  All Projects
+                </Link>
 
-            <Link to="/addproject" className={navLinkClass("/addproject")}>
-              <PlusSquare size={16} />
-              Add Project
-            </Link>
-            {/* 
-            <Link to="/pd" className={navLinkClass("/pd")}>
-              <PlusSquare size={16} />
-              PD
-            </Link>
+                <Link to="/addproject" className={navLinkClass("/addproject")}>
+                  <PlusSquare size={16} />
+                  Add Project
+                </Link>
+              </>
+            )}
 
-            <Link to="/nonpd" className={navLinkClass("/nonpd")}>
-              <PlusSquare size={16} />
-              Non PD
-            </Link> */}
-            <Link to="/pd2" className={navLinkClass("/pd2")}>
-              <PlusSquare size={16} />
-              PD 2
-            </Link>
-            {/* <Link to="/nonpd2" className={navLinkClass("/nonpd2")}>
-              <PlusSquare size={16} />
-              Non PD 2
-            </Link> */}
-
-            <Link to="/pdform" className={navLinkClass("/pdform")}>
-              <Form size={16} />
-              PD
-            </Link>
-            <Link to="/pdform" className={navLinkClass("/nonpdform")}>
-              <Form size={16} />
-              Non PD
-            </Link>
+            {isUser && (
+              <Link to="/myprojects" className={navLinkClass("/myprojects")}>
+                <FolderKanban size={16} />
+                My Projects
+              </Link>
+            )}
           </div>
         </div>
 
@@ -96,17 +87,17 @@ const NavBar = () => {
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-slate-800 max-w-30 truncate">
-                  {user?.username || "Guest"}
+                  {user?.userId || "Guest"}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-1.5 py-0.5 text-[10px] font-medium text-rose-600 border border-rose-100">
                   <ShieldCheck size={10} />
-                  {user?.role || "User"}
+                  {user?.gradeCode || "User"}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-xs text-slate-500">
                 <Building2 size={12} className="text-slate-400" />
                 <span className="max-w-30 truncate">
-                  {department || "Department"}
+                  {department || user?.deptNameShort}
                 </span>
               </div>
             </div>

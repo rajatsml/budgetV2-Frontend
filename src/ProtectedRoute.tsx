@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
-import useUserStore from './store/userStore';
+import type { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
+import useUserStore from "./store/userStore";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = useUserStore((s: any) => s.isAuthenticated);

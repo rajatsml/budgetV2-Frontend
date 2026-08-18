@@ -176,16 +176,16 @@ const PDForm = () => {
     "C/F Fund Flow",
   ];
   const inputStyle =
-    "w-full h-10 px-3 text-xs border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
+    "w-full h-8  px-3 text-xs border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
 
   return (
     <div className="p-4 space-y-4">
       <PDHeader />
 
-      <div className="rounded-2xl border-slate-200">
+      <div className=" border-slate-200 rounded-xl">
         {/* name of each tab group should be unique */}
 
-        <div className="tabs tabs-box bg-slate-100 p-2 gap-x-2 tabs-xs">
+        <div className="tabs tabs-box bg-gray-50 p-4 gap-x-2 tabs-xs  border border-slate-200">
           <input
             type="radio"
             name="my_tabs_2"
@@ -203,7 +203,8 @@ const PDForm = () => {
                   Description
                 </label>
                 <textarea
-                  className="textarea textarea-bordered w-full"
+                  rows={1}
+                  className="textarea textarea-xs"
                   value={formData.capexDescription}
                   onChange={(e) =>
                     handleChange("capexDescription", e.target.value)
@@ -216,6 +217,7 @@ const PDForm = () => {
                   Remarks
                 </label>
                 <textarea
+                  rows={1}
                   value={formData.capexRemarks}
                   onChange={(e) => handleChange("capexRemarks", e.target.value)}
                   className="textarea textarea-bordered w-full"

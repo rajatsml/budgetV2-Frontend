@@ -1,6 +1,6 @@
 import api from "./axios";
 
-const FetchAllAdminProjects = async (url: string) => {
+const FetchAllProjectsOfUser = async (url: string) => {
   try {
     const response = await api.get(url);
     return response.data?.items || [];
@@ -93,7 +93,7 @@ const DeleteProject = async (projectId: string) => {
 };
 
 export {
-  FetchAllAdminProjects,
+  FetchAllProjectsOfUser,
   CreateProject,
   GetProjects,
   GetProjectById,

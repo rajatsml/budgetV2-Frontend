@@ -1,9 +1,9 @@
 const PDHeader = () => {
   const inputStyle =
-    "w-full h-10 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
+    "w-full h-8 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
   return (
-    <div className="rounded-2xl border border-slate-200 p-6">
-      <h3 className="mb-5 text-lg font-semibold text-slate-800">
+    <div className="rounded-xl border border-slate-200 p-4">
+      <h3 className="mb-2 text-md font-semibold text-slate-800">
         Project Information
       </h3>
 
