@@ -58,7 +58,7 @@ const NavBar = () => {
               Add Project
             </Link>
 
-            {/* <Link to="/pd" className={navLinkClass("/pd")}>
+            <Link to="/pd" className={navLinkClass("/pd")}>
               <PlusSquare size={16} />
               PD
             </Link>
@@ -66,7 +66,7 @@ const NavBar = () => {
             <Link to="/nonpd" className={navLinkClass("/nonpd")}>
               <PlusSquare size={16} />
               Non PD
-            </Link> */}
+            </Link>
             <Link to="/pd2" className={navLinkClass("/pd2")}>
               <PlusSquare size={16} />
               PD 2

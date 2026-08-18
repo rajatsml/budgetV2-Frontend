@@ -145,7 +145,7 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
               <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 <th className="py-4 px-6">Project ID</th>
                 <th className="py-4 px-6">Project Details</th>
-                <th className="py-4 px-6 text-center">Type</th>
+                {/* <th className="py-4 px-6 text-center">Type</th> */}
                 <th className="py-4 px-6 text-center">FY</th>
                 <th className="py-4 px-6 text-center">Status</th>
                 <th className="py-4 px-6 text-right">Actions</th>
@@ -193,11 +193,11 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
                     </td>
 
                     {/* Project Type */}
-                    <td className="py-4 px-6 text-center">
+                    {/* <td className="py-4 px-6 text-center">
                       <span className="px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-md">
                         {project.projectType}
                       </span>
-                    </td>
+                    </td> */}
 
                     {/* Fiscal Year */}
                     <td className="py-4 px-6 text-center font-xs text-gray-600">

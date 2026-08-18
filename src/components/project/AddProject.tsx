@@ -250,7 +250,7 @@ const AddProject = () => {
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold tracking-tight text-base-content">
+          <h1 className="text-xl font-bold tracking-tight text-base-content">
             Initiate New Project
           </h1>
           <p className="mt-2 text-sm text-base-content/70 max-w-3xl">
@@ -347,7 +347,7 @@ const AddProject = () => {
                   </label>
                   <textarea
                     onChange={(e) => setProjectScope(e.target.value)}
-                    rows={4}
+                    rows={2}
                     placeholder="Define the primary objectives and boundaries of this initiative..."
                     className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
                   />
@@ -366,20 +366,6 @@ const AddProject = () => {
                     placeholder="List financial or operational dependencies..."
                     className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
                   />
-                </div>
-              </div>
-            </div>
-
-            {/* 02. Execution Timeline */}
-            <div className="card bg-base-100 shadow-sm border border-base-300">
-              <div className="card-body gap-6">
-                <div className="flex items-center gap-3 border-b border-base-200 pb-4">
-                  <div className="badge badge-neutral w-7 h-7 font-mono p-0 rounded-full flex items-center justify-center text-xs">
-                    02
-                  </div>
-                  <h2 className="card-title text-lg font-bold">
-                    Execution Timeline
-                  </h2>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -415,120 +401,125 @@ const AddProject = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* 03. Departmental Configuration */}
-            <div className="card bg-base-100 shadow-sm border border-base-300">
-              <div className="card-body gap-6">
-                <div className="flex items-center gap-3 border-b border-base-200 pb-4">
-                  <div className="badge badge-neutral w-7 h-7 font-mono p-0 rounded-full flex items-center justify-center text-xs">
-                    03
-                  </div>
-                  <h2 className="card-title text-lg font-bold">
-                    Departmental Configuration
-                  </h2>
-                </div>
+                <div className="flex gap-4">
+                  <div className="form-control w-1/2 gap-2">
+                    <label className="label py-0">
+                      <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
+                        Assign Departments
+                      </span>
+                    </label>
 
-                <div className="form-control w-full gap-2">
-                  <label className="label py-0">
-                    <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
-                      Assign Departments
-                    </span>
-                  </label>
+                    {/* Flex Wrapper: Row of Chips + Dropdown Anchor Button */}
+                    <div className="flex flex-wrap gap-2 items-center p-2 rounded border border-base-300 bg-base-200/30">
+                      {/* Selected Chips */}
+                      {selectedDeps.map((dept) => (
+                        <div
+                          key={dept}
+                          className="badge badge-neutral gap-1 py-3.5 rounded-md pr-1 font-semibold text-xs"
+                        >
+                          {dept}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDepartment(dept)}
+                            className="btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4 rounded-full"
+                          >
+                            <X size={11} />
+                          </button>
+                        </div>
+                      ))}
 
-                  {/* Flex Wrapper: Row of Chips + Dropdown Anchor Button */}
-                  <div className="flex flex-wrap gap-2 items-center p-2 rounded-xl border border-base-300 bg-base-200/30">
-                    {/* Selected Chips */}
-                    {selectedDeps.map((dept) => (
+                      {/* DaisyUI Dropdown Menu */}
                       <div
-                        key={dept}
-                        className="badge badge-neutral gap-1 py-3.5 rounded-md pr-1 font-semibold text-xs"
+                        className={`dropdown ${isOpen ? "dropdown-open" : ""} flex-1 min-w-37.5`}
                       >
-                        {dept}
                         <button
                           type="button"
-                          onClick={() => handleRemoveDepartment(dept)}
-                          className="btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4 rounded-full"
+                          onClick={() => setIsOpen(!isOpen)}
+                          className="btn btn-ghost btn-xs text-xs justify-start w-full text-base-content/50 font-normal h-8 hover:bg-base-200"
                         >
-                          <X size={11} />
+                          + Add department...
                         </button>
+
+                        {/* Popover Dropdown Card */}
+                        {isOpen && (
+                          <div className="dropdown-content menu p-3 shadow-lg bg-base-100 border border-base-200 rounded-xl w-full z-100 mt-1 space-y-2">
+                            {/* Inner Search Box */}
+
+                            <div className="flex gap-x-2">
+                              <input
+                                type="text"
+                                placeholder="Search departments..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="input input-sm input-bordered w-full bg-base-200/50"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => {
+                                  setSearchTerm("");
+                                  setIsOpen(false);
+                                }}
+                                className="btn btn-ghost btn-sm p-0 min-h-0 h-8 w-8 rounded-full"
+                              >
+                                <X />
+                              </button>
+                            </div>
+
+                            {/* Options List */}
+                            <div className="max-h-48 overflow-y-auto space-y-0.5 custom-scrollbar">
+                              {filteredDeps.length === 0 ? (
+                                <span className="text-xs text-base-content/40 p-2 block text-center">
+                                  No options found
+                                </span>
+                              ) : (
+                                filteredDeps.map((dept) => (
+                                  <button
+                                    key={dept.value}
+                                    type="button"
+                                    onClick={() => {
+                                      handleSelectDepartment(dept.text);
+                                      setSearchTerm("");
+                                      setIsOpen(false);
+                                    }}
+                                    className="w-full text-left px-2 py-1.5 text-sm rounded-md hover:bg-base-200 text-base-content"
+                                  >
+                                    {dept.text}
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ))}
-
-                    {/* DaisyUI Dropdown Menu */}
-                    <div
-                      className={`dropdown ${isOpen ? "dropdown-open" : ""} flex-1 min-w-37.5`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="btn btn-ghost btn-xs text-xs justify-start w-full text-base-content/50 font-normal h-8 hover:bg-base-200"
-                      >
-                        + Add department...
-                      </button>
-
-                      {/* Popover Dropdown Card */}
-                      {isOpen && (
-                        <div className="dropdown-content menu p-3 shadow-lg bg-base-100 border border-base-200 rounded-xl w-full z-100 mt-1 space-y-2">
-                          {/* Inner Search Box */}
-
-                          <div className="flex gap-x-2">
-                            <input
-                              type="text"
-                              placeholder="Search departments..."
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                              className="input input-sm input-bordered w-full bg-base-200/50"
-                              autoFocus
-                            />
-                            <button
-                              onClick={() => {
-                                setSearchTerm("");
-                                setIsOpen(false);
-                              }}
-                              className="btn btn-ghost btn-sm p-0 min-h-0 h-8 w-8 rounded-full"
-                            >
-                              <X />
-                            </button>
-                          </div>
-
-                          {/* Options List */}
-                          <div className="max-h-48 overflow-y-auto space-y-0.5 custom-scrollbar">
-                            {filteredDeps.length === 0 ? (
-                              <span className="text-xs text-base-content/40 p-2 block text-center">
-                                No options found
-                              </span>
-                            ) : (
-                              filteredDeps.map((dept) => (
-                                <button
-                                  key={dept.value}
-                                  type="button"
-                                  onClick={() => {
-                                    handleSelectDepartment(dept.text);
-                                    setSearchTerm("");
-                                    setIsOpen(false);
-                                  }}
-                                  className="w-full text-left px-2 py-1.5 text-sm rounded-md hover:bg-base-200 text-base-content"
-                                >
-                                  {dept.text}
-                                </button>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="w-1/2">
                     <div className="form-control w-full">
                       <label className="label py-1">
                         <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
                           Hierarchy Count
                         </span>
                       </label>
-                      <input
+                      <select
+                        onChange={(e) =>
+                          handleHierarchyCountChange(e.target.value)
+                        }
+                        defaultValue=""
+                        className="select w-full"
+                      >
+                        <option disabled value="">
+                          0
+                        </option>
+
+                        {[1, 2, 3].map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                      {/* <input
                         type="number"
                         min={0}
                         max={3}
@@ -538,13 +529,13 @@ const AddProject = () => {
                         }
                         className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
                         placeholder="Enter number of approval levels"
-                      />
+                      /> */}
                       <p className="text-xs text-base-content/50 mt-1">
                         Add the number of approval levels for each selected
                         department.
                       </p>
                     </div>
-                    <div className="form-control w-full">
+                    {/* <div className="form-control w-full">
                       <label className="label py-1">
                         <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
                           Expected Approvers
@@ -558,7 +549,7 @@ const AddProject = () => {
                         Based on selected departments, makers and hierarchy
                         count.
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
@@ -567,9 +558,6 @@ const AddProject = () => {
                   <div className="card bg-base-100 shadow-sm border border-base-300">
                     <div className="card-body gap-6">
                       <div className="flex items-center gap-3 border-b border-base-200 pb-4">
-                        <div className="badge badge-info text-info-content w-7 h-7 font-mono p-0 rounded-full flex items-center justify-center text-xs">
-                          03
-                        </div>
                         <div>
                           <h2 className="card-title text-lg font-bold">
                             Approver Assignment Matrix
@@ -859,6 +847,8 @@ const AddProject = () => {
                 )}
               </div>
             </div>
+
+            {/* 03. Departmental Configuration */}
           </div>
 
           {/* Right Summary Sidebar (Sticky) */}
@@ -884,14 +874,14 @@ const AddProject = () => {
                       {selectedDeps.length}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  {/* <div className="flex justify-between items-center">
                     <span className="text-base-content/60">
                       Total Approvers
                     </span>
                     <span className="font-bold text-base-content">
                       {totalAssignedApprovers}
                     </span>
-                  </div>
+                  </div> */}
                   {totalExpectedApprovers !== totalAssignedApprovers && (
                     <div className="flex justify-between items-center text-xs text-base-content/50">
                       <span>Expected</span>
