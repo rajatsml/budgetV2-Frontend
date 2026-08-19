@@ -162,9 +162,7 @@ const MyProjects = () => {
                   <td>{index + 1}</td>
 
                   <td>
-                    <span className="font-semibold text-primary">
-                      {project.projectId}
-                    </span>
+                    <span className="font-semibold ">{project.projectId}</span>
                   </td>
 
                   <td>
@@ -173,11 +171,7 @@ const MyProjects = () => {
 
                   <td>
                     <div
-                      className={`badge ${
-                        project.projectType === "1"
-                          ? "badge-info"
-                          : "badge-secondary"
-                      }`}
+                      className={`badge badge-ghost ${project.projectType === "1"}`}
                     >
                       {project?.projectTypeDesc}
                     </div>
@@ -207,13 +201,7 @@ const MyProjects = () => {
                   </td>
 
                   <td>
-                    <div
-                      className={`badge ${
-                        project.status === "Posted"
-                          ? "badge-success"
-                          : "badge-warning"
-                      }`}
-                    >
+                    <div className={`badge  ${project.status === "Posted"}`}>
                       {project.status}
                     </div>
                   </td>
@@ -222,7 +210,7 @@ const MyProjects = () => {
 
                   <td>
                     <button
-                      className="btn btn-sm btn-primary"
+                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600"
                       onClick={() =>
                         handleNavigation(
                           project?.projectTypeDesc,

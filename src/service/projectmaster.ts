@@ -148,6 +148,14 @@ const GetPDMaster = async (projectID: string, deptId: any) => {
   }
 };
 
+export const DeletePDMaster = async (pdDetailId: number) => {
+  const response = await api.delete(
+    `${import.meta.env.VITE_API_URL}/api/PDMaster/${pdDetailId}`,
+  );
+
+  return response.data;
+};
+
 export {
   FetchAllProjectsOfUser,
   CreateProject,

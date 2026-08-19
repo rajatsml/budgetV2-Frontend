@@ -5,6 +5,7 @@ import {
   SavePDMaster,
   UpdatePDMaster,
   GetPDMaster,
+  DeletePDMaster,
 } from "../../service/projectmaster";
 
 import { useLocation } from "react-router-dom";
@@ -118,11 +119,11 @@ const PDProjecDetail = () => {
 
   const data = location.state;
 
-  const buildPayload = () => ({
+  const buildPayload = (draftStat: string) => ({
     ProjectId: data?.projectID,
-    RecordId: editingRowId ?? "1",
+    RecordId: pdDetailId?.toString() || "0",
     DeptId: data?.deptID.toString(),
-    DraftStatus: "Draft",
+    DraftStatus: draftStat,
 
     CapexDescription: formData.capexDescription,
     CapexRemarks: formData.capexRemarks,
@@ -185,7 +186,7 @@ const PDProjecDetail = () => {
 
   const savePDData = async () => {
     try {
-      const payload = buildPayload();
+      const payload = buildPayload("DRAFT");
 
       if (!pdDetailId) {
         console.log("PD VALUE NOT FOUND");
@@ -249,73 +250,115 @@ const PDProjecDetail = () => {
     setFormData(initialFormState);
     setEditingRowId(null);
   };
-  // const handleSave = async () => {
-  //   try {
-  //     const payload = {
-  //       ...buildPayload(),
-  //     };
-
-  //     await SavePDMaster(payload);
-
-  //     if (editingRowId) {
-  //       setRows((prev) =>
-  //         prev.map((row) =>
-  //           row.id === editingRowId ? { ...row, ...formData } : row,
-  //         ),
-  //       );
-  //     } else {
-  //       setRows((prev) => [
-  //         ...prev,
-  //         {
-  //           id: createRowId(),
-  //           ...formData,
-  //         },
-  //       ]);
-  //     }
-
-  //     await fetchPDDetails();
-  //     resetForm();
-  //   } catch (error) {
-  //     console.error("Error saving row:", error);
-  //   }
-  // };
 
   const handleSave = async () => {
     try {
-      const payload = {
-        ...buildPayload(),
-      };
+      const payload = buildPayload("COMPLETE");
 
-      await SavePDMaster(payload);
+      if (editingRowId) {
+        await UpdatePDMaster(payload, Number(editingRowId));
+
+        console.log("Row Updated");
+      } else {
+        if (!pdDetailId) {
+          const response = await SavePDMaster(payload);
+          setPDDetailId(response?.pdDetailId);
+        } else {
+          const response = await UpdatePDMaster(payload, pdDetailId);
+          setPDDetailId(response?.pdDetailId);
+        }
+
+        console.log("Row Saved");
+      }
 
       await fetchPDDetails();
 
+      resetForm();
+
       setPDDetailId(null);
 
-      resetForm();
+      setActiveTab(0);
     } catch (error) {
       console.error("Error saving row:", error);
     }
   };
 
-  const handleEdit = (id: string) => {
-    const row = rows.find((r) => r.id === id);
+  const handleEdit = (id: number) => {
+    const row = rows.find((r) => r.PDDetailId === id);
 
     if (!row) return;
 
-    setFormData(row);
-    setEditingRowId(id);
+    setPDDetailId(row.PDDetailId);
+
+    setFormData({
+      capexDescription: row.CapexDescription || "",
+      capexRemarks: row.CapexRemarks || "",
+      capexAmount: row.CapexAmount || "",
+      capexTotalPR: row.CapexTotalPR || "",
+      capexH1Fy1: row.CapexH1Fy1 || "",
+      capexH2Fy1: row.CapexH2Fy1 || "",
+      capexFy2: row.CapexFy2 || "",
+      capexFy3: row.CapexFy3 || "",
+
+      revenueDescription: row.RevenueDescription || "",
+      revenueRemarks: row.RevenueRemarks || "",
+      revenueAmount: row.RevenueAmount || "",
+      revenueTotalPR: row.RevenueTotalPR || "",
+      revenueH1Fy1: row.RevenueH1Fy1 || "",
+      revenueH2Fy1: row.RevenueH2Fy1 || "",
+      revenueFy2: row.RevenueFy2 || "",
+      revenueFy3: row.RevenueFy3 || "",
+
+      carryForward: row.CarryForward || "",
+      actualRevex: row.ActualRevex || "",
+      actualCapex: row.ActualCapex || "",
+
+      fundFlowCapH1: row.FundFlowCapH1 || "",
+      fundFlowCapH2: row.FundFlowCapH2 || "",
+      fundFlowRevH1: row.FundFlowRevH1 || "",
+      fundFlowRevH2: row.FundFlowRevH2 || "",
+      fundFlowH1: row.FundFlowH1 || "",
+      fundFlowH2: row.FundFlowH2 || "",
+      fundFlowTotal: row.FundFlowTotal || "",
+      fundFlow2: row.FundFlow2 || "",
+      fundFlow3: row.FundFlow3 || "",
+      fundFlow4: row.FundFlow4 || "",
+      fundFlow5: row.FundFlow5 || "",
+
+      cfCapH1: row.CFCapH1 || "",
+      cfCapH2: row.CFCapH2 || "",
+      cfRevH1: row.CFRevH1 || "",
+      cfRevH2: row.CFRevH2 || "",
+      cfH1: row.CFH1 || "",
+      cfH2: row.CFH2 || "",
+      cfTotal: row.CFTotal || "",
+    });
+
+    setEditingRowId(id.toString());
 
     setActiveTab(0);
   };
 
-  const handleDelete = (id: string) => {
-    setRows((prev) => prev.filter((row) => row.id !== id));
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this record?",
+    );
 
-    if (editingRowId === id) {
-      resetForm();
+    if (!confirmed) return;
+
+    try {
+      await DeletePDMaster(id);
+
+      await fetchPDDetails();
+
+      if (editingRowId === id.toString()) {
+        resetForm();
+      }
+    } catch (error) {
+      console.error("Delete Failed", error);
     }
   };
+  ``;
 
   useEffect(() => {
     fetchPDDetails();
@@ -895,11 +938,19 @@ const PDProjecDetail = () => {
         </div>
 
         <div className="flex gap-x-4 place-content-left m-4 ">
-          <button className="btn btn-sm btn-neutral" onClick={prevTab}>
+          <button
+            className="btn btn-sm btn-neutral"
+            onClick={prevTab}
+            disabled={activeTab === 0}
+          >
             <ChevronLeft />
             Back
           </button>
-          <button className="btn btn-sm btn-neutral" onClick={nextTab}>
+          <button
+            className="btn btn-sm btn-neutral"
+            onClick={nextTab}
+            disabled={activeTab === tabs.length - 1}
+          >
             Next
             <ChevronRight />
           </button>
@@ -907,7 +958,7 @@ const PDProjecDetail = () => {
             className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
             onClick={handleSave}
           >
-            {isEditing ? "Update Row" : "Add Row"}
+            {isEditing ? "Update Row" : "Save All Entries"}
           </button>
         </div>
       </div>
@@ -918,6 +969,9 @@ const PDProjecDetail = () => {
             <table className="table table-zebra table-xs ">
               <thead className="sticky top-0 z-10 bg-slate-200 text-slate-800">
                 <tr>
+                  <th className="border border-slate-300 whitespace-nowrap">
+                    Actions
+                  </th>
                   <th className="border border-slate-300 whitespace-nowrap ">
                     Capex Desc
                   </th>
@@ -1033,151 +1087,152 @@ const PDProjecDetail = () => {
                   <th className="border border-slate-300 whitespace-nowrap">
                     CF Total
                   </th>
-
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Actions
-                  </th>
                 </tr>
               </thead>
 
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.PDDetailId}>
-                    <td className="border border-slate-200 max-w-100 whitespace-normal wrap-break-word">
-                      {row.capexDescription}
-                    </td>
-                    <td className="border border-slate-200 max-w-100 whitespace-normal wrap-break-word">
-                      {row.capexRemarks}
-                    </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.capexAmount}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.capexTotalPR}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.capexH1Fy1}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.capexH2Fy1}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.capexFy2}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.capexFy3}
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          className="btn btn-xs btn-neutral"
+                          onClick={() => handleEdit(row.PDDetailId)}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="btn btn-xs btn-neutral text-white"
+                          onClick={() => handleDelete(row.PDDetailId)}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
 
-                    <td className="border border-slate-200 max-w-100 whitespace-normal wrap-break-word">
-                      {row.revenueDescription}
+                    {/* Capex */}
+                    <td className="border border-slate-200 max-w-48 whitespace-normal wrap-break-word">
+                      {row.CapexDescription}
                     </td>
-                    <td className="border border-slate-200  max-w-100 whitespace-normal wrap-break-word">
-                      {row.revenueRemarks}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.revenueAmount}
+                    <td className="border border-slate-200 max-w-48 whitespace-normal wrap-break-word">
+                      {row.CapexRemarks}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.revenueTotalPR}
+                      {row.CapexAmount}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.revenueH1Fy1}
+                      {row.CapexTotalPR}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.revenueH2Fy1}
+                      {row.CapexH1Fy1}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.revenueFy2}
+                      {row.CapexH2Fy1}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.revenueFy3}
+                      {row.CapexFy2}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.CapexFy3}
                     </td>
 
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.carryForward}
+                    {/* Revenue */}
+                    <td className="border border-slate-200 max-w-48 whitespace-normal wrap-break-word">
+                      {row.RevenueDescription}
+                    </td>
+                    <td className="border border-slate-200 max-w-48 whitespace-normal wrap-break-word">
+                      {row.RevenueRemarks}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.actualRevex}
+                      {row.RevenueAmount}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.actualCapex}
-                    </td>
-
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlowCapH1}
+                      {row.RevenueTotalPR}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlowCapH2}
+                      {row.RevenueH1Fy1}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlowRevH1}
+                      {row.RevenueH2Fy1}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlowRevH2}
+                      {row.RevenueFy2}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlowH1}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlowH2}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlowTotal}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlow2}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlow3}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlow4}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.fundFlow5}
+                      {row.RevenueFy3}
                     </td>
 
+                    {/* Carry Forward */}
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.cfCapH1}
+                      {row.CarryForward}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.cfCapH2}
+                      {row.ActualRevex}
                     </td>
                     <td className="border border-slate-200 whitespace-nowrap">
-                      {row.cfRevH1}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.cfRevH2}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.cfH1}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.cfH2}
-                    </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      {row.cfTotal}
+                      {row.ActualCapex}
                     </td>
 
+                    {/* Fund Flow */}
                     <td className="border border-slate-200 whitespace-nowrap">
-                      <td className="border border-slate-200">
-                        <div className="flex gap-2">
-                          <button
-                            className="btn btn-xs btn-primary"
-                            onClick={() => handleEdit(row.id)}
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            className="btn btn-xs btn-error"
-                            onClick={() => handleDelete(row.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
+                      {row.FundFlowCapH1}
                     </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlowCapH2}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlowRevH1}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlowRevH2}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlowH1}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlowH2}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlowTotal}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlow2}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlow3}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlow4}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.FundFlow5}
+                    </td>
+
+                    {/* C/F Fund Flow */}
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.CFCapH1}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.CFCapH2}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.CFRevH1}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.CFRevH2}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.CFH1}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.CFH2}
+                    </td>
+                    <td className="border border-slate-200 whitespace-nowrap">
+                      {row.CFTotal}
+                    </td>
+
+                    {/* Actions */}
                   </tr>
                 ))}
               </tbody>
