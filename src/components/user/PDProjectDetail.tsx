@@ -358,7 +358,24 @@ const PDProjecDetail = () => {
       console.error("Delete Failed", error);
     }
   };
-  ``;
+
+  const getNumber = (value: string) => Number(value || 0);
+
+  const summary = {
+    capex: getNumber(formData.capexAmount),
+
+    revenue: getNumber(formData.revenueAmount),
+
+    carryForward: getNumber(formData.carryForward),
+
+    actualRevex: getNumber(formData.actualRevex),
+
+    actualCapex: getNumber(formData.actualCapex),
+
+    fundFlow: getNumber(formData.fundFlowTotal),
+
+    cfFundFlow: getNumber(formData.cfTotal),
+  };
 
   useEffect(() => {
     fetchPDDetails();
@@ -374,16 +391,62 @@ const PDProjecDetail = () => {
   const inputStyle =
     "w-full h-8  px-3 text-xs border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
 
+  const getTotal = (field: string) =>
+    rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
   return (
     <div className="p-4 space-y-4">
-      <PDHeader
-        projectID={data?.projectID}
-        projectName={data?.projectName}
-        deptName={data?.deptName}
-        deptID={data?.deptID}
-        category={data?.category}
-        fyYear={data?.FyYear}
-      />
+      {/* Project Info / Summary */}
+      <div className="flex gap-x-2">
+        <PDHeader
+          projectID={data?.projectID}
+          projectName={data?.projectName}
+          deptName={data?.deptName}
+          deptID={data?.deptID}
+          category={data?.category}
+          fyYear={data?.FyYear}
+        />
+
+        <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3">
+            <div className="bg-white p-3 rounded border">
+              <p className="text-xs text-slate-500">Capex</p>
+              <p className="font-semibold">{summary.capex}</p>
+            </div>
+
+            <div className="bg-white p-3 rounded border">
+              <p className="text-xs text-slate-500">Revenue</p>
+              <p className="font-semibold">{summary.revenue}</p>
+            </div>
+
+            <div className="bg-white p-3 rounded border">
+              <p className="text-xs text-slate-500">Carry Forward</p>
+              <p className="font-semibold">{summary.carryForward}</p>
+            </div>
+
+            <div className="bg-white p-3 rounded border">
+              <p className="text-xs text-slate-500">Actual Revex</p>
+              <p className="font-semibold">{summary.actualRevex}</p>
+            </div>
+
+            <div className="bg-white p-3 rounded border">
+              <p className="text-xs text-slate-500">Actual Capex</p>
+              <p className="font-semibold">{summary.actualCapex}</p>
+            </div>
+
+            <div className="bg-white p-3 rounded border">
+              <p className="text-xs text-slate-500">Fund Flow</p>
+              <p className="font-semibold">{summary.fundFlow}</p>
+            </div>
+
+            <div className="bg-white p-3 rounded border">
+              <p className="text-xs text-slate-500">C/F Fund Flow</p>
+              <p className="font-semibold">{summary.cfFundFlow}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className=" border-slate-200 rounded-xl">
         {/* name of each tab group should be unique */}
@@ -620,11 +683,6 @@ const PDProjecDetail = () => {
                   className={inputStyle}
                 />
               </div>
-
-              {/* Left Side */}
-
-              {/* Right Side */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
           </div>
 
@@ -964,146 +1022,173 @@ const PDProjecDetail = () => {
       </div>
 
       {rows.length > 0 && (
-        <div className="mt-6 border border-slate-300 shadow-md overflow-hidden">
-          <div className="overflow-x-auto w-full ">
-            <table className="table table-zebra table-xs ">
-              <thead className="sticky top-0 z-10 bg-slate-200 text-slate-800">
-                <tr>
-                  <th className="border border-slate-300 whitespace-nowrap">
+        <div className="mt-6 border border-slate-300 font-medium text-xs bg-white overflow-hidden">
+          <div className="max-h-175 overflow-auto">
+            <table className="table table-zebra table-xs w-full">
+              <thead className="sticky top-0 z-30 ">
+                <tr className="bg-red-500 text-white text-xs">
+                  <th
+                    rowSpan={2}
+                    className="sticky left-0 z-40 bg-red-500 border  text-center"
+                  >
                     Actions
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap ">
+
+                  <th colSpan={8} className="text-center border ">
+                    CAPEX
+                  </th>
+
+                  <th colSpan={8} className="text-center border">
+                    REVENUE
+                  </th>
+
+                  <th colSpan={3} className="text-center border ">
+                    ACTUALS
+                  </th>
+
+                  <th colSpan={11} className="text-center border">
+                    FUND FLOW
+                  </th>
+
+                  <th colSpan={7} className="text-center border">
+                    C/F FUND FLOW
+                  </th>
+                </tr>
+
+                <tr className="bg-slate-100 text-slate-800 ">
+                  <th className="border border-slate-300 font-medium text-xs">
                     Capex Desc
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
+                  <th className="border border-slate-300 font-medium text-xs">
                     Capex Remarks
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Capex Amount
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Amount
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Capex Total PR
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Total PR
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Capex H1
+                  <th className="border border-slate-300 font-medium text-xs">
+                    H1
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Capex H2
+                  <th className="border border-slate-300 font-medium text-xs">
+                    H2
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Capex FY28
+                  <th className="border border-slate-300 font-medium text-xs">
+                    FY28
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Capex FY29
+                  <th className="border border-slate-300 font-medium text-xs">
+                    FY29
                   </th>
 
-                  <th className="border border-slate-300 whitespace-nowrap">
+                  <th className="border border-slate-300 font-medium text-xs">
                     Revenue Desc
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
+                  <th className="border border-slate-300 font-medium text-xs">
                     Revenue Remarks
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Revenue Amount
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Amount
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Revenue Total PR
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Total PR
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Revenue H1
+                  <th className="border border-slate-300 font-medium text-xs">
+                    H1
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Revenue H2
+                  <th className="border border-slate-300 font-medium text-xs">
+                    H2
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Revenue FY28
+                  <th className="border border-slate-300 font-medium text-xs">
+                    FY28
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Revenue FY29
-                  </th>
-
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Carry Forward
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Actual Revex
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    Actual Capex
+                  <th className="border border-slate-300 font-medium text-xs">
+                    FY29
                   </th>
 
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF Cap H1
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Carry Fwd
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF Cap H2
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Act Revex
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF Rev H1
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF Rev H2
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF H1
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF H2
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF Total
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF 28
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF 29
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF 30
-                  </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    FF 31
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Act Capex
                   </th>
 
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    CF Cap H1
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Cap H1
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    CF Cap H2
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Cap H2
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    CF Rev H1
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Rev H1
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    CF Rev H2
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Rev H2
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    CF H1
+                  <th className="border border-slate-300 font-medium text-xs">
+                    H1
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    CF H2
+                  <th className="border border-slate-300 font-medium text-xs">
+                    H2
                   </th>
-                  <th className="border border-slate-300 whitespace-nowrap">
-                    CF Total
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Total
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    FY28
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    FY29
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    FY30
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    FY31
+                  </th>
+
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Cap H1
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Cap H2
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Rev H1
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Rev H2
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    H1
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    H2
+                  </th>
+                  <th className="border border-slate-300 font-medium text-xs">
+                    Total
                   </th>
                 </tr>
               </thead>
 
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.PDDetailId}>
-                    <td className="border border-slate-200 whitespace-nowrap">
-                      <div className="flex gap-2 justify-center">
+                  <tr key={row.PDDetailId} className="text-xs">
+                    {/* Actions */}
+                    <td className="sticky left-0 z-20 bg-white border border-slate-200">
+                      <div className="flex gap-1 justify-center">
                         <button
-                          className="btn btn-xs btn-neutral"
+                          className="btn btn-xs bg-red-500 text-white"
                           onClick={() => handleEdit(row.PDDetailId)}
                         >
                           Edit
                         </button>
 
                         <button
-                          className="btn btn-xs btn-neutral text-white"
+                          className="btn btn-xs bg-red-500 text-white"
                           onClick={() => handleDelete(row.PDDetailId)}
                         >
                           Delete
@@ -1111,131 +1196,311 @@ const PDProjecDetail = () => {
                       </div>
                     </td>
 
-                    {/* Capex */}
-                    <td className="border border-slate-200 max-w-48 whitespace-normal wrap-break-word">
+                    {/* CAPEX */}
+                    <td className="border border-slate-200 max-w-55 wrap-break-word whitespace-normal leading-4">
                       {row.CapexDescription}
                     </td>
-                    <td className="border border-slate-200 max-w-48 whitespace-normal wrap-break-word">
+
+                    <td className="border border-slate-200 max-w-55 wrap-break-word  whitespace-normal leading-4">
                       {row.CapexRemarks}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CapexAmount}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CapexTotalPR}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CapexH1Fy1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CapexH2Fy1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CapexFy2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CapexFy3}
                     </td>
 
-                    {/* Revenue */}
-                    <td className="border border-slate-200 max-w-48 whitespace-normal wrap-break-word">
+                    {/* REVENUE */}
+                    <td className="border border-slate-200 max-w-55 wrap-break-word  whitespace-normal leading-4">
                       {row.RevenueDescription}
                     </td>
-                    <td className="border border-slate-200 max-w-48 whitespace-normal wrap-break-word">
+
+                    <td className="border border-slate-200 max-w-55 wrap-break-word  whitespace-normal leading-4">
                       {row.RevenueRemarks}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.RevenueAmount}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.RevenueTotalPR}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.RevenueH1Fy1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.RevenueH2Fy1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.RevenueFy2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.RevenueFy3}
                     </td>
 
-                    {/* Carry Forward */}
-                    <td className="border border-slate-200 whitespace-nowrap">
+                    {/* ACTUALS */}
+                    <td className="border border-slate-200 text-right">
                       {row.CarryForward}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.ActualRevex}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.ActualCapex}
                     </td>
 
-                    {/* Fund Flow */}
-                    <td className="border border-slate-200 whitespace-nowrap">
+                    {/* FUND FLOW */}
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlowCapH1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlowCapH2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlowRevH1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlowRevH2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlowH1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlowH2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right font-semibold">
                       {row.FundFlowTotal}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlow2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlow3}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlow4}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.FundFlow5}
                     </td>
 
-                    {/* C/F Fund Flow */}
-                    <td className="border border-slate-200 whitespace-nowrap">
+                    {/* CF FUND FLOW */}
+                    <td className="border border-slate-200 text-right">
                       {row.CFCapH1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CFCapH2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CFRevH1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CFRevH2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CFH1}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right">
                       {row.CFH2}
                     </td>
-                    <td className="border border-slate-200 whitespace-nowrap">
+
+                    <td className="border border-slate-200 text-right font-semibold">
                       {row.CFTotal}
                     </td>
-
-                    {/* Actions */}
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="sticky bottom-0 z-20 bg-amber-100 font-bold text-xs">
+                  <td className="sticky left-0 z-40 bg-amber-100 font-semibold text-center">
+                    Total
+                  </td>
+
+                  {/* Capex */}
+                  <td className="border border-slate-300 font-medium text-xs"></td>
+                  <td className="border border-slate-300 font-medium text-xs"></td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CapexAmount")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CapexTotalPR")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CapexH1Fy1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CapexH2Fy1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CapexFy2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CapexFy3")}
+                  </td>
+
+                  {/* Revenue */}
+                  <td className="border border-slate-300 font-medium text-xs"></td>
+                  <td className="border border-slate-300 font-medium text-xs"></td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("RevenueAmount")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("RevenueTotalPR")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("RevenueH1Fy1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("RevenueH2Fy1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("RevenueFy2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("RevenueFy3")}
+                  </td>
+
+                  {/* Carry Forward */}
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CarryForward")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("ActualRevex")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("ActualCapex")}
+                  </td>
+
+                  {/* Fund Flow */}
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlowCapH1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlowCapH2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlowRevH1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlowRevH2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlowH1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlowH2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlowTotal")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlow2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlow3")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlow4")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("FundFlow5")}
+                  </td>
+
+                  {/* C/F Fund Flow */}
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CFCapH1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CFCapH2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CFRevH1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CFRevH2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CFH1")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CFH2")}
+                  </td>
+
+                  <td className="border border-slate-300 font-medium text-xs">
+                    {getTotal("CFTotal")}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
