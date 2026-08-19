@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PDHeader from "../pd/PDHeader";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  SavePDMaster,
+  UpdatePDMaster,
+  GetPDMaster,
+} from "../../service/projectmaster";
 
 import { useLocation } from "react-router-dom";
 
@@ -93,9 +98,11 @@ const initialFormState: PDFormData = {
 };
 
 const PDProjecDetail = () => {
-  type PDFormDataWithId = PDFormData & {
-    id: string;
-  };
+  // type PDFormDataWithId = PDFormData & {
+  //   id: string;
+  // };
+
+  const [pdDetailId, setPDDetailId] = useState<number | null>(null);
 
   const location = useLocation();
 
@@ -103,7 +110,7 @@ const PDProjecDetail = () => {
 
   const [formData, setFormData] = useState<PDFormData>(initialFormState);
 
-  const [rows, setRows] = useState<PDFormDataWithId[]>([]);
+  const [rows, setRows] = useState<any[]>([]);
 
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
 
@@ -111,13 +118,119 @@ const PDProjecDetail = () => {
 
   const data = location.state;
 
-  const nextTab = () => {
+  const buildPayload = () => ({
+    ProjectId: data?.projectID,
+    RecordId: editingRowId ?? "1",
+    DeptId: data?.deptID.toString(),
+    DraftStatus: "Draft",
+
+    CapexDescription: formData.capexDescription,
+    CapexRemarks: formData.capexRemarks,
+    CapexAmount: formData.capexAmount,
+    CapexTotalPR: formData.capexTotalPR,
+    CapexH1Fy1: formData.capexH1Fy1,
+    CapexH2Fy1: formData.capexH2Fy1,
+    CapexFy2: formData.capexFy2,
+    CapexFy3: formData.capexFy3,
+
+    RevenueDescription: formData.revenueDescription,
+    RevenueRemarks: formData.revenueRemarks,
+    RevenueAmount: formData.revenueAmount,
+    RevenueTotalPR: formData.revenueTotalPR,
+    RevenueH1Fy1: formData.revenueH1Fy1,
+    RevenueH2Fy1: formData.revenueH2Fy1,
+    RevenueFy2: formData.revenueFy2,
+    RevenueFy3: formData.revenueFy3,
+
+    CarryForward: formData.carryForward,
+    ActualRevex: formData.actualRevex,
+    ActualCapex: formData.actualCapex,
+
+    FundFlowCapH1: formData.fundFlowCapH1,
+    FundFlowCapH2: formData.fundFlowCapH2,
+    FundFlowRevH1: formData.fundFlowRevH1,
+    FundFlowRevH2: formData.fundFlowRevH2,
+    FundFlowH1: formData.fundFlowH1,
+    FundFlowH2: formData.fundFlowH2,
+    FundFlowTotal: formData.fundFlowTotal,
+    FundFlow2: formData.fundFlow2,
+    FundFlow3: formData.fundFlow3,
+    FundFlow4: formData.fundFlow4,
+    FundFlow5: formData.fundFlow5,
+
+    CFCapH1: formData.cfCapH1,
+    CFCapH2: formData.cfCapH2,
+    CFRevH1: formData.cfRevH1,
+    CFRevH2: formData.cfRevH2,
+    CFH1: formData.cfH1,
+    CFH2: formData.cfH2,
+    CFTotal: formData.cfTotal,
+
+    UserId: "13254", // replace with logged-in user
+    FyYear: data?.FyYear,
+    CategoryId: data?.categoryId || 1,
+  });
+
+  const fetchPDDetails = async () => {
+    try {
+      console.log(data?.projectID, data?.deptID);
+
+      const response = await GetPDMaster(data?.projectID, data?.deptID);
+
+      setRows(response);
+    } catch (error) {
+      console.error("Failed to fetch PD Details", error);
+    }
+  };
+
+  const savePDData = async () => {
+    try {
+      const payload = buildPayload();
+
+      if (!pdDetailId) {
+        console.log("PD VALUE NOT FOUND");
+        const response = await SavePDMaster(payload);
+        setPDDetailId(response?.pdDetailId);
+        console.log("PD Saved SAVE Successfully", response);
+      } else {
+        console.log("PD VALUE FOUND");
+        const response = await UpdatePDMaster(payload, pdDetailId);
+        setPDDetailId(response?.pdDetailId);
+        console.log("PD Saved UPDATE Successfully", response);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("PD Save Failed", error);
+      return false;
+    }
+  };
+
+  const changeTab = async (tabIndex: number) => {
+    const success = await savePDData();
+
+    if (!success) return;
+
+    setActiveTab(tabIndex);
+  };
+
+  const nextTab = async () => {
+    const success = await savePDData();
+    if (!success) return;
+
+    console.log("This is success - NEXT", success);
+
     if (activeTab < tabs.length - 1) {
       setActiveTab((prev) => prev + 1);
     }
   };
 
-  const prevTab = () => {
+  const prevTab = async () => {
+    const success = await savePDData();
+    if (!success) return;
+
+    console.log("This is success - NEXT", success);
+
     if (activeTab > 0) {
       setActiveTab((prev) => prev - 1);
     }
@@ -130,31 +243,59 @@ const PDProjecDetail = () => {
     }));
   };
 
-  const createRowId = () => `${Date.now()}-${Math.random()}`;
+  // const createRowId = () => `${Date.now()}-${Math.random()}`;
 
   const resetForm = () => {
     setFormData(initialFormState);
     setEditingRowId(null);
   };
+  // const handleSave = async () => {
+  //   try {
+  //     const payload = {
+  //       ...buildPayload(),
+  //     };
 
-  const handleSave = () => {
-    if (editingRowId) {
-      setRows((prev) =>
-        prev.map((row) =>
-          row.id === editingRowId ? { ...row, ...formData } : row,
-        ),
-      );
-    } else {
-      setRows((prev) => [
-        ...prev,
-        {
-          id: createRowId(),
-          ...formData,
-        },
-      ]);
+  //     await SavePDMaster(payload);
+
+  //     if (editingRowId) {
+  //       setRows((prev) =>
+  //         prev.map((row) =>
+  //           row.id === editingRowId ? { ...row, ...formData } : row,
+  //         ),
+  //       );
+  //     } else {
+  //       setRows((prev) => [
+  //         ...prev,
+  //         {
+  //           id: createRowId(),
+  //           ...formData,
+  //         },
+  //       ]);
+  //     }
+
+  //     await fetchPDDetails();
+  //     resetForm();
+  //   } catch (error) {
+  //     console.error("Error saving row:", error);
+  //   }
+  // };
+
+  const handleSave = async () => {
+    try {
+      const payload = {
+        ...buildPayload(),
+      };
+
+      await SavePDMaster(payload);
+
+      await fetchPDDetails();
+
+      setPDDetailId(null);
+
+      resetForm();
+    } catch (error) {
+      console.error("Error saving row:", error);
     }
-
-    resetForm();
   };
 
   const handleEdit = (id: string) => {
@@ -175,6 +316,10 @@ const PDProjecDetail = () => {
       resetForm();
     }
   };
+
+  useEffect(() => {
+    fetchPDDetails();
+  }, []);
 
   const tabs = [
     "Capex",
@@ -207,7 +352,7 @@ const PDProjecDetail = () => {
             className={`tab ${activeTab === 0 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
             checked={activeTab === 0}
             onClick={() => {
-              setActiveTab(0);
+              changeTab(0);
             }}
             aria-label={`Capex | Bifurcation`}
           />
@@ -325,7 +470,7 @@ const PDProjecDetail = () => {
             className={`tab ${activeTab === 1 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
             checked={activeTab === 1}
             onClick={() => {
-              setActiveTab(1);
+              changeTab(1);
             }}
             aria-label={`Revenue | Bifurcation`}
           />
@@ -446,7 +591,7 @@ const PDProjecDetail = () => {
             className={`tab ${activeTab === 2 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
             checked={activeTab === 2}
             onClick={() => {
-              setActiveTab(2);
+              changeTab(2);
             }}
             aria-label="Carry Forward | Actual Spent"
           />
@@ -498,7 +643,7 @@ const PDProjecDetail = () => {
             className={`tab ${activeTab === 3 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
             checked={activeTab === 3}
             onClick={() => {
-              setActiveTab(3);
+              changeTab(3);
             }}
             aria-label="Fund Flow"
           />
@@ -655,7 +800,7 @@ const PDProjecDetail = () => {
             className={`tab ${activeTab === 4 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
             checked={activeTab === 4}
             onClick={() => {
-              setActiveTab(4);
+              changeTab(4);
             }}
             aria-label="C/F Fund Flow"
           />
@@ -897,7 +1042,7 @@ const PDProjecDetail = () => {
 
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.id}>
+                  <tr key={row.PDDetailId}>
                     <td className="border border-slate-200 max-w-100 whitespace-normal wrap-break-word">
                       {row.capexDescription}
                     </td>

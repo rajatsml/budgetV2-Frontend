@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../store/userStore";
-import { GetProjects } from "../../service/projectmaster";
+import { GetProjects, InitializePDMaster } from "../../service/projectmaster";
 
 const MyProjects = () => {
   const navigate = useNavigate();
@@ -59,16 +59,29 @@ const MyProjects = () => {
     );
   }, [projects, searchText]);
 
-  const handleNavigation = (
-    projectType: string,
+  const handleNavigation = async (
+    projectTypeDesc: string,
     projectID: string,
     projectName: string,
     deptName: string,
-    deptID: Number,
+    deptID: number,
     category: string,
     FyYear: string,
+    projectType: string,
   ) => {
-    if (projectType === "PD") {
+    try {
+      await InitializePDMaster({
+        ProjectId: projectID,
+        DeptId: deptID?.toString(),
+        FyYear: FyYear,
+        CategoryId: projectType,
+        UserId: user?.userId,
+      });
+    } catch (err) {
+      console.error("Initialization error:", err);
+    }
+
+    if (projectTypeDesc === "PD") {
       navigate("/pd-project", {
         state: {
           projectType,
@@ -80,7 +93,7 @@ const MyProjects = () => {
           FyYear,
         },
       });
-    } else if (projectType === "Non PD") {
+    } else if (projectTypeDesc === "Non PD") {
       navigate("/nonpd-project", {
         state: {
           projectType,
@@ -219,6 +232,7 @@ const MyProjects = () => {
                           project?.deptId,
                           project?.projectTypeDesc,
                           project?.financialYear,
+                          project?.projectType,
                         )
                       }
                     >

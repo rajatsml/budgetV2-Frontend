@@ -92,6 +92,62 @@ const DeleteProject = async (projectId: string) => {
   }
 };
 
+const InitializePDMaster = async (payload: Record<string, unknown>) => {
+  try {
+    const response = await api.post(
+      `${import.meta.env.VITE_API_URL}/api/pdmaster/initialize`,
+      payload,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error initializing PD master:", error);
+    throw error;
+  }
+};
+
+const SavePDMaster = async (payload: Record<string, unknown>) => {
+  try {
+    const response = await api.post(
+      `${import.meta.env.VITE_API_URL}/api/pdmaster`,
+      payload,
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error saving PD Master:", error);
+    throw error;
+  }
+};
+
+const UpdatePDMaster = async (
+  payload: Record<string, unknown>,
+  pdRecordId: any,
+) => {
+  try {
+    const response = await api.put(
+      `${import.meta.env.VITE_API_URL}/api/pdmaster/${pdRecordId}`,
+      payload,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error saving PD Master:", error);
+    throw error;
+  }
+};
+
+const GetPDMaster = async (projectID: string, deptId: any) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/PDMaster?projectId=${projectID}&deptId=${deptId}`,
+    );
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching PD Master :", error);
+    return [];
+  }
+};
+
 export {
   FetchAllProjectsOfUser,
   CreateProject,
@@ -99,4 +155,8 @@ export {
   GetProjectById,
   UpdateProject,
   DeleteProject,
+  InitializePDMaster,
+  SavePDMaster,
+  UpdatePDMaster,
+  GetPDMaster,
 };
