@@ -59,10 +59,40 @@ const MyProjects = () => {
     );
   }, [projects, searchText]);
 
-  const handleNavigation = (projectType: string, projectID: string) => {
-    if (projectType === "PD") navigate(`/pd-project/${projectID}`);
-    else if (projectType === "Non PD") navigate(`/nonpd-project/${projectID}`);
-    else navigate("/");
+  const handleNavigation = (
+    projectType: string,
+    projectID: string,
+    projectName: string,
+    deptName: string,
+    deptID: Number,
+    category: string,
+    FyYear: string,
+  ) => {
+    if (projectType === "PD") {
+      navigate("/pd-project", {
+        state: {
+          projectType,
+          projectName,
+          projectID,
+          deptName,
+          deptID,
+          category,
+          FyYear,
+        },
+      });
+    } else if (projectType === "Non PD") {
+      navigate("/nonpd-project", {
+        state: {
+          projectType,
+          projectName,
+          projectID,
+          deptName,
+          deptID,
+          category,
+          FyYear,
+        },
+      });
+    } else navigate("/");
   };
 
   return (
@@ -184,6 +214,11 @@ const MyProjects = () => {
                         handleNavigation(
                           project?.projectTypeDesc,
                           project?.projectId,
+                          project?.projectName,
+                          project?.departmentName,
+                          project?.deptId,
+                          project?.projectTypeDesc,
+                          project?.financialYear,
                         )
                       }
                     >

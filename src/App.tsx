@@ -129,7 +129,7 @@ function App() {
         />
 
         <Route
-          path="/pd-project/:id"
+          path="/pd-project"
           element={
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
@@ -140,7 +140,7 @@ function App() {
         />
 
         <Route
-          path="/nonpd-project/:id"
+          path="/nonpd-project"
           element={
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
