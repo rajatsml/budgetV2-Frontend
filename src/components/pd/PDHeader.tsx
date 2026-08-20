@@ -5,6 +5,8 @@ interface PDHeaderProps {
   deptID?: number;
   category: string;
   fyYear: string;
+  pendingWith: string;
+  status: string;
 }
 
 const PDHeader: React.FC<PDHeaderProps> = ({
@@ -13,9 +15,11 @@ const PDHeader: React.FC<PDHeaderProps> = ({
   deptName,
   category,
   fyYear,
+  pendingWith,
+  status,
 }) => {
   const inputStyle =
-    "w-full h-8 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
+    "w-full h-8 px-3 text-xs bg-white border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
 
   return (
     <div className="rounded-xl border border-slate-200 p-4 bg-slate-50 w-1/2">
@@ -30,7 +34,7 @@ const PDHeader: React.FC<PDHeaderProps> = ({
         <input value={projectName} readOnly className={inputStyle} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4 mb-4">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
             Project ID
@@ -63,6 +67,25 @@ const PDHeader: React.FC<PDHeaderProps> = ({
             FY Year
           </label>
           <input value={fyYear} readOnly className={inputStyle} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            Status
+          </label>
+          <input value={status} readOnly className={inputStyle} />
+        </div>
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            Pending With
+          </label>
+          <input
+            value={pendingWith ? pendingWith : "APPROVED"}
+            readOnly
+            className={inputStyle}
+          />
         </div>
       </div>
     </div>

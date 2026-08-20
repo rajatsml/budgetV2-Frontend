@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PDHeader from "../pd/PDHeader";
-import { GetPDMaster, UpdatePDStatus } from "../../service/projectmaster";
+import {
+  GetPDMaster,
+  UpdatePDStatus,
+  GetPDApprovalHistory,
+} from "../../service/projectmaster";
 import useUserStore from "../../store/userStore";
 
 const PDApprover = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [approvalHistory, setApprovalHistory] = useState<any[]>([]);
   const data = location.state;
   const [remarks, setRemarks] = useState("");
   const { user } = useUserStore();
@@ -39,6 +44,18 @@ const PDApprover = () => {
     fundFlow: getTotal("FundFlowTotal"),
     cfFundFlow: getTotal("CFTotal"),
   };
+  const fetchApprovalHistory = async () => {
+    try {
+      const response = await GetPDApprovalHistory(
+        data?.projectID,
+        data?.deptID?.toString(),
+      );
+
+      setApprovalHistory(response || []);
+    } catch (error) {
+      console.error("Failed to fetch approval history", error);
+    }
+  };
 
   const handleApprove = async () => {
     if (!isPendingWithCurrentUser) return;
@@ -53,10 +70,7 @@ const PDApprover = () => {
 
       alert(response.message);
 
-      // await ApprovePD(payload);
-
-      alert("Project approved successfully");
-      navigate("/my-projects");
+      navigate("/budgetV2/myprojects");
     } catch (error) {
       console.error("Approval failed", error);
     }
@@ -75,9 +89,7 @@ const PDApprover = () => {
 
       alert(response.message);
 
-      // await ReviewBackPD(payload);
-      navigate("/my-projects");
-      alert("Project sent back for review");
+      navigate("/budgetV2/myprojects");
     } catch (error) {
       console.error("Review Back failed", error);
     }
@@ -85,6 +97,7 @@ const PDApprover = () => {
 
   useEffect(() => {
     fetchPDDetails();
+    fetchApprovalHistory();
   }, []);
   return (
     <div className="p-4 space-y-4">
@@ -97,12 +110,14 @@ const PDApprover = () => {
           deptID={data?.deptID}
           category={data?.category}
           fyYear={data?.FyYear}
+          pendingWith={data?.pendingWithUser}
+          status={data?.status}
         />
-        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 shadow-sm self-stretch w-1/2">
+        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 self-stretch w-1/2 ">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
 
           <div className="overflow-x-auto rounded-lg border border-base-300 bg-white">
-            <table className="table w-full table-xs">
+            <table className="table w-full table-sm">
               <thead>
                 <tr className="bg-base-200 ">
                   <th className="border-r border-base-300 font-medium">
@@ -447,6 +462,50 @@ const PDApprover = () => {
                   <td className="text-center">{getTotal("CFTotal")}</td>
                 </tr>
               </tfoot>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {approvalHistory.length > 0 && (
+        <div className="mt-6 border border-slate-200 rounded-xl bg-white overflow-hidden">
+          <div className="px-4 py-3 border-b bg-slate-50">
+            <h3 className="text-sm font-semibold text-slate-700">
+              Approval History
+            </h3>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="table table-zebra table-xs w-full">
+              <thead>
+                <tr className="bg-red-500 text-white">
+                  <th>S.No</th>
+                  <th>Action</th>
+                  <th>Employee</th>
+                  <th>Remarks</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {approvalHistory.map((item, index) => (
+                  <tr key={item.HistoryId}>
+                    <td>{index + 1}</td>
+
+                    <td>
+                      <span className="badge badge-sm badge-neutral">
+                        {item.ActionPerformed}
+                      </span>
+                    </td>
+
+                    <td>{item.EmployeeName || item.ActionPerformedBy}</td>
+
+                    <td>{item.Remarks || "-"}</td>
+
+                    <td>{new Date(item.TDate).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </div>

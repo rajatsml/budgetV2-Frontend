@@ -171,6 +171,20 @@ const UpdatePDStatus = async (payload: {
   return response.data;
 };
 
+const GetPDApprovalHistory = async (projectId: string, deptId: string) => {
+  const response = await api.get(
+    `${import.meta.env.VITE_API_URL}/api/PDMaster/GetPDApprovalHistory`,
+    {
+      params: {
+        projectId,
+        deptId,
+      },
+    },
+  );
+
+  return response.data;
+};
+
 export {
   FetchAllProjectsOfUser,
   CreateProject,
@@ -183,4 +197,5 @@ export {
   UpdatePDMaster,
   GetPDMaster,
   UpdatePDStatus,
+  GetPDApprovalHistory,
 };

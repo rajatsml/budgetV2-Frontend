@@ -8,6 +8,7 @@ import {
   GetPDMaster,
   DeletePDMaster,
   UpdatePDStatus,
+  GetPDApprovalHistory,
 } from "../../service/projectmaster";
 import useUserStore from "../../store/userStore";
 
@@ -110,6 +111,7 @@ const PDProjecDetail = () => {
   const [pdDetailId, setPDDetailId] = useState<number | null>(null);
 
   const location = useLocation();
+  const [approvalHistory, setApprovalHistory] = useState<any[]>([]);
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -194,6 +196,23 @@ const PDProjecDetail = () => {
       console.error("Failed to fetch PD Details", error);
     }
   };
+
+  const fetchApprovalHistory = async () => {
+    try {
+      const response = await GetPDApprovalHistory(
+        data?.projectID,
+        data?.deptID?.toString(),
+      );
+
+      setApprovalHistory(response || []);
+    } catch (error) {
+      console.error("Failed to fetch approval history", error);
+    }
+  };
+  useEffect(() => {
+    fetchPDDetails();
+    fetchApprovalHistory();
+  }, []);
 
   const savePDData = async () => {
     try {
@@ -453,7 +472,7 @@ const PDProjecDetail = () => {
 
       alert(response.message);
 
-      navigate("/my-projects"); // your route
+      navigate("/budgetV2/myprojects"); // your route
     } catch (error) {
       console.error(error);
     }
@@ -507,12 +526,14 @@ const PDProjecDetail = () => {
           deptID={data?.deptID}
           category={data?.category}
           fyYear={data?.FyYear}
+          pendingWith={data?.pendingWithUser}
+          status={data?.status}
         />
         <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 shadow-sm self-stretch w-1/2">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
 
           <div className="overflow-x-auto rounded-lg border border-base-300 bg-white">
-            <table className="table w-full table-xs">
+            <table className="table w-full table-sm">
               <thead>
                 <tr className="bg-base-200 ">
                   <th className="border-r border-base-300 font-medium">
@@ -1689,6 +1710,51 @@ const PDProjecDetail = () => {
                   </td>
                 </tr>
               </tfoot>
+            </table>
+          </div>
+        </div>
+      )}
+      {approvalHistory.length > 0 && (
+        <div className="mt-6 border border-slate-200 rounded-xl bg-white overflow-hidden">
+          <div className="px-4 py-3 border-b bg-slate-50">
+            <h3 className="text-sm font-semibold text-slate-700">
+              Approval History
+            </h3>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="table table-zebra table-xs w-full">
+              <thead>
+                <tr className="bg-red-500 text-white">
+                  <th>S.No.</th>
+                  <th>Action</th>
+                  <th>User ID</th>
+                  <th>Employee</th>
+                  <th>Remarks</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {approvalHistory.map((item, index) => (
+                  <tr key={item.HistoryId}>
+                    <td>{index + 1}</td>
+
+                    <td>
+                      <span className="badge badge-sm badge-neutral ">
+                        {item.ActionPerformed}
+                      </span>
+                    </td>
+
+                    <td>{item.ActionPerformedBy}</td>
+                    <td>{item.EmployeeName}</td>
+
+                    <td>{item.Remarks || "-"}</td>
+
+                    <td>{new Date(item.TDate).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </div>

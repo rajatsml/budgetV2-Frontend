@@ -85,8 +85,13 @@ const NavBar = () => {
             <UserCircle2 size={36} className="text-slate-400 shrink-0" />
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-slate-800 max-w-30 truncate">
-                  {user?.userId || "Guest"}
+                <span className="text-sm font-semibold text-slate-800 max-w-40 truncate">
+                  {user?.employeeName || "Guest"}
+                  {user?.userId && (
+                    <span className="ml-1 text-xs font-normal text-slate-500">
+                      ({user.userId})
+                    </span>
+                  )}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-1.5 py-0.5 text-[10px] font-medium text-rose-600 border border-rose-100">
                   <ShieldCheck size={10} />

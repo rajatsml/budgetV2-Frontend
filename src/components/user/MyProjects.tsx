@@ -187,7 +187,7 @@ const MyProjects = () => {
                 <th>Financial Year</th>
                 <th>Project Scope</th>
                 <th>Duration</th>
-                <th>Status</th>
+                {/* <th>Status</th> */}
                 <th>Created By</th>
                 <th>Action</th>
               </tr>
@@ -237,11 +237,11 @@ const MyProjects = () => {
                     </div>
                   </td>
 
-                  <td>
+                  {/* <td>
                     <div className={`badge  ${project.status === "Posted"}`}>
                       {project.status}
                     </div>
-                  </td>
+                  </td> */}
 
                   <td>{project.createdBy}</td>
 
