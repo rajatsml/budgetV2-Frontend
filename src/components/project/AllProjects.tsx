@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { GetProjects } from "../../service/projectmaster";
 
-// 1. Interface matching the form fields from your image and list requirements
-
 export interface ProjectItem {
   projectId: string;
   projectName: string;
@@ -45,45 +43,19 @@ interface ProjectListProps {
 }
 
 const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
-  const [search, setSearch] = useState<string>("");
-  const [fyFilter, setFyFilter] = useState<string>("All");
-  const [projects, setProjects] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [fyFilter, setFyFilter] = useState("All");
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Get dynamic fiscal years for filter dropdown
-  const fiscalYears = useMemo<string[]>(() => {
-    const years = projects.map((p) => p.financialYear);
-    return ["All", ...Array.from(new Set(years))];
-  }, [projects]);
+  const formatDate = (date?: string) => {
+    if (!date) return "-";
 
-  // Filter projects by search string (ID/Name) and Fiscal Year
-  const filteredProjects = useMemo<ProjectItem[]>(() => {
-    return projects.filter((project) => {
-      const matchesSearch =
-        project.projectId?.toLowerCase().includes(search.toLowerCase()) ||
-        project.projectName?.toLowerCase().includes(search.toLowerCase());
-
-      const matchesFY =
-        fyFilter === "All" || project.financialYear === fyFilter;
-
-      return matchesSearch && matchesFY;
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
-  }, [projects, search, fyFilter]);
-
-  // Status badge styling helper
-  const getStatusStyle = (status: ProjectItem["status"]): string => {
-    switch (status) {
-      case "Approved":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "Pending Approval":
-        return "bg-amber-50 text-amber-700 border-amber-200";
-      case "Draft":
-        return "bg-gray-100 text-gray-700 border-gray-200";
-      case "Rejected":
-        return "bg-red-50 text-red-700 border-red-200";
-      default:
-        return "bg-gray-50 text-gray-600";
-    }
   };
 
   useEffect(() => {
@@ -98,32 +70,67 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
 
       console.log("Projects API Response:", data);
 
-      setProjects(data);
+      setProjects(data || []);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      setProjects([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const fiscalYears = useMemo(() => {
+    const years = projects.map((p) => p.financialYear).filter(Boolean);
+
+    return ["All", ...Array.from(new Set(years))];
+  }, [projects]);
+
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project) => {
+      const searchValue = search.toLowerCase();
+
+      const matchesSearch =
+        project.projectId?.toLowerCase().includes(searchValue) ||
+        project.projectName?.toLowerCase().includes(searchValue) ||
+        project.status?.toLowerCase().includes(searchValue) ||
+        project.financialYear?.toLowerCase().includes(searchValue);
+
+      const matchesFY =
+        fyFilter === "All" || project.financialYear === fyFilter;
+
+      return matchesSearch && matchesFY;
+    });
+  }, [projects, search, fyFilter]);
+
   return (
-    <div className="w-full max-w-full mx-auto p-6 bg-gray-50 min-h-screen ">
-      {/* Search and Filters Header */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex flex-1 gap-3 w-full sm:w-auto">
+    <div className="p-6 min-h-screen">
+      {/* Header */}
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">All Projects</h1>
+
+          <p className="text-sm opacity-70 mt-1">
+            Total Projects: {filteredProjects.length}
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
           <input
             type="text"
-            placeholder="Search Project ID or Name..."
+            placeholder="Search Project..."
+            className="input input-bordered w-full lg:w-80"
             value={search}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setSearch(e.target.value)
             }
-            className="w-full sm:max-w-md px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+
           <select
             value={fyFilter}
             onChange={(e: ChangeEvent<HTMLSelectElement>) =>
               setFyFilter(e.target.value)
             }
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="select select-bordered"
           >
             {fiscalYears.map((year) => (
               <option key={year} value={year}>
@@ -132,111 +139,94 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
             ))}
           </select>
         </div>
-        <div className="text-sm text-gray-500 self-end sm:self-center">
-          Showing <strong>{filteredProjects.length}</strong> projects
-        </div>
       </div>
 
-      {/* Responsive Line Item Table Container */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+      {/* Loading */}
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      ) : filteredProjects.length === 0 ? (
+        <div className="alert">
+          <span>No projects found.</span>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100 shadow">
+          <table className="table table-zebra table-pin-rows">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                <th className="py-4 px-6">Project ID</th>
-                <th className="py-4 px-6">Project Details</th>
-                {/* <th className="py-4 px-6 text-center">Type</th> */}
-                <th className="py-4 px-6 text-center">FY</th>
-                <th className="py-4 px-6 text-center">Status</th>
-                <th className="py-4 px-6 text-right">Actions</th>
+              <tr>
+                <th>#</th>
+                <th>Project ID</th>
+                <th>Project Name</th>
+                <th>Financial Year</th>
+                <th>Status</th>
+                <th>Duration</th>
+                <th>Created By</th>
+                <th>Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
-              {filteredProjects.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-10 text-center text-gray-400">
-                    No active configurations found matching criteria.
+
+            <tbody>
+              {filteredProjects.map((project, index) => (
+                <tr key={project.projectId}>
+                  <td>{index + 1}</td>
+
+                  <td>
+                    <span className="font-semibold">{project.projectId}</span>
+                  </td>
+
+                  <td>
+                    <div
+                      className="font-medium max-w-xs truncate"
+                      title={project.projectName}
+                    >
+                      {project.projectName}
+                    </div>
+                  </td>
+
+                  <td>{project.financialYear}</td>
+
+                  <td>
+                    <div className="badge badge-neutral">{project.status}</div>
+                  </td>
+
+                  <td>
+                    <div className="text-xs">
+                      <div>
+                        <strong>Start:</strong> {formatDate(project.startDate)}
+                      </div>
+
+                      <div>
+                        <strong>End:</strong> {formatDate(project.endDate)}
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>{project.createdBy}</td>
+
+                  <td>
+                    <div className="flex gap-2">
+                      <button
+                        className="btn btn-sm btn-outline"
+                        onClick={() => onView?.(project.projectId)}
+                      >
+                        View
+                      </button>
+                      {/* 
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => onEdit?.(project.projectId)}
+                      >
+                        Edit
+                      </button> */}
+                    </div>
                   </td>
                 </tr>
-              ) : (
-                filteredProjects.map((project) => (
-                  <tr
-                    key={project?.projectId}
-                    className="hover:bg-gray-50/70 transition-colors"
-                  >
-                    {/* Project ID */}
-                    <td className="py-4 px-6 font-mono text-xs font-bold text-gray-900">
-                      {project?.projectId}
-                    </td>
-
-                    {/* Project Name and Timeline */}
-                    <td className="py-4 px-6 max-w-xs">
-                      <div
-                        className="font-semibold text-gray-900 truncate mb-1"
-                        title={project?.projectName}
-                      >
-                        {project?.projectName}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {project?.startDate
-                          ? new Date(project.startDate).toLocaleDateString(
-                              "en-GB",
-                            )
-                          : "-"}{" "}
-                        to{" "}
-                        {project?.endDate
-                          ? new Date(project.endDate).toLocaleDateString(
-                              "en-GB",
-                            )
-                          : "-"}
-                      </div>
-                    </td>
-
-                    {/* Project Type */}
-                    {/* <td className="py-4 px-6 text-center">
-                      <span className="px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-md">
-                        {project.projectType}
-                      </span>
-                    </td> */}
-
-                    {/* Fiscal Year */}
-                    <td className="py-4 px-6 text-center font-xs text-gray-600">
-                      {project.financialYear}
-                    </td>
-
-                    {/* Custom Status Tag */}
-                    <td className="py-4 px-6 text-center">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusStyle(project.status)}`}
-                      >
-                        {project.status}
-                      </span>
-                    </td>
-
-                    {/* Actions Interactive Buttons */}
-                    <td className="py-4 px-6 text-right whitespace-nowrap">
-                      <div className="inline-flex gap-2">
-                        <button
-                          onClick={() => onView?.(project.projectId)}
-                          className="px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={() => onEdit?.(project.projectId)}
-                          className="px-2.5 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
+      )}
     </div>
   );
 };
