@@ -38,7 +38,7 @@ const Login = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:5024/api/Auth/login",
+        `${import.meta.env.VITE_API_URL}/api/Auth/login`,
         payload,
         {
           headers: {

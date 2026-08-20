@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { GetProjects } from "../../service/projectmaster";
 
 export interface ProjectItem {
@@ -43,6 +44,7 @@ interface ProjectListProps {
 }
 
 const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [fyFilter, setFyFilter] = useState("All");
   const [projects, setProjects] = useState<ProjectItem[]>([]);
@@ -208,7 +210,17 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
                     <div className="flex gap-2">
                       <button
                         className="btn btn-sm btn-outline"
-                        onClick={() => onView?.(project.projectId)}
+                        onClick={() => {
+                          if (onEdit) {
+                            onEdit(project.projectId);
+                            return;
+                          }
+                          if (onView) {
+                            onView(project.projectId);
+                            return;
+                          }
+                          navigate(`/addproject/${project.projectId}`);
+                        }}
                       >
                         View
                       </button>

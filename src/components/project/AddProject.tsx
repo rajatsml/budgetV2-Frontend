@@ -1,10 +1,18 @@
 import { FileText, X } from "lucide-react";
 import { type MouseEvent, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { FetchDropDownData } from "../../service/master";
-import { CreateProject } from "../../service/projectmaster";
+import {
+  CreateProject,
+  GetProjectById,
+  UpdateProject,
+} from "../../service/projectmaster";
 import useUserStore from "../../store/userStore";
 
 const AddProject = () => {
+  const navigate = useNavigate();
+  const { projectId } = useParams();
+  const isExistingProject = Boolean(projectId);
   // Financial Year options and selected state
   const AVAILABLE_FINANCIAL_YEARS = [
     "2023-24",
@@ -42,8 +50,19 @@ const AddProject = () => {
   const [keyAssumptions, setKeyAssumptions] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [projectStatus, setProjectStatus] = useState("Draft");
   const [loading, setLoading] = useState(false);
+  const [loadingProject, setLoadingProject] = useState(Boolean(projectId));
   const user = useUserStore((s: any) => s.user);
+  const canEditProject =
+    !isExistingProject || projectStatus.toLowerCase() !== "posted";
+
+  const formatDateForInput = (value?: string) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toISOString().slice(0, 10);
+  };
 
   const buildDepartmentsPayload = () => {
     return selectedDeps.map((dept) => {
@@ -69,25 +88,30 @@ const AddProject = () => {
   };
 
   const handleCreateProject = async (status: "Draft" | "Posted") => {
+    if (isExistingProject && !canEditProject) {
+      alert("This project is already posted and cannot be edited.");
+      return;
+    }
+
     try {
       setLoading(true);
 
       const payload = {
-        projectId: crypto.randomUUID(),
+        projectId: isExistingProject ? projectId : crypto.randomUUID(),
         projectName,
         projectType,
         financialYear,
         projectScope,
         keyAssumptions,
 
-        startDate: new Date(startDate).toISOString(),
-        endDate: new Date(endDate).toISOString(),
+        startDate: startDate ? new Date(startDate).toISOString() : null,
+        endDate: endDate ? new Date(endDate).toISOString() : null,
 
-        createdAt: new Date().toISOString(),
+        createdAt: isExistingProject ? undefined : new Date().toISOString(),
         updatedAt: new Date().toISOString(),
 
         createdBy: user?.userId,
-        status: status,
+        status,
         isDeleted: false,
 
         departments: buildDepartmentsPayload(),
@@ -95,20 +119,37 @@ const AddProject = () => {
 
       console.log("PROJECT PAYLOAD", payload);
 
-      const response = await CreateProject(payload);
+      const response = isExistingProject
+        ? await UpdateProject(projectId!, payload)
+        : await CreateProject(payload);
 
-      console.log("PROJECT CREATED", response);
+      console.log("PROJECT SAVED", response);
+      alert(
+        isExistingProject
+          ? "Project updated successfully"
+          : "Project created successfully",
+      );
 
-      alert("Project created successfully");
+      if (isExistingProject) {
+        navigate("/allprojects");
+      } else {
+        navigate("/allprojects");
+      }
     } catch (error) {
       console.error(error);
-      alert("Failed to create project");
+      alert(
+        isExistingProject
+          ? "Failed to update project"
+          : "Failed to create project",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleHierarchyCountChange = (value: string) => {
+    if (!canEditProject) return;
+
     const parsedValue = value === "" ? null : Number(value);
     if (parsedValue === null || Number.isNaN(parsedValue)) {
       setHierarchyCount(null);
@@ -163,6 +204,8 @@ const AddProject = () => {
 
   // 3. Selection handler function
   const handleSelectDepartment = (deptName: string) => {
+    if (!canEditProject) return;
+
     const trimmed = deptName.trim();
     if (!selectedDeps.includes(trimmed)) {
       setSelectedDeps([...selectedDeps, trimmed]);
@@ -172,6 +215,8 @@ const AddProject = () => {
 
   // 4. Removal handler function (with memory purge)
   const handleRemoveDepartment = (dept: string) => {
+    if (!canEditProject) return;
+
     setSelectedDeps(selectedDeps.filter((d) => d !== dept));
 
     // Wipe out any typed approvers for the deleted department
@@ -227,11 +272,79 @@ const AddProject = () => {
     }
   };
 
+  const loadProject = async (currentProjectId: string) => {
+    try {
+      setLoadingProject(true);
+      const project = await GetProjectById(currentProjectId);
+
+      if (!project) {
+        return;
+      }
+
+      setProjectName(project.projectName || "");
+      setProjectType(project.projectType || "");
+      setFinancialYear(project.financialYear || "");
+      setProjectScope(project.projectScope || "");
+      setKeyAssumptions(project.keyAssumptions || "");
+      setStartDate(formatDateForInput(project.startDate));
+      setEndDate(formatDateForInput(project.endDate));
+      setProjectStatus(project.status || "Draft");
+
+      const deptNames = (project.departments || []).map(
+        (dept: any) => dept.departmentName,
+      );
+      setSelectedDeps(deptNames.filter(Boolean));
+
+      const nextMakers: Record<string, { id: string; name: string }> = {};
+      const nextApprovers: Record<string, { id: string; name: string }> = {};
+      let maxLevel = 0;
+
+      (project.departments || []).forEach((dept: any) => {
+        const deptName = dept.departmentName;
+        if (!deptName) return;
+
+        if (dept.hierarchy?.makerId) {
+          nextMakers[deptName] = {
+            id: dept.hierarchy.makerId,
+            name: dept.hierarchy.makerId,
+          };
+        }
+
+        [1, 2, 3].forEach((level) => {
+          const approverKey = `approver${level}`;
+          const value = dept.hierarchy?.[approverKey];
+          if (value) {
+            maxLevel = Math.max(maxLevel, level);
+            nextApprovers[`${deptName}-Level ${level}`] = {
+              id: value,
+              name: value,
+            };
+          }
+        });
+      });
+
+      setMakers(nextMakers);
+      setApprovers(nextApprovers);
+      setHierarchyCount(maxLevel || null);
+    } catch (error) {
+      console.error("Error loading project:", error);
+      alert("Could not load project details.");
+    } finally {
+      setLoadingProject(false);
+    }
+  };
+
   useEffect(() => {
     GetProjectTypes();
     GetDepartments();
     GetEmployees();
   }, []);
+
+  useEffect(() => {
+    if (projectId) {
+      loadProject(projectId);
+    }
+  }, [projectId]);
 
   useEffect(() => {
     const makerSearch =
@@ -251,11 +364,12 @@ const AddProject = () => {
         {/* Header Section */}
         <div className="mb-10">
           <h1 className="text-xl font-bold tracking-tight text-base-content">
-            Initiate New Project
+            {isExistingProject ? "Project Details" : "Initiate New Project"}
           </h1>
           <p className="mt-2 text-sm text-base-content/70 max-w-3xl">
-            Establish foundational parameters, departmental oversight, and
-            approval workflows for new capital allocations.
+            {isExistingProject
+              ? "Review the saved project information. Draft projects can be edited, while posted projects remain read-only."
+              : "Establish foundational parameters, departmental oversight, and approval workflows for new capital allocations."}
           </p>
         </div>
 
@@ -286,9 +400,11 @@ const AddProject = () => {
                     </label>
                     <input
                       type="text"
+                      value={projectName}
                       onChange={(e) => setProjectName(e.target.value)}
                       placeholder="e.g., Q3 Infrastructure Upgrade"
                       className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
+                      disabled={!canEditProject}
                     />
                   </div>
 
@@ -299,9 +415,10 @@ const AddProject = () => {
                       </span>
                     </label>
                     <select
+                      value={projectType}
                       onChange={(e) => setProjectType(e.target.value)}
-                      defaultValue=""
                       className="select w-full"
+                      disabled={!canEditProject}
                     >
                       <option disabled value="">
                         Project Type
@@ -325,6 +442,7 @@ const AddProject = () => {
                       value={financialYear}
                       onChange={(e) => setFinancialYear(e.target.value)}
                       className="select w-full"
+                      disabled={!canEditProject}
                     >
                       <option disabled={true} value={""}>
                         Select Financial Year
@@ -348,9 +466,11 @@ const AddProject = () => {
                     </label>
                     <div className="relative">
                       <input
+                        value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
                         type="date"
                         className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
+                        disabled={!canEditProject}
                       />
                     </div>
                   </div>
@@ -364,9 +484,11 @@ const AddProject = () => {
                     </label>
                     <div className="relative">
                       <input
+                        value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                         type="date"
                         className="input input-bordered w-full bg-base-200/30 focus:bg-base-100"
+                        disabled={!canEditProject}
                       />
                     </div>
                   </div>
@@ -380,10 +502,12 @@ const AddProject = () => {
                     </span>
                   </label>
                   <textarea
+                    value={projectScope}
                     onChange={(e) => setProjectScope(e.target.value)}
                     rows={2}
                     placeholder="Define the primary objectives and boundaries of this initiative..."
                     className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
+                    disabled={!canEditProject}
                   />
                 </div>
 
@@ -395,10 +519,12 @@ const AddProject = () => {
                     </span>
                   </label>
                   <textarea
+                    value={keyAssumptions}
                     onChange={(e) => setKeyAssumptions(e.target.value)}
                     rows={3}
                     placeholder="List financial or operational dependencies..."
                     className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
+                    disabled={!canEditProject}
                   />
                 </div>
 
@@ -423,6 +549,7 @@ const AddProject = () => {
                             type="button"
                             onClick={() => handleRemoveDepartment(dept)}
                             className="btn btn-ghost btn-xs p-0 min-h-0 h-4 w-4 rounded-full"
+                            disabled={!canEditProject}
                           >
                             <X size={11} />
                           </button>
@@ -437,6 +564,7 @@ const AddProject = () => {
                           type="button"
                           onClick={() => setIsOpen(!isOpen)}
                           className="btn btn-ghost btn-xs text-xs justify-start w-full text-base-content/50 font-normal h-8 hover:bg-base-200"
+                          disabled={!canEditProject}
                         >
                           + Add department...
                         </button>
@@ -503,11 +631,12 @@ const AddProject = () => {
                         </span>
                       </label>
                       <select
+                        value={hierarchyCount ?? ""}
                         onChange={(e) =>
                           handleHierarchyCountChange(e.target.value)
                         }
-                        defaultValue=""
                         className="select w-full"
+                        disabled={!canEditProject}
                       >
                         <option disabled value="">
                           0
@@ -863,7 +992,7 @@ const AddProject = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-base-content/60">Status</span>
                     <span className="badge badge-ghost font-semibold tracking-wider text-[11px]">
-                      DRAFT
+                      {projectStatus ? projectStatus.toUpperCase() : "DRAFT"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -889,18 +1018,28 @@ const AddProject = () => {
                       type="button"
                       onClick={() => handleCreateProject("Posted")}
                       className="btn btn-neutral w-full gap-2 rounded-xl normal-case"
+                      disabled={loading || loadingProject || !canEditProject}
                     >
                       <FileText size={16} />
-                      {loading ? "Creating..." : "Initialize Project"}
+                      {loading
+                        ? "Saving..."
+                        : isExistingProject
+                          ? "Update Project"
+                          : "Initialize Project"}
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleCreateProject("Draft")}
                       className="btn btn-ghost btn-sm w-full normal-case text-base-content/70 hover:text-base-content"
+                      disabled={loading || loadingProject || !canEditProject}
                     >
                       <FileText size={16} />
-                      {loading ? "Saving..." : "Save as Draft"}
+                      {loading
+                        ? "Saving..."
+                        : isExistingProject
+                          ? "Save Draft Changes"
+                          : "Save as Draft"}
                     </button>
                   </div>
                 </div>

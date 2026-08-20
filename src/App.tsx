@@ -46,7 +46,7 @@ function App() {
         />
 
         <Route
-          path="/addproject"
+          path="/addproject/:projectId?"
           element={
             <RoleProtectedRoute allowedRoles={["Admin"]}>
               <NavBar />
