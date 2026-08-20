@@ -8,7 +8,6 @@ import {
   LogOut,
   UserCircle2,
   Building2,
-  Form,
   ShieldCheck,
 } from "lucide-react";
 
@@ -106,7 +105,7 @@ const NavBar = () => {
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-slate-800 hover:shadow-sm"
+            className="flex items-center gap-2 rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-slate-800 hover:shadow-sm"
           >
             <LogOut size={16} />
             Logout

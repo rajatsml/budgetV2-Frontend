@@ -247,7 +247,7 @@ const AddProject = () => {
 
   return (
     <div className="min-h-screen bg-base-200/50 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto">
         {/* Header Section */}
         <div className="mb-10">
           <h1 className="text-xl font-bold tracking-tight text-base-content">
@@ -338,36 +338,6 @@ const AddProject = () => {
                   </div>
                 </div>
 
-                {/* Form Control: Project Scope */}
-                <div className="form-control w-full">
-                  <label className="label py-1">
-                    <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
-                      Project Scope
-                    </span>
-                  </label>
-                  <textarea
-                    onChange={(e) => setProjectScope(e.target.value)}
-                    rows={2}
-                    placeholder="Define the primary objectives and boundaries of this initiative..."
-                    className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
-                  />
-                </div>
-
-                {/* Form Control: Key Assumptions */}
-                <div className="form-control w-full">
-                  <label className="label py-1">
-                    <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
-                      Key Assumptions
-                    </span>
-                  </label>
-                  <textarea
-                    onChange={(e) => setKeyAssumptions(e.target.value)}
-                    rows={3}
-                    placeholder="List financial or operational dependencies..."
-                    className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
-                  />
-                </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Start Date */}
                   <div className="form-control w-full">
@@ -400,6 +370,36 @@ const AddProject = () => {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Form Control: Project Scope */}
+                <div className="form-control w-full">
+                  <label className="label py-1">
+                    <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
+                      Project Scope
+                    </span>
+                  </label>
+                  <textarea
+                    onChange={(e) => setProjectScope(e.target.value)}
+                    rows={2}
+                    placeholder="Define the primary objectives and boundaries of this initiative..."
+                    className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
+                  />
+                </div>
+
+                {/* Form Control: Key Assumptions */}
+                <div className="form-control w-full">
+                  <label className="label py-1">
+                    <span className="label-text uppercase tracking-wider text-[11px] font-bold text-base-content/60">
+                      Key Assumptions
+                    </span>
+                  </label>
+                  <textarea
+                    onChange={(e) => setKeyAssumptions(e.target.value)}
+                    rows={3}
+                    placeholder="List financial or operational dependencies..."
+                    className="textarea textarea-bordered w-full bg-base-200/30 focus:bg-base-100 resize-none"
+                  />
                 </div>
 
                 <div className="flex gap-4">
@@ -874,14 +874,7 @@ const AddProject = () => {
                       {selectedDeps.length}
                     </span>
                   </div>
-                  {/* <div className="flex justify-between items-center">
-                    <span className="text-base-content/60">
-                      Total Approvers
-                    </span>
-                    <span className="font-bold text-base-content">
-                      {totalAssignedApprovers}
-                    </span>
-                  </div> */}
+
                   {totalExpectedApprovers !== totalAssignedApprovers && (
                     <div className="flex justify-between items-center text-xs text-base-content/50">
                       <span>Expected</span>

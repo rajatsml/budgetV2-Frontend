@@ -14,6 +14,7 @@ import PDForm from "./components/pd/PDForm";
 import MyProjects from "./components/user/MyProjects";
 import PDProjectDetail from "./components/user/PDProjectDetail";
 import RoleProtectedRoute from "./RoleProtectedRoute";
+import PDApprover from "./components/user/PDApprover";
 
 function App() {
   return (
@@ -134,6 +135,16 @@ function App() {
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <PDProjectDetail />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/pd-project-approver"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <PDApprover />
               <Footer />
             </RoleProtectedRoute>
           }

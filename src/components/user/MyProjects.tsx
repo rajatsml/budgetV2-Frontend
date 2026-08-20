@@ -68,31 +68,68 @@ const MyProjects = () => {
     category: string,
     FyYear: string,
     projectType: string,
+    makerId: string,
+    approver1: string,
+    approver2: string,
+    approver3: string,
   ) => {
+    let status = "";
+    let pendingWithUser = "";
+
     try {
-      await InitializePDMaster({
+      const response = await InitializePDMaster({
         ProjectId: projectID,
         DeptId: deptID?.toString(),
         FyYear: FyYear,
         CategoryId: projectType,
         UserId: user?.userId,
       });
-    } catch (err) {
+
+      status = response.status;
+      pendingWithUser = response.pendingWithUser;
+    } catch (err: any) {
+      status = err?.response?.data?.status;
+      pendingWithUser = err?.response?.data?.pendingWithUser;
       console.error("Initialization error:", err);
     }
-
     if (projectTypeDesc === "PD") {
-      navigate("/pd-project", {
-        state: {
-          projectType,
-          projectName,
-          projectID,
-          deptName,
-          deptID,
-          category,
-          FyYear,
-        },
-      });
+      if (user?.userId === makerId) {
+        navigate("/pd-project", {
+          state: {
+            projectType,
+            projectName,
+            projectID,
+            deptName,
+            deptID,
+            category,
+            FyYear,
+            makerId,
+            approver1,
+            approver2,
+            approver3,
+            status,
+            pendingWithUser,
+          },
+        });
+      } else {
+        navigate("/pd-project-approver", {
+          state: {
+            projectType,
+            projectName,
+            projectID,
+            deptName,
+            deptID,
+            category,
+            FyYear,
+            makerId,
+            approver1,
+            approver2,
+            approver3,
+            status,
+            pendingWithUser,
+          },
+        });
+      }
     } else if (projectTypeDesc === "Non PD") {
       navigate("/nonpd-project", {
         state: {
@@ -221,6 +258,10 @@ const MyProjects = () => {
                           project?.projectTypeDesc,
                           project?.financialYear,
                           project?.projectType,
+                          project?.makerId,
+                          project?.approver1,
+                          project?.approver2,
+                          project?.approver3,
                         )
                       }
                     >

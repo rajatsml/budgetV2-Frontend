@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import PDHeader from "../pd/PDHeader";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import {
   SavePDMaster,
   UpdatePDMaster,
   GetPDMaster,
   DeletePDMaster,
+  UpdatePDStatus,
 } from "../../service/projectmaster";
+import useUserStore from "../../store/userStore";
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type PDFormData = {
   capexDescription: string;
@@ -103,6 +106,7 @@ const PDProjecDetail = () => {
   //   id: string;
   // };
 
+  const navigate = useNavigate();
   const [pdDetailId, setPDDetailId] = useState<number | null>(null);
 
   const location = useLocation();
@@ -118,6 +122,13 @@ const PDProjecDetail = () => {
   const isEditing = editingRowId !== null;
 
   const data = location.state;
+
+  console.log(data);
+  console.log(data?.status);
+
+  const canEdit = data?.status === "OPENED";
+
+  const { user } = useUserStore();
 
   const buildPayload = (draftStat: string) => ({
     ProjectId: data?.projectID,
@@ -208,9 +219,10 @@ const PDProjecDetail = () => {
   };
 
   const changeTab = async (tabIndex: number) => {
-    const success = await savePDData();
+    // Save will happen only at the next/back button click
+    // const success = await savePDData();
 
-    if (!success) return;
+    // if (!success) return;
 
     setActiveTab(tabIndex);
   };
@@ -224,6 +236,8 @@ const PDProjecDetail = () => {
     if (activeTab < tabs.length - 1) {
       setActiveTab((prev) => prev + 1);
     }
+
+    fetchPDDetails();
   };
 
   const prevTab = async () => {
@@ -235,6 +249,7 @@ const PDProjecDetail = () => {
     if (activeTab > 0) {
       setActiveTab((prev) => prev - 1);
     }
+    fetchPDDetails();
   };
 
   const handleChange = (key: keyof PDFormData, value: string) => {
@@ -360,21 +375,88 @@ const PDProjecDetail = () => {
   };
 
   const getNumber = (value: string) => Number(value || 0);
+  const hasValue = (value: string) => value?.trim() !== "";
 
-  const summary = {
-    capex: getNumber(formData.capexAmount),
+  const isCurrentTabValid = () => {
+    switch (activeTab) {
+      case 0:
+        return [
+          formData.capexDescription,
+          formData.capexRemarks,
+          formData.capexAmount,
+          formData.capexTotalPR,
+          formData.capexH1Fy1,
+          formData.capexH2Fy1,
+          formData.capexFy2,
+          formData.capexFy3,
+        ].some(hasValue);
 
-    revenue: getNumber(formData.revenueAmount),
+      case 1:
+        return [
+          formData.revenueDescription,
+          formData.revenueRemarks,
+          formData.revenueAmount,
+          formData.revenueTotalPR,
+          formData.revenueH1Fy1,
+          formData.revenueH2Fy1,
+          formData.revenueFy2,
+          formData.revenueFy3,
+        ].some(hasValue);
 
-    carryForward: getNumber(formData.carryForward),
+      case 2:
+        return [
+          formData.carryForward,
+          formData.actualRevex,
+          formData.actualCapex,
+        ].some(hasValue);
 
-    actualRevex: getNumber(formData.actualRevex),
+      case 3:
+        return [
+          formData.fundFlowCapH1,
+          formData.fundFlowCapH2,
+          formData.fundFlowRevH1,
+          formData.fundFlowRevH2,
+          formData.fundFlowH1,
+          formData.fundFlowH2,
+          formData.fundFlowTotal,
+          formData.fundFlow2,
+          formData.fundFlow3,
+          formData.fundFlow4,
+          formData.fundFlow5,
+        ].some(hasValue);
 
-    actualCapex: getNumber(formData.actualCapex),
+      case 4:
+        return [
+          formData.cfCapH1,
+          formData.cfCapH2,
+          formData.cfRevH1,
+          formData.cfRevH2,
+          formData.cfH1,
+          formData.cfH2,
+          formData.cfTotal,
+        ].some(hasValue);
 
-    fundFlow: getNumber(formData.fundFlowTotal),
+      default:
+        return false;
+    }
+  };
 
-    cfFundFlow: getNumber(formData.cfTotal),
+  const handleSubmitForApproval = async () => {
+    try {
+      const response = await UpdatePDStatus({
+        projectId: data?.projectID,
+        deptId: data?.deptID?.toString(),
+        userId: user?.userId!,
+        actionPerformed: "POSTED",
+        remarks: "Submitted for approval",
+      });
+
+      alert(response.message);
+
+      navigate("/my-projects"); // your route
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -393,6 +475,27 @@ const PDProjecDetail = () => {
 
   const getTotal = (field: string) =>
     rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
+
+  const summary = canEdit
+    ? {
+        capex: getNumber(formData.capexAmount),
+        revenue: getNumber(formData.revenueAmount),
+        carryForward: getNumber(formData.carryForward),
+        actualRevex: getNumber(formData.actualRevex),
+        actualCapex: getNumber(formData.actualCapex),
+        fundFlow: getNumber(formData.fundFlowTotal),
+        cfFundFlow: getNumber(formData.cfTotal),
+      }
+    : {
+        capex: getTotal("CapexAmount"),
+        revenue: getTotal("RevenueAmount"),
+        carryForward: getTotal("CarryForward"),
+        actualRevex: getTotal("ActualRevex"),
+        actualCapex: getTotal("ActualCapex"),
+        fundFlow: getTotal("FundFlowTotal"),
+        cfFundFlow: getTotal("CFTotal"),
+      };
+
   return (
     <div className="p-4 space-y-4">
       {/* Project Info / Summary */}
@@ -405,45 +508,95 @@ const PDProjecDetail = () => {
           category={data?.category}
           fyYear={data?.FyYear}
         />
-
-        <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 shadow-sm self-stretch w-1/2">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3">
-            <div className="bg-white p-3 rounded border">
-              <p className="text-xs text-slate-500">Capex</p>
-              <p className="font-semibold">{summary.capex}</p>
-            </div>
+          <div className="overflow-x-auto rounded-lg border border-base-300 bg-white">
+            <table className="table w-full table-xs">
+              <thead>
+                <tr className="bg-base-200 ">
+                  <th className="border-r border-base-300 font-medium">
+                    Metric
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    Value
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    Metric
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    Value
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    Metric
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    Value
+                  </th>
+                </tr>
+              </thead>
 
-            <div className="bg-white p-3 rounded border">
-              <p className="text-xs text-slate-500">Revenue</p>
-              <p className="font-semibold">{summary.revenue}</p>
-            </div>
+              <tbody>
+                <tr className="hover">
+                  <td className="border border-base-300 font-medium">Capex</td>
+                  <td className="border border-base-300 font-semibold">
+                    {summary.capex}
+                  </td>
 
-            <div className="bg-white p-3 rounded border">
-              <p className="text-xs text-slate-500">Carry Forward</p>
-              <p className="font-semibold">{summary.carryForward}</p>
-            </div>
+                  <td className="border border-base-300 font-medium">
+                    Revenue
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    {summary.revenue}
+                  </td>
 
-            <div className="bg-white p-3 rounded border">
-              <p className="text-xs text-slate-500">Actual Revex</p>
-              <p className="font-semibold">{summary.actualRevex}</p>
-            </div>
+                  <td className="border border-base-300 font-medium">
+                    Carry Forward
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    {summary.carryForward}
+                  </td>
+                </tr>
 
-            <div className="bg-white p-3 rounded border">
-              <p className="text-xs text-slate-500">Actual Capex</p>
-              <p className="font-semibold">{summary.actualCapex}</p>
-            </div>
+                <tr className="hover">
+                  <td className="border border-base-300 font-medium">
+                    Actual Revex
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    {summary.actualRevex}
+                  </td>
 
-            <div className="bg-white p-3 rounded border">
-              <p className="text-xs text-slate-500">Fund Flow</p>
-              <p className="font-semibold">{summary.fundFlow}</p>
-            </div>
+                  <td className="border border-base-300 font-medium">
+                    Actual Capex
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    {summary.actualCapex}
+                  </td>
 
-            <div className="bg-white p-3 rounded border">
-              <p className="text-xs text-slate-500">C/F Fund Flow</p>
-              <p className="font-semibold">{summary.cfFundFlow}</p>
-            </div>
+                  <td className="border border-base-300 font-medium">
+                    Fund Flow
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    {summary.fundFlow}
+                  </td>
+                </tr>
+
+                <tr className="hover">
+                  <td className="border border-base-300 font-medium">
+                    C/F Fund Flow
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    {summary.cfFundFlow}
+                  </td>
+
+                  <td className="border border-base-300 bg-base-100"></td>
+                  <td className="border border-base-300 bg-base-100"></td>
+
+                  <td className="border border-base-300 bg-base-100"></td>
+                  <td className="border border-base-300 bg-base-100"></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -451,574 +604,607 @@ const PDProjecDetail = () => {
       <div className=" border-slate-200 rounded-xl">
         {/* name of each tab group should be unique */}
 
-        <div className="tabs tabs-box bg-gray-50 p-4 gap-x-2 tabs-xs  border border-slate-200">
-          <input
-            type="radio"
-            name="my_tabs_2"
-            className={`tab ${activeTab === 0 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
-            checked={activeTab === 0}
-            onClick={() => {
-              changeTab(0);
-            }}
-            aria-label={`Capex | Bifurcation`}
-          />
-          <div className="tab-content border-base-300 bg-base-100 p-4">
-            <div className="grid grid-cols-1 lg:grid-cols-8 gap-2">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Description
-                </label>
-                <textarea
-                  rows={1}
-                  className="textarea textarea-xs"
-                  value={formData.capexDescription}
-                  onChange={(e) =>
-                    handleChange("capexDescription", e.target.value)
-                  }
-                />
-              </div>
+        {canEdit && (
+          <div className="tabs tabs-box bg-gray-50 p-4 gap-x-2 tabs-xs  border border-slate-200">
+            <input
+              type="radio"
+              name="my_tabs_2"
+              className={`tab ${activeTab === 0 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
+              checked={activeTab === 0}
+              onClick={() => {
+                changeTab(0);
+              }}
+              aria-label={`Capex | Bifurcation`}
+            />
+            <div className="tab-content border-base-300 bg-base-100 p-4">
+              <div className="grid grid-cols-1 lg:grid-cols-8 gap-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Description
+                  </label>
+                  <textarea
+                    rows={1}
+                    className="textarea textarea-xs rounded-xl"
+                    value={formData.capexDescription}
+                    onChange={(e) =>
+                      handleChange("capexDescription", e.target.value)
+                    }
+                  />
+                </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Remarks
-                </label>
-                <textarea
-                  rows={1}
-                  value={formData.capexRemarks}
-                  onChange={(e) => handleChange("capexRemarks", e.target.value)}
-                  className="textarea textarea-bordered w-full"
-                />
-              </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Remarks
+                  </label>
+                  <textarea
+                    rows={1}
+                    value={formData.capexRemarks}
+                    onChange={(e) =>
+                      handleChange("capexRemarks", e.target.value)
+                    }
+                    className="textarea textarea-xs rounded-xl"
+                  />
+                </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Amount
-                </label>
-                <input
-                  className={inputStyle}
-                  placeholder="Amount"
-                  value={formData.capexAmount}
-                  onChange={(e) => handleChange("capexAmount", e.target.value)}
-                />
-              </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Amount
+                  </label>
+                  <input
+                    className={inputStyle}
+                    placeholder="Amount"
+                    value={formData.capexAmount}
+                    onChange={(e) =>
+                      handleChange("capexAmount", e.target.value)
+                    }
+                  />
+                </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Total PR
-                </label>
-                <input
-                  value={formData.capexTotalPR}
-                  onChange={(e) => handleChange("capexTotalPR", e.target.value)}
-                  placeholder="Total PR"
-                  className={inputStyle}
-                />
-              </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Total PR
+                  </label>
+                  <input
+                    value={formData.capexTotalPR}
+                    onChange={(e) =>
+                      handleChange("capexTotalPR", e.target.value)
+                    }
+                    placeholder="Total PR"
+                    className={inputStyle}
+                  />
+                </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  H1 FY 27
-                </label>
-                <input
-                  value={formData.capexH1Fy1}
-                  onChange={(e) => handleChange("capexH1Fy1", e.target.value)}
-                  placeholder="H1 FY 27"
-                  className={inputStyle}
-                />
-              </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    H1 FY 27
+                  </label>
+                  <input
+                    value={formData.capexH1Fy1}
+                    onChange={(e) => handleChange("capexH1Fy1", e.target.value)}
+                    placeholder="H1 FY 27"
+                    className={inputStyle}
+                  />
+                </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  H2 FY 27
-                </label>
-                <input
-                  value={formData.capexH2Fy1}
-                  onChange={(e) => handleChange("capexH2Fy1", e.target.value)}
-                  placeholder="H2 FY 27"
-                  className={inputStyle}
-                />
-              </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    H2 FY 27
+                  </label>
+                  <input
+                    value={formData.capexH2Fy1}
+                    onChange={(e) => handleChange("capexH2Fy1", e.target.value)}
+                    placeholder="H2 FY 27"
+                    className={inputStyle}
+                  />
+                </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  FY 28
-                </label>
-                <input
-                  value={formData.capexFy2}
-                  onChange={(e) => handleChange("capexFy2", e.target.value)}
-                  placeholder="FY 28"
-                  className={inputStyle}
-                />
-              </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    FY 28
+                  </label>
+                  <input
+                    value={formData.capexFy2}
+                    onChange={(e) => handleChange("capexFy2", e.target.value)}
+                    placeholder="FY 28"
+                    className={inputStyle}
+                  />
+                </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  FY 29
-                </label>
-                <input
-                  value={formData.capexFy3}
-                  onChange={(e) => handleChange("capexFy3", e.target.value)}
-                  placeholder="FY 29"
-                  className={inputStyle}
-                />
-              </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    FY 29
+                  </label>
+                  <input
+                    value={formData.capexFy3}
+                    onChange={(e) => handleChange("capexFy3", e.target.value)}
+                    placeholder="FY 29"
+                    className={inputStyle}
+                  />
+                </div>
 
-              {/* Left Side */}
-              {/* <div className="space-y-4"></div> */}
+                {/* Left Side */}
+                {/* <div className="space-y-4"></div> */}
 
-              {/* Right Side */}
-              {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4"></div> */}
-            </div>
-          </div>
-
-          <input
-            type="radio"
-            name="my_tabs_2"
-            className={`tab ${activeTab === 1 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
-            checked={activeTab === 1}
-            onClick={() => {
-              changeTab(1);
-            }}
-            aria-label={`Revenue | Bifurcation`}
-          />
-          <div className="tab-content border-base-300 bg-base-100 p-4">
-            <div className="grid grid-cols-1 lg:grid-cols-8 gap-2">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Description
-                </label>
-                <textarea
-                  value={formData.revenueDescription}
-                  onChange={(e) =>
-                    handleChange("revenueDescription", e.target.value)
-                  }
-                  className="textarea textarea-bordered w-full h-20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Remarks
-                </label>
-                <textarea
-                  value={formData.revenueRemarks}
-                  onChange={(e) =>
-                    handleChange("revenueRemarks", e.target.value)
-                  }
-                  className="textarea textarea-bordered w-full h-20"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Amount
-                </label>
-                <input
-                  value={formData.revenueAmount}
-                  onChange={(e) =>
-                    handleChange("revenueAmount", e.target.value)
-                  }
-                  placeholder="Amount"
-                  className={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Total PR
-                </label>
-                <input
-                  value={formData.revenueTotalPR}
-                  onChange={(e) =>
-                    handleChange("revenueTotalPR", e.target.value)
-                  }
-                  placeholder="Total PR"
-                  className={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  H1 FY 27
-                </label>
-                <input
-                  value={formData.revenueH1Fy1}
-                  onChange={(e) => handleChange("revenueH1Fy1", e.target.value)}
-                  placeholder="H1 FY 27"
-                  className={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  H2 FY 27
-                </label>
-                <input
-                  value={formData.revenueH2Fy1}
-                  onChange={(e) => handleChange("revenueH2Fy1", e.target.value)}
-                  placeholder="H2 FY 27"
-                  className={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  FY 28
-                </label>
-                <input
-                  value={formData.revenueFy2}
-                  onChange={(e) => handleChange("revenueFy2", e.target.value)}
-                  placeholder="FY 28"
-                  className={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  FY 29
-                </label>
-                <input
-                  value={formData.revenueFy3}
-                  onChange={(e) => handleChange("revenueFy3", e.target.value)}
-                  placeholder="FY 29"
-                  className={inputStyle}
-                />
+                {/* Right Side */}
+                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4"></div> */}
               </div>
             </div>
-          </div>
 
-          <input
-            type="radio"
-            name="my_tabs_2"
-            className={`tab ${activeTab === 2 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
-            checked={activeTab === 2}
-            onClick={() => {
-              changeTab(2);
-            }}
-            aria-label="Carry Forward | Actual Spent"
-          />
-          <div className="tab-content border-base-300 bg-base-100 p-4">
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-6 ">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Carry Forward
-                </label>
+            <input
+              type="radio"
+              name="my_tabs_2"
+              className={`tab ${activeTab === 1 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
+              checked={activeTab === 1}
+              onClick={() => {
+                changeTab(1);
+              }}
+              aria-label={`Revenue | Bifurcation`}
+            />
+            <div className="tab-content border-base-300 bg-base-100 p-4">
+              <div className="grid grid-cols-1 lg:grid-cols-8 gap-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Description
+                  </label>
+                  <textarea
+                    value={formData.revenueDescription}
+                    onChange={(e) =>
+                      handleChange("revenueDescription", e.target.value)
+                    }
+                    className="textarea textarea-xs rounded-xl"
+                  />
+                </div>
 
-                <input
-                  value={formData.carryForward}
-                  onChange={(e) => handleChange("carryForward", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Remarks
+                  </label>
+                  <textarea
+                    value={formData.revenueRemarks}
+                    onChange={(e) =>
+                      handleChange("revenueRemarks", e.target.value)
+                    }
+                    className="textarea textarea-xs rounded-xl"
+                  />
+                </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Revex
-                </label>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Amount
+                  </label>
+                  <input
+                    value={formData.revenueAmount}
+                    onChange={(e) =>
+                      handleChange("revenueAmount", e.target.value)
+                    }
+                    placeholder="Amount"
+                    className={inputStyle}
+                  />
+                </div>
 
-                <input
-                  value={formData.actualRevex}
-                  onChange={(e) => handleChange("actualRevex", e.target.value)}
-                  placeholder="Revex"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Capex
-                </label>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Total PR
+                  </label>
+                  <input
+                    value={formData.revenueTotalPR}
+                    onChange={(e) =>
+                      handleChange("revenueTotalPR", e.target.value)
+                    }
+                    placeholder="Total PR"
+                    className={inputStyle}
+                  />
+                </div>
 
-                <input
-                  value={formData.actualCapex}
-                  onChange={(e) => handleChange("actualCapex", e.target.value)}
-                  placeholder="Capex"
-                  className={inputStyle}
-                />
-              </div>
-            </div>
-          </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    H1 FY 27
+                  </label>
+                  <input
+                    value={formData.revenueH1Fy1}
+                    onChange={(e) =>
+                      handleChange("revenueH1Fy1", e.target.value)
+                    }
+                    placeholder="H1 FY 27"
+                    className={inputStyle}
+                  />
+                </div>
 
-          <input
-            type="radio"
-            name="my_tabs_2"
-            className={`tab ${activeTab === 3 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
-            checked={activeTab === 3}
-            onClick={() => {
-              changeTab(3);
-            }}
-            aria-label="Fund Flow"
-          />
-          <div className="tab-content border-base-300 bg-base-100 p-4">
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-6 ">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Cap H1
-                </label>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    H2 FY 27
+                  </label>
+                  <input
+                    value={formData.revenueH2Fy1}
+                    onChange={(e) =>
+                      handleChange("revenueH2Fy1", e.target.value)
+                    }
+                    placeholder="H2 FY 27"
+                    className={inputStyle}
+                  />
+                </div>
 
-                <input
-                  value={formData.fundFlowCapH1}
-                  onChange={(e) =>
-                    handleChange("fundFlowCapH1", e.target.value)
-                  }
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Cap H2
-                </label>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    FY 28
+                  </label>
+                  <input
+                    value={formData.revenueFy2}
+                    onChange={(e) => handleChange("revenueFy2", e.target.value)}
+                    placeholder="FY 28"
+                    className={inputStyle}
+                  />
+                </div>
 
-                <input
-                  value={formData.fundFlowCapH2}
-                  onChange={(e) =>
-                    handleChange("fundFlowCapH2", e.target.value)
-                  }
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Rev H1
-                </label>
-
-                <input
-                  value={formData.fundFlowRevH1}
-                  onChange={(e) =>
-                    handleChange("fundFlowRevH1", e.target.value)
-                  }
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Rev H2
-                </label>
-
-                <input
-                  value={formData.fundFlowRevH2}
-                  onChange={(e) =>
-                    handleChange("fundFlowRevH2", e.target.value)
-                  }
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  H1
-                </label>
-
-                <input
-                  value={formData.fundFlowH1}
-                  onChange={(e) => handleChange("fundFlowH1", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  H2
-                </label>
-
-                <input
-                  value={formData.fundFlowH2}
-                  onChange={(e) => handleChange("fundFlowH2", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Total
-                </label>
-
-                <input
-                  value={formData.fundFlowTotal}
-                  onChange={(e) =>
-                    handleChange("fundFlowTotal", e.target.value)
-                  }
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Fund Flow 28
-                </label>
-
-                <input
-                  value={formData.fundFlow2}
-                  onChange={(e) => handleChange("fundFlow2", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Fund Flow 29
-                </label>
-
-                <input
-                  value={formData.fundFlow3}
-                  onChange={(e) => handleChange("fundFlow3", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Fund Flow 30
-                </label>
-
-                <input
-                  value={formData.fundFlow4}
-                  onChange={(e) => handleChange("fundFlow4", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Fund Flow 31
-                </label>
-
-                <input
-                  value={formData.fundFlow5}
-                  onChange={(e) => handleChange("fundFlow5", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    FY 29
+                  </label>
+                  <input
+                    value={formData.revenueFy3}
+                    onChange={(e) => handleChange("revenueFy3", e.target.value)}
+                    placeholder="FY 29"
+                    className={inputStyle}
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <input
-            type="radio"
-            name="my_tabs_2"
-            className={`tab ${activeTab === 4 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
-            checked={activeTab === 4}
-            onClick={() => {
-              changeTab(4);
-            }}
-            aria-label="C/F Fund Flow"
-          />
-          <div className="tab-content border-base-300 bg-base-100 p-4">
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-7 ">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Cap H1
-                </label>
+            <input
+              type="radio"
+              name="my_tabs_2"
+              className={`tab ${activeTab === 2 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
+              checked={activeTab === 2}
+              onClick={() => {
+                changeTab(2);
+              }}
+              aria-label="Carry Forward | Actual Spent"
+            />
+            <div className="tab-content border-base-300 bg-base-100 p-4">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-6 ">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Carry Forward
+                  </label>
 
-                <input
-                  value={formData.cfCapH1}
-                  onChange={(e) => handleChange("cfCapH1", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Cap H2
-                </label>
+                  <input
+                    value={formData.carryForward}
+                    onChange={(e) =>
+                      handleChange("carryForward", e.target.value)
+                    }
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
 
-                <input
-                  value={formData.cfCapH2}
-                  onChange={(e) => handleChange("cfCapH2", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Rev H1
-                </label>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Revex
+                  </label>
 
-                <input
-                  value={formData.cfRevH1}
-                  onChange={(e) => handleChange("cfRevH1", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Rev H2
-                </label>
+                  <input
+                    value={formData.actualRevex}
+                    onChange={(e) =>
+                      handleChange("actualRevex", e.target.value)
+                    }
+                    placeholder="Revex"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Capex
+                  </label>
 
-                <input
-                  value={formData.cfRevH2}
-                  onChange={(e) => handleChange("cfRevH2", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  H1
-                </label>
-
-                <input
-                  value={formData.cfH1}
-                  onChange={(e) => handleChange("cfH1", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  H2
-                </label>
-
-                <input
-                  value={formData.cfH2}
-                  onChange={(e) => handleChange("cfH2", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Total
-                </label>
-
-                <input
-                  value={formData.cfTotal}
-                  onChange={(e) => handleChange("cfTotal", e.target.value)}
-                  placeholder="amount"
-                  className={inputStyle}
-                />
+                  <input
+                    value={formData.actualCapex}
+                    onChange={(e) =>
+                      handleChange("actualCapex", e.target.value)
+                    }
+                    placeholder="Capex"
+                    className={inputStyle}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="flex gap-x-4 place-content-left m-4 ">
-          <button
-            className="btn btn-sm btn-neutral"
-            onClick={prevTab}
-            disabled={activeTab === 0}
-          >
-            <ChevronLeft />
-            Back
-          </button>
-          <button
-            className="btn btn-sm btn-neutral"
-            onClick={nextTab}
-            disabled={activeTab === tabs.length - 1}
-          >
-            Next
-            <ChevronRight />
-          </button>
-          <button
-            className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
-            onClick={handleSave}
-          >
-            {isEditing ? "Update Row" : "Save All Entries"}
-          </button>
-        </div>
+            <input
+              type="radio"
+              name="my_tabs_2"
+              className={`tab ${activeTab === 3 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
+              checked={activeTab === 3}
+              onClick={() => {
+                changeTab(3);
+              }}
+              aria-label="Fund Flow"
+            />
+            <div className="tab-content border-base-300 bg-base-100 p-4">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-6 ">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Cap H1
+                  </label>
+
+                  <input
+                    value={formData.fundFlowCapH1}
+                    onChange={(e) =>
+                      handleChange("fundFlowCapH1", e.target.value)
+                    }
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Cap H2
+                  </label>
+
+                  <input
+                    value={formData.fundFlowCapH2}
+                    onChange={(e) =>
+                      handleChange("fundFlowCapH2", e.target.value)
+                    }
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Rev H1
+                  </label>
+
+                  <input
+                    value={formData.fundFlowRevH1}
+                    onChange={(e) =>
+                      handleChange("fundFlowRevH1", e.target.value)
+                    }
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Rev H2
+                  </label>
+
+                  <input
+                    value={formData.fundFlowRevH2}
+                    onChange={(e) =>
+                      handleChange("fundFlowRevH2", e.target.value)
+                    }
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    H1
+                  </label>
+
+                  <input
+                    value={formData.fundFlowH1}
+                    onChange={(e) => handleChange("fundFlowH1", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    H2
+                  </label>
+
+                  <input
+                    value={formData.fundFlowH2}
+                    onChange={(e) => handleChange("fundFlowH2", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Total
+                  </label>
+
+                  <input
+                    value={formData.fundFlowTotal}
+                    onChange={(e) =>
+                      handleChange("fundFlowTotal", e.target.value)
+                    }
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Fund Flow 28
+                  </label>
+
+                  <input
+                    value={formData.fundFlow2}
+                    onChange={(e) => handleChange("fundFlow2", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Fund Flow 29
+                  </label>
+
+                  <input
+                    value={formData.fundFlow3}
+                    onChange={(e) => handleChange("fundFlow3", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Fund Flow 30
+                  </label>
+
+                  <input
+                    value={formData.fundFlow4}
+                    onChange={(e) => handleChange("fundFlow4", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Fund Flow 31
+                  </label>
+
+                  <input
+                    value={formData.fundFlow5}
+                    onChange={(e) => handleChange("fundFlow5", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <input
+              type="radio"
+              name="my_tabs_2"
+              className={`tab ${activeTab === 4 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
+              checked={activeTab === 4}
+              onClick={() => {
+                changeTab(4);
+              }}
+              aria-label="C/F Fund Flow"
+            />
+
+            <div className="tab-content border-base-300 bg-base-100 p-4">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-7 ">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Cap H1
+                  </label>
+
+                  <input
+                    value={formData.cfCapH1}
+                    onChange={(e) => handleChange("cfCapH1", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Cap H2
+                  </label>
+
+                  <input
+                    value={formData.cfCapH2}
+                    onChange={(e) => handleChange("cfCapH2", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Rev H1
+                  </label>
+
+                  <input
+                    value={formData.cfRevH1}
+                    onChange={(e) => handleChange("cfRevH1", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Rev H2
+                  </label>
+
+                  <input
+                    value={formData.cfRevH2}
+                    onChange={(e) => handleChange("cfRevH2", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    H1
+                  </label>
+
+                  <input
+                    value={formData.cfH1}
+                    onChange={(e) => handleChange("cfH1", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    H2
+                  </label>
+
+                  <input
+                    value={formData.cfH2}
+                    onChange={(e) => handleChange("cfH2", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Total
+                  </label>
+
+                  <input
+                    value={formData.cfTotal}
+                    onChange={(e) => handleChange("cfTotal", e.target.value)}
+                    placeholder="amount"
+                    className={inputStyle}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm text-error self-center font-semibold">
+              Please fill the entries and then click on next
+            </p>
+          </div>
+        )}
+
+        {canEdit && (
+          <div className="flex gap-x-4 place-content-left m-4 ">
+            <button
+              className="btn btn-sm btn-neutral"
+              onClick={prevTab}
+              disabled={activeTab === 0}
+            >
+              <ChevronLeft />
+              Back
+            </button>
+            <button
+              className="btn btn-sm btn-neutral"
+              onClick={nextTab}
+              disabled={activeTab === tabs.length - 1 || !isCurrentTabValid()}
+            >
+              Next
+              <ChevronRight />
+            </button>
+
+            <button
+              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+              onClick={handleSave}
+            >
+              {isEditing ? "Update Row" : "Save All Entries"}
+            </button>
+
+            <button
+              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+              onClick={handleSubmitForApproval}
+            >
+              Submit For Approval
+            </button>
+          </div>
+        )}
       </div>
 
       {rows.length > 0 && (
@@ -1179,21 +1365,23 @@ const PDProjecDetail = () => {
                   <tr key={row.PDDetailId} className="text-xs">
                     {/* Actions */}
                     <td className="sticky left-0 z-20 bg-white border border-slate-200">
-                      <div className="flex gap-1 justify-center">
-                        <button
-                          className="btn btn-xs bg-red-500 text-white"
-                          onClick={() => handleEdit(row.PDDetailId)}
-                        >
-                          Edit
-                        </button>
+                      {canEdit && (
+                        <div className="flex gap-1 justify-center">
+                          <button
+                            className="btn btn-xs bg-red-500 text-white"
+                            onClick={() => handleEdit(row.PDDetailId)}
+                          >
+                            Edit
+                          </button>
 
-                        <button
-                          className="btn btn-xs bg-red-500 text-white"
-                          onClick={() => handleDelete(row.PDDetailId)}
-                        >
-                          Delete
-                        </button>
-                      </div>
+                          <button
+                            className="btn btn-xs bg-red-500 text-white"
+                            onClick={() => handleDelete(row.PDDetailId)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </td>
 
                     {/* CAPEX */}

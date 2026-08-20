@@ -156,6 +156,21 @@ export const DeletePDMaster = async (pdDetailId: number) => {
   return response.data;
 };
 
+const UpdatePDStatus = async (payload: {
+  projectId: string;
+  deptId: string;
+  userId: string;
+  actionPerformed: string;
+  remarks?: string;
+}) => {
+  const response = await api.post(
+    `${import.meta.env.VITE_API_URL}/api/PDMaster/UpdatePDStatus`,
+    payload,
+  );
+
+  return response.data;
+};
+
 export {
   FetchAllProjectsOfUser,
   CreateProject,
@@ -167,4 +182,5 @@ export {
   SavePDMaster,
   UpdatePDMaster,
   GetPDMaster,
+  UpdatePDStatus,
 };
