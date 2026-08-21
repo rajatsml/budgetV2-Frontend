@@ -121,23 +121,17 @@ const PDApprover = () => {
               <thead>
                 <tr className="bg-base-200 ">
                   <th className="border-r border-base-300 font-medium">
-                    Metric
+                    Budget
                   </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
                   <th className="border-r border-base-300 font-medium">
-                    Value
+                    Budget
                   </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
                   <th className="border-r border-base-300 font-medium">
-                    Metric
+                    Budget
                   </th>
-                  <th className="border-r border-base-300 font-medium">
-                    Value
-                  </th>
-                  <th className="border-r border-base-300 font-medium">
-                    Metric
-                  </th>
-                  <th className="border-r border-base-300 font-medium">
-                    Value
-                  </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
                 </tr>
               </thead>
 
@@ -469,7 +463,7 @@ const PDApprover = () => {
 
       {approvalHistory.length > 0 && (
         <div className="mt-6 border border-slate-200 rounded-xl bg-white overflow-hidden">
-          <div className="px-4 py-3 border-b bg-slate-50">
+          <div className="px-4 py-3 bg-slate-50">
             <h3 className="text-sm font-semibold text-slate-700">
               Approval History
             </h3>
@@ -479,9 +473,10 @@ const PDApprover = () => {
             <table className="table table-zebra table-xs w-full">
               <thead>
                 <tr className="bg-red-500 text-white">
-                  <th>S.No</th>
-                  <th>Action</th>
+                  <th>S.No.</th>
+                  <th>User ID</th>
                   <th>Employee</th>
+                  <th>Action</th>
                   <th>Remarks</th>
                   <th>Date & Time</th>
                 </tr>
@@ -492,13 +487,13 @@ const PDApprover = () => {
                   <tr key={item.HistoryId}>
                     <td>{index + 1}</td>
 
+                    <td>{item.ActionPerformedBy}</td>
+                    <td>{item.EmployeeName}</td>
                     <td>
-                      <span className="badge badge-sm badge-neutral">
+                      <span className="badge badge-sm badge-neutral ">
                         {item.ActionPerformed}
                       </span>
                     </td>
-
-                    <td>{item.EmployeeName || item.ActionPerformedBy}</td>
 
                     <td>{item.Remarks || "-"}</td>
 

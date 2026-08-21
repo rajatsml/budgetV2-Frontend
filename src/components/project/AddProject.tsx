@@ -13,13 +13,6 @@ const AddProject = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
   const isExistingProject = Boolean(projectId);
-  // Financial Year options and selected state
-  const AVAILABLE_FINANCIAL_YEARS = [
-    "2023-24",
-    "2024-25",
-    "2025-26",
-    "2026-27",
-  ];
 
   // 2. Add these state hooks to your form states
   const [selectedDeps, setSelectedDeps] = useState<string[]>([]);
@@ -41,6 +34,7 @@ const AddProject = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [projectTypes, setProjectTypes] = useState<any[]>([]);
+  const [financialYears, setFinancialYears] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
 
@@ -235,6 +229,18 @@ const AddProject = () => {
     setMakerSearchTerms(updatedMakerSearchTerms);
   };
 
+  const GetFinancialYear = async () => {
+    try {
+      const data = await FetchDropDownData(
+        `${import.meta.env.VITE_API_URL}/api/Dropdowns/4`,
+      );
+
+      setFinancialYears(data || []);
+    } catch (error) {
+      console.error("Error fetching project types:", error);
+    }
+  };
+
   const GetProjectTypes = async () => {
     try {
       const data = await FetchDropDownData(
@@ -338,6 +344,7 @@ const AddProject = () => {
     GetProjectTypes();
     GetDepartments();
     GetEmployees();
+    GetFinancialYear();
   }, []);
 
   useEffect(() => {
@@ -447,9 +454,9 @@ const AddProject = () => {
                       <option disabled={true} value={""}>
                         Select Financial Year
                       </option>
-                      {AVAILABLE_FINANCIAL_YEARS.map((fy) => (
-                        <option key={fy} value={fy}>
-                          {fy}
+                      {financialYears.map((fy) => (
+                        <option key={fy.value} value={fy.value}>
+                          {fy.value}
                         </option>
                       ))}
                     </select>
@@ -1012,8 +1019,8 @@ const AddProject = () => {
                   )}
                 </div>
 
-                <div className="card-actions flex-col gap-2 mt-4 w-full">
-                  <div className="card-actions flex-col gap-2 mt-4 w-full">
+                <div className="card-actions flex-col gap-2 w-full">
+                  <div className="card-actions flex-col gap-2 w-full">
                     <button
                       type="button"
                       onClick={() => handleCreateProject("Posted")}

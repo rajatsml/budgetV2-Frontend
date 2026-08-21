@@ -81,11 +81,7 @@ const PDHeader: React.FC<PDHeaderProps> = ({
           <label className="mb-2 block text-sm font-medium text-slate-700">
             Pending With
           </label>
-          <input
-            value={pendingWith ? pendingWith : "APPROVED"}
-            readOnly
-            className={inputStyle}
-          />
+          <input value={pendingWith} readOnly className={inputStyle} />
         </div>
       </div>
     </div>

@@ -214,20 +214,43 @@ const PDProjecDetail = () => {
     fetchApprovalHistory();
   }, []);
 
+  // const savePDData = async () => {
+  //   try {
+  //     const payload = buildPayload("DRAFT");
+
+  //     if (!pdDetailId) {
+  //       console.log("PD VALUE NOT FOUND");
+  //       const response = await SavePDMaster(payload);
+  //       setPDDetailId(response?.pdDetailId);
+  //       console.log("PD Saved SAVE Successfully", response);
+  //     } else {
+  //       console.log("PD VALUE FOUND");
+  //       const response = await UpdatePDMaster(payload, pdDetailId);
+  //       setPDDetailId(response?.pdDetailId);
+  //       console.log("PD Saved UPDATE Successfully", response);
+  //     }
+
+  //     return true;
+  //   } catch (error) {
+  //     console.error("PD Save Failed", error);
+  //     return false;
+  //   }
+  // };
+
   const savePDData = async () => {
     try {
+      if (isRowEmpty()) {
+        return false;
+      }
+
       const payload = buildPayload("DRAFT");
 
       if (!pdDetailId) {
-        console.log("PD VALUE NOT FOUND");
         const response = await SavePDMaster(payload);
         setPDDetailId(response?.pdDetailId);
-        console.log("PD Saved SAVE Successfully", response);
       } else {
-        console.log("PD VALUE FOUND");
         const response = await UpdatePDMaster(payload, pdDetailId);
         setPDDetailId(response?.pdDetailId);
-        console.log("PD Saved UPDATE Successfully", response);
       }
 
       return true;
@@ -287,6 +310,10 @@ const PDProjecDetail = () => {
 
   const handleSave = async () => {
     try {
+      if (isRowEmpty()) {
+        alert("Please enter at least one value before saving.");
+        return;
+      }
       const payload = buildPayload("COMPLETE");
 
       if (editingRowId) {
@@ -391,6 +418,12 @@ const PDProjecDetail = () => {
     } catch (error) {
       console.error("Delete Failed", error);
     }
+  };
+
+  const isRowEmpty = () => {
+    return Object.values(formData).every(
+      (value) => !value || value.toString().trim() === "",
+    );
   };
 
   const getNumber = (value: string) => Number(value || 0);
@@ -537,23 +570,17 @@ const PDProjecDetail = () => {
               <thead>
                 <tr className="bg-base-200 ">
                   <th className="border-r border-base-300 font-medium">
-                    Metric
+                    Budget
                   </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
                   <th className="border-r border-base-300 font-medium">
-                    Value
+                    Budget
                   </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
                   <th className="border-r border-base-300 font-medium">
-                    Metric
+                    Budget
                   </th>
-                  <th className="border-r border-base-300 font-medium">
-                    Value
-                  </th>
-                  <th className="border-r border-base-300 font-medium">
-                    Metric
-                  </th>
-                  <th className="border-r border-base-300 font-medium">
-                    Value
-                  </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
                 </tr>
               </thead>
 
@@ -1211,12 +1238,15 @@ const PDProjecDetail = () => {
               <ChevronRight />
             </button>
 
-            <button
-              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
-              onClick={handleSave}
-            >
-              {isEditing ? "Update Row" : "Save All Entries"}
-            </button>
+            {!isRowEmpty() && (
+              <button
+                className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+                onClick={handleSave}
+                disabled={isRowEmpty()}
+              >
+                {isEditing ? "Update Row" : "Save All Entries"}
+              </button>
+            )}
 
             <button
               className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
@@ -1234,10 +1264,7 @@ const PDProjecDetail = () => {
             <table className="table table-zebra table-xs w-full">
               <thead className="sticky top-0 z-30 ">
                 <tr className="bg-red-500 text-white text-xs">
-                  <th
-                    rowSpan={2}
-                    className="sticky left-0 z-40 bg-red-500 border  text-center"
-                  >
+                  <th className="sticky left-0 z-40 bg-red-500 border  text-center">
                     Actions
                   </th>
 
@@ -1263,6 +1290,7 @@ const PDProjecDetail = () => {
                 </tr>
 
                 <tr className="bg-slate-100 text-slate-800 ">
+                  <th></th>
                   <th className="border border-slate-300 font-medium text-xs">
                     Capex Desc
                   </th>
@@ -1716,7 +1744,7 @@ const PDProjecDetail = () => {
       )}
       {approvalHistory.length > 0 && (
         <div className="mt-6 border border-slate-200 rounded-xl bg-white overflow-hidden">
-          <div className="px-4 py-3 border-b bg-slate-50">
+          <div className="px-4 py-3 bg-slate-50">
             <h3 className="text-sm font-semibold text-slate-700">
               Approval History
             </h3>
@@ -1727,9 +1755,9 @@ const PDProjecDetail = () => {
               <thead>
                 <tr className="bg-red-500 text-white">
                   <th>S.No.</th>
-                  <th>Action</th>
                   <th>User ID</th>
                   <th>Employee</th>
+                  <th>Action</th>
                   <th>Remarks</th>
                   <th>Date & Time</th>
                 </tr>
@@ -1740,14 +1768,13 @@ const PDProjecDetail = () => {
                   <tr key={item.HistoryId}>
                     <td>{index + 1}</td>
 
+                    <td>{item.ActionPerformedBy}</td>
+                    <td>{item.EmployeeName}</td>
                     <td>
                       <span className="badge badge-sm badge-neutral ">
                         {item.ActionPerformed}
                       </span>
                     </td>
-
-                    <td>{item.ActionPerformedBy}</td>
-                    <td>{item.EmployeeName}</td>
 
                     <td>{item.Remarks || "-"}</td>
 
