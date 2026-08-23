@@ -75,13 +75,13 @@ const NavBar = () => {
                   <FolderKanban size={16} />
                   My Projects
                 </Link>
-                <Link
+                {/* <Link
                   to="/nonpd-project"
                   className={navLinkClass("/nonpd-project")}
                 >
                   <FolderKanban size={16} />
                   Non PD
-                </Link>
+                </Link> */}
               </>
             )}
           </div>

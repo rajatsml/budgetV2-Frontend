@@ -316,7 +316,7 @@ const NonPDProjectDetail = () => {
     fetchApprovalHistory();
   }, []);
 
-  const savePDData = async () => {
+  const saveNonPDData = async () => {
     try {
       if (isRowEmpty()) {
         return false;
@@ -334,7 +334,7 @@ const NonPDProjectDetail = () => {
 
       return true;
     } catch (error) {
-      console.error("PD Save Failed", error);
+      console.error("Non-PD Save Failed", error);
       return false;
     }
   };
@@ -344,7 +344,7 @@ const NonPDProjectDetail = () => {
   };
 
   const nextTab = async () => {
-    const success = await savePDData();
+    const success = await saveNonPDData();
     if (!success) return;
 
     console.log("This is success - NEXT", success);
@@ -357,7 +357,7 @@ const NonPDProjectDetail = () => {
   };
 
   const prevTab = async () => {
-    const success = await savePDData();
+    const success = await saveNonPDData();
     if (!success) return;
 
     console.log("This is success - NEXT", success);
