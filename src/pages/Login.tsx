@@ -37,6 +37,12 @@ const Login = () => {
         password,
       };
 
+      console.log(
+        "Login payload:",
+        `${import.meta.env.VITE_API_URL}/api/Auth/login`,
+        payload,
+      );
+
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/Auth/login`,
         payload,

@@ -50,7 +50,7 @@ const useUserStore = create<UserState>((set, get) => ({
   user: loadFromStorage(),
 
   login: async (userId: string, password: string) => {
-    const url = "http://localhost:5024/api/Auth/login";
+    const url = `${import.meta.env.VITE_API_URL}/api/Auth/login`;
 
     const body = {
       userId: userId.trim(),

@@ -148,7 +148,7 @@ const GetPDMaster = async (projectID: string, deptId: any) => {
   }
 };
 
-export const DeletePDMaster = async (pdDetailId: number) => {
+const DeletePDMaster = async (pdDetailId: number) => {
   const response = await api.delete(
     `${import.meta.env.VITE_API_URL}/api/PDMaster/${pdDetailId}`,
   );
@@ -185,6 +185,96 @@ const GetPDApprovalHistory = async (projectId: string, deptId: string) => {
   return response.data;
 };
 
+const InitializeNonPDMaster = async (payload: Record<string, unknown>) => {
+  try {
+    const response = await api.post(
+      `${import.meta.env.VITE_API_URL}/api/NonPDMaster/initialize`,
+      payload,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error initializing NonPD master:", error);
+    throw error;
+  }
+};
+
+const SaveNonPDMaster = async (payload: Record<string, unknown>) => {
+  try {
+    const response = await api.post(
+      `${import.meta.env.VITE_API_URL}/api/NonPDMaster`,
+      payload,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error saving NonPD Master:", error);
+    throw error;
+  }
+};
+
+const UpdateNonPDMaster = async (
+  payload: Record<string, unknown>,
+  nonPDRecordId: number | string,
+) => {
+  try {
+    const response = await api.put(
+      `${import.meta.env.VITE_API_URL}/api/NonPDMaster/${nonPDRecordId}`,
+      payload,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating NonPD Master:", error);
+    throw error;
+  }
+};
+
+const GetNonPDMaster = async (projectID: string, deptId: any) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/NonPDMaster?projectId=${projectID}&deptId=${deptId}`,
+    );
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching NonPD Master:", error);
+    return [];
+  }
+};
+
+const DeleteNonPDMaster = async (nonPDDetailId: number) => {
+  const response = await api.delete(
+    `${import.meta.env.VITE_API_URL}/api/NonPDMaster/${nonPDDetailId}`,
+  );
+
+  return response.data;
+};
+
+const UpdateNonPDStatus = async (payload: {
+  projectId: string;
+  deptId: string;
+  userId: string;
+  actionPerformed: string;
+  remarks?: string;
+}) => {
+  const response = await api.post(
+    `${import.meta.env.VITE_API_URL}/api/NonPDMaster/UpdateNonPDStatus`,
+    payload,
+  );
+
+  return response.data;
+};
+
+const GetNonPDApprovalHistory = async (projectId: string, deptId: string) => {
+  const response = await api.get(
+    `${import.meta.env.VITE_API_URL}/api/NonPDMaster/GetNonPDApprovalHistory`,
+    {
+      params: {
+        projectId,
+        deptId,
+      },
+    },
+  );
+
+  return response.data;
+};
 export {
   FetchAllProjectsOfUser,
   CreateProject,
@@ -192,10 +282,22 @@ export {
   GetProjectById,
   UpdateProject,
   DeleteProject,
+
+  // PD Master
   InitializePDMaster,
   SavePDMaster,
   UpdatePDMaster,
   GetPDMaster,
+  DeletePDMaster,
   UpdatePDStatus,
   GetPDApprovalHistory,
+
+  // Non-PD Master
+  InitializeNonPDMaster,
+  SaveNonPDMaster,
+  UpdateNonPDMaster,
+  GetNonPDMaster,
+  DeleteNonPDMaster,
+  UpdateNonPDStatus,
+  GetNonPDApprovalHistory,
 };

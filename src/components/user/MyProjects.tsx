@@ -131,17 +131,43 @@ const MyProjects = () => {
         });
       }
     } else if (projectTypeDesc === "Non PD") {
-      navigate("/nonpd-project", {
-        state: {
-          projectType,
-          projectName,
-          projectID,
-          deptName,
-          deptID,
-          category,
-          FyYear,
-        },
-      });
+      if (user?.userId === makerId) {
+        navigate("/nonpd-project", {
+          state: {
+            projectType,
+            projectName,
+            projectID,
+            deptName,
+            deptID,
+            category,
+            FyYear,
+            makerId,
+            approver1,
+            approver2,
+            approver3,
+            status,
+            pendingWithUser,
+          },
+        });
+      } else {
+        navigate("/nonpd-project-approver", {
+          state: {
+            projectType,
+            projectName,
+            projectID,
+            deptName,
+            deptID,
+            category,
+            FyYear,
+            makerId,
+            approver1,
+            approver2,
+            approver3,
+            status,
+            pendingWithUser,
+          },
+        });
+      }
     } else navigate("/");
   };
 
