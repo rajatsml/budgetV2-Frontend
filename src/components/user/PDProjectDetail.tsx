@@ -102,7 +102,7 @@ const initialFormState: PDFormData = {
   cfTotal: "",
 };
 
-const PDProjecDetail = () => {
+const PDProjectDetail = () => {
   // type PDFormDataWithId = PDFormData & {
   //   id: string;
   // };
@@ -495,6 +495,11 @@ const PDProjecDetail = () => {
 
   const handleSubmitForApproval = async () => {
     try {
+      if (rows.length === 0) {
+        alert("Please save at least one entry before submitting for approval.");
+
+        return;
+      }
       const response = await UpdatePDStatus({
         projectId: data?.projectID,
         deptId: data?.deptID?.toString(),
@@ -523,7 +528,7 @@ const PDProjecDetail = () => {
     "C/F Fund Flow",
   ];
   const inputStyle =
-    "w-full h-8  px-3 text-xs border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
+    "w-full h-8  px-3 text-xs border border-slate-200 rounded outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
 
   const getTotal = (field: string) =>
     rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
@@ -562,86 +567,66 @@ const PDProjecDetail = () => {
           pendingWith={data?.pendingWithUser}
           status={data?.status}
         />
-        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 shadow-sm self-stretch w-1/2">
+        <div className="border border-slate-200 rounded p-4 bg-gray-200 shadow-sm w-1/2">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
 
-          <div className="overflow-x-auto rounded-lg border border-base-300 bg-white">
+          <div className="overflow-x-auto rounded border border-base-300 bg-white">
             <table className="table w-full table-sm">
               <thead>
-                <tr className="bg-base-200 ">
+                <tr className="bg-base-200">
                   <th className="border-r border-base-300 font-medium">
-                    Budget
+                    Capex
                   </th>
-                  <th className="border-r border-base-300 font-medium">Amt</th>
                   <th className="border-r border-base-300 font-medium">
-                    Budget
+                    Revenue
                   </th>
-                  <th className="border-r border-base-300 font-medium">Amt</th>
                   <th className="border-r border-base-300 font-medium">
-                    Budget
+                    Carry Forward
                   </th>
-                  <th className="border-r border-base-300 font-medium">Amt</th>
+                  <th className="border-r border-base-300 font-medium">
+                    Actual Revex
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    Actual Capex
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    Fund Flow
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    C/F Fund Flow
+                  </th>
                 </tr>
               </thead>
 
               <tbody>
                 <tr className="hover">
-                  <td className="border border-base-300 font-medium">Capex</td>
                   <td className="border border-base-300 font-semibold">
                     {summary.capex}
                   </td>
 
-                  <td className="border border-base-300 font-medium">
-                    Revenue
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.revenue}
                   </td>
 
-                  <td className="border border-base-300 font-medium">
-                    Carry Forward
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.carryForward}
                   </td>
-                </tr>
 
-                <tr className="hover">
-                  <td className="border border-base-300 font-medium">
-                    Actual Revex
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.actualRevex}
                   </td>
 
-                  <td className="border border-base-300 font-medium">
-                    Actual Capex
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.actualCapex}
                   </td>
 
-                  <td className="border border-base-300 font-medium">
-                    Fund Flow
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.fundFlow}
                   </td>
-                </tr>
 
-                <tr className="hover">
-                  <td className="border border-base-300 font-medium">
-                    C/F Fund Flow
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.cfFundFlow}
                   </td>
-
-                  <td className="border border-base-300 bg-base-100"></td>
-                  <td className="border border-base-300 bg-base-100"></td>
-
-                  <td className="border border-base-300 bg-base-100"></td>
-                  <td className="border border-base-300 bg-base-100"></td>
                 </tr>
               </tbody>
             </table>
@@ -649,7 +634,7 @@ const PDProjecDetail = () => {
         </div>
       </div>
 
-      <div className=" border-slate-200 rounded-xl">
+      <div className=" border-slate-200 rounded">
         {/* name of each tab group should be unique */}
 
         {canEdit && (
@@ -665,14 +650,13 @@ const PDProjecDetail = () => {
               aria-label={`Capex | Bifurcation`}
             />
             <div className="tab-content border-base-300 bg-base-100 p-4">
-              <div className="grid grid-cols-1 lg:grid-cols-8 gap-2">
-                <div>
+              <div className="grid grid-cols-1 lg:grid-cols-10 gap-2">
+                <div className="col-span-2">
                   <label className="mb-2 block text-sm font-medium text-slate-700">
                     Description
                   </label>
                   <textarea
-                    rows={1}
-                    className="textarea textarea-xs rounded-xl"
+                    className={`${inputStyle} py-2 overflow-y-hidden`}
                     value={formData.capexDescription}
                     onChange={(e) =>
                       handleChange("capexDescription", e.target.value)
@@ -680,17 +664,16 @@ const PDProjecDetail = () => {
                   />
                 </div>
 
-                <div>
+                <div className="col-span-2">
                   <label className="mb-2 block text-sm font-medium text-slate-700">
                     Remarks
                   </label>
                   <textarea
-                    rows={1}
                     value={formData.capexRemarks}
                     onChange={(e) =>
                       handleChange("capexRemarks", e.target.value)
                     }
-                    className="textarea textarea-xs rounded-xl"
+                    className={`${inputStyle} py-2 overflow-y-hidden`}
                   />
                 </div>
 
@@ -769,12 +752,6 @@ const PDProjecDetail = () => {
                     className={inputStyle}
                   />
                 </div>
-
-                {/* Left Side */}
-                {/* <div className="space-y-4"></div> */}
-
-                {/* Right Side */}
-                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4"></div> */}
               </div>
             </div>
 
@@ -789,8 +766,8 @@ const PDProjecDetail = () => {
               aria-label={`Revenue | Bifurcation`}
             />
             <div className="tab-content border-base-300 bg-base-100 p-4">
-              <div className="grid grid-cols-1 lg:grid-cols-8 gap-2">
-                <div>
+              <div className="grid grid-cols-1 lg:grid-cols-10 gap-2">
+                <div className="col-span-2">
                   <label className="mb-2 block text-sm font-medium text-slate-700">
                     Description
                   </label>
@@ -799,11 +776,11 @@ const PDProjecDetail = () => {
                     onChange={(e) =>
                       handleChange("revenueDescription", e.target.value)
                     }
-                    className="textarea textarea-xs rounded-xl"
+                    className={`${inputStyle} py-2 overflow-y-hidden`}
                   />
                 </div>
 
-                <div>
+                <div className="col-span-2">
                   <label className="mb-2 block text-sm font-medium text-slate-700">
                     Remarks
                   </label>
@@ -812,7 +789,7 @@ const PDProjecDetail = () => {
                     onChange={(e) =>
                       handleChange("revenueRemarks", e.target.value)
                     }
-                    className="textarea textarea-xs rounded-xl"
+                    className={`${inputStyle} py-2 overflow-y-hidden`}
                   />
                 </div>
 
@@ -1213,7 +1190,7 @@ const PDProjecDetail = () => {
               </div>
             </div>
 
-            <p className="text-sm text-error self-center font-semibold">
+            <p className="text-sm text-error self-center  font-semibold">
               Please fill the entries and then click on next
             </p>
           </div>
@@ -1247,10 +1224,10 @@ const PDProjecDetail = () => {
                 {isEditing ? "Update Row" : "Save All Entries"}
               </button>
             )}
-
             <button
-              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:border-gray-400"
               onClick={handleSubmitForApproval}
+              disabled={rows.length === 0}
             >
               Submit For Approval
             </button>
@@ -1743,7 +1720,7 @@ const PDProjecDetail = () => {
         </div>
       )}
       {approvalHistory.length > 0 && (
-        <div className="mt-6 border border-slate-200 rounded-xl bg-white overflow-hidden">
+        <div className="mt-6 border border-slate-200 rounded bg-white overflow-hidden">
           <div className="px-4 py-3 bg-slate-50">
             <h3 className="text-sm font-semibold text-slate-700">
               Approval History
@@ -1790,4 +1767,4 @@ const PDProjecDetail = () => {
   );
 };
 
-export default PDProjecDetail;
+export default PDProjectDetail;

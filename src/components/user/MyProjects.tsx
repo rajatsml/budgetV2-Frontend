@@ -188,7 +188,7 @@ const MyProjects = () => {
                 <th>Project Scope</th>
                 <th>Duration</th>
                 <th>Project Status</th>
-                <th>Pending With</th>
+                {/* <th>Pending With</th> */}
                 {/* <th>Created By</th> */}
                 <th>Action</th>
               </tr>
@@ -237,12 +237,12 @@ const MyProjects = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="text-xs">
+                  {/* <td className="text-xs">
                     {project.deptProjectStatus
                       ? project.deptProjectStatus
                       : "OPENED"}
-                  </td>
-                  <td className="text-xs">
+                  </td> */}
+                  {/* <td className="text-xs">
                     {project.deptProjectStatus === null ? (
                       <>{project.makerId}</>
                     ) : project.pendingWithUser &&
@@ -254,6 +254,14 @@ const MyProjects = () => {
                     ) : (
                       <>-</>
                     )}
+                  </td> */}
+
+                  <td className="text-xs">
+                    {project.deptProjectStatus === "APPROVED"
+                      ? "APPROVED"
+                      : `${project.deptProjectStatus || "OPENED"} - ${
+                          project.pendingWithUserName || project.makerId || ""
+                        }`}
                   </td>
 
                   {/* <td>

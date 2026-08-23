@@ -70,10 +70,19 @@ const NavBar = () => {
             )}
 
             {isUser && (
-              <Link to="/myprojects" className={navLinkClass("/myprojects")}>
-                <FolderKanban size={16} />
-                My Projects
-              </Link>
+              <>
+                <Link to="/myprojects" className={navLinkClass("/myprojects")}>
+                  <FolderKanban size={16} />
+                  My Projects
+                </Link>
+                <Link
+                  to="/nonpd-project"
+                  className={navLinkClass("/nonpd-project")}
+                >
+                  <FolderKanban size={16} />
+                  Non PD
+                </Link>
+              </>
             )}
           </div>
         </div>
