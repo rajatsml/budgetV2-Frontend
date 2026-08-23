@@ -174,7 +174,7 @@ const Login = () => {
                   disabled={loading}
                   aria-busy={loading}
                 >
-                  Sign In as User
+                  Login
                 </button>
               </div>
             </div>

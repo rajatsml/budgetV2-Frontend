@@ -113,92 +113,66 @@ const PDApprover = () => {
           pendingWith={data?.pendingWithUser}
           status={data?.status}
         />
-        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 self-stretch w-1/2 ">
+        <div className="border border-slate-200 rounded p-4 bg-gray-200 shadow-sm w-1/2">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
 
-          <div className="overflow-x-auto rounded-lg border border-base-300 bg-white">
+          <div className="overflow-x-auto rounded border border-base-300 bg-white">
             <table className="table w-full table-sm">
               <thead>
-                <tr className="bg-base-200 ">
+                <tr className="bg-base-200">
                   <th className="border-r border-base-300 font-medium">
-                    Metric
+                    Capex
                   </th>
                   <th className="border-r border-base-300 font-medium">
-                    Value
+                    Revenue
                   </th>
                   <th className="border-r border-base-300 font-medium">
-                    Metric
+                    Carry Forward
                   </th>
                   <th className="border-r border-base-300 font-medium">
-                    Value
+                    Actual Revex
                   </th>
                   <th className="border-r border-base-300 font-medium">
-                    Metric
+                    Actual Capex
                   </th>
                   <th className="border-r border-base-300 font-medium">
-                    Value
+                    Fund Flow
+                  </th>
+                  <th className="border-r border-base-300 font-medium">
+                    C/F Fund Flow
                   </th>
                 </tr>
               </thead>
 
               <tbody>
                 <tr className="hover">
-                  <td className="border border-base-300 font-medium">Capex</td>
                   <td className="border border-base-300 font-semibold">
                     {summary.capex}
                   </td>
 
-                  <td className="border border-base-300 font-medium">
-                    Revenue
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.revenue}
                   </td>
 
-                  <td className="border border-base-300 font-medium">
-                    Carry Forward
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.carryForward}
                   </td>
-                </tr>
 
-                <tr className="hover">
-                  <td className="border border-base-300 font-medium">
-                    Actual Revex
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.actualRevex}
                   </td>
 
-                  <td className="border border-base-300 font-medium">
-                    Actual Capex
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.actualCapex}
                   </td>
 
-                  <td className="border border-base-300 font-medium">
-                    Fund Flow
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.fundFlow}
                   </td>
-                </tr>
 
-                <tr className="hover">
-                  <td className="border border-base-300 font-medium">
-                    C/F Fund Flow
-                  </td>
                   <td className="border border-base-300 font-semibold">
                     {summary.cfFundFlow}
                   </td>
-
-                  <td className="border border-base-300 bg-base-100"></td>
-                  <td className="border border-base-300 bg-base-100"></td>
-
-                  <td className="border border-base-300 bg-base-100"></td>
-                  <td className="border border-base-300 bg-base-100"></td>
                 </tr>
               </tbody>
             </table>
@@ -469,7 +443,7 @@ const PDApprover = () => {
 
       {approvalHistory.length > 0 && (
         <div className="mt-6 border border-slate-200 rounded-xl bg-white overflow-hidden">
-          <div className="px-4 py-3 border-b bg-slate-50">
+          <div className="px-4 py-3 bg-slate-50">
             <h3 className="text-sm font-semibold text-slate-700">
               Approval History
             </h3>
@@ -479,9 +453,10 @@ const PDApprover = () => {
             <table className="table table-zebra table-xs w-full">
               <thead>
                 <tr className="bg-red-500 text-white">
-                  <th>S.No</th>
-                  <th>Action</th>
+                  <th>S.No.</th>
+                  <th>User ID</th>
                   <th>Employee</th>
+                  <th>Action</th>
                   <th>Remarks</th>
                   <th>Date & Time</th>
                 </tr>
@@ -492,13 +467,13 @@ const PDApprover = () => {
                   <tr key={item.HistoryId}>
                     <td>{index + 1}</td>
 
+                    <td>{item.ActionPerformedBy}</td>
+                    <td>{item.EmployeeName}</td>
                     <td>
-                      <span className="badge badge-sm badge-neutral">
+                      <span className="badge badge-sm badge-neutral ">
                         {item.ActionPerformed}
                       </span>
                     </td>
-
-                    <td>{item.EmployeeName || item.ActionPerformedBy}</td>
 
                     <td>{item.Remarks || "-"}</td>
 

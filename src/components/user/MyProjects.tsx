@@ -187,8 +187,9 @@ const MyProjects = () => {
                 <th>Financial Year</th>
                 <th>Project Scope</th>
                 <th>Duration</th>
-                {/* <th>Status</th> */}
-                <th>Created By</th>
+                <th>Project Status</th>
+                {/* <th>Pending With</th> */}
+                {/* <th>Created By</th> */}
                 <th>Action</th>
               </tr>
             </thead>
@@ -236,6 +237,32 @@ const MyProjects = () => {
                       </div>
                     </div>
                   </td>
+                  {/* <td className="text-xs">
+                    {project.deptProjectStatus
+                      ? project.deptProjectStatus
+                      : "OPENED"}
+                  </td> */}
+                  {/* <td className="text-xs">
+                    {project.deptProjectStatus === null ? (
+                      <>{project.makerId}</>
+                    ) : project.pendingWithUser &&
+                      project.pendingWithUserName ? (
+                      <>
+                        {project.pendingWithUserName} -{" "}
+                        {project.pendingWithUser}
+                      </>
+                    ) : (
+                      <>-</>
+                    )}
+                  </td> */}
+
+                  <td className="text-xs">
+                    {project.deptProjectStatus === "APPROVED"
+                      ? "APPROVED"
+                      : `${project.deptProjectStatus || "OPENED"} - ${
+                          project.pendingWithUserName || project.makerId || ""
+                        }`}
+                  </td>
 
                   {/* <td>
                     <div className={`badge  ${project.status === "Posted"}`}>
@@ -243,7 +270,7 @@ const MyProjects = () => {
                     </div>
                   </td> */}
 
-                  <td>{project.createdBy}</td>
+                  {/* <td>{project.createdBy}</td> */}
 
                   <td>
                     <button

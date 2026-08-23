@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { PlusSquare, Pencil, Trash2 } from "lucide-react";
+import { PlusSquare, Pencil, Trash2, ChevronRight } from "lucide-react";
 import MasterInfoNonPD from "./MasterInfoNonPD";
+import NonPDHeader from "./NonPDHeader";
 
 type NonPDRow = {
   itemDescription: string;
@@ -256,6 +257,110 @@ const initialRowState: NonPDRow = NON_PD_ROW_FIELDS.reduce((acc, field) => {
   return acc;
 }, {} as NonPDRow);
 
+const tabs = [
+  {
+    label: "Master Info",
+    fields: [
+      "itemDescription",
+      "currentScenarioAndJustification",
+      "deliverablesKPI",
+      "budgetBasedOn",
+      "requestFor",
+      "financial",
+      "projectOwner",
+      "capexRevenue",
+      "templateCategory",
+      "projectName",
+    ],
+    cols: "lg:grid-cols-5",
+  },
+  {
+    label: "Costing",
+    fields: [
+      "quantity",
+      "unitOfMeasure",
+      "unitRate",
+      "currency",
+      "exchangeRate",
+      "basicInLacs",
+      "typeOfPurchase",
+      "nrTaxPercentage",
+      "netCost",
+    ],
+    cols: "lg:grid-cols-5",
+  },
+  {
+    label: "PR Plan",
+    fields: ["h1PR", "h2PR", "prTotal", "prYear2"],
+    cols: "md:grid-cols-4",
+  },
+  {
+    label: "Cash Flow",
+    fields: ["h1CashFlow", "h2CashFlow", "cashFlowTotal", "cashFlowYear2"],
+    cols: "md:grid-cols-4",
+  },
+  {
+    label: "Proposal",
+    fields: [
+      "remarks",
+      "proposedQty",
+      "proposedBudget",
+      "proposalRemark",
+      "contingencyFactor",
+      "vital",
+      "essential",
+      "desirable",
+    ],
+    cols: "md:grid-cols-4",
+  },
+  {
+    label: "Monthly Cash Flow",
+    fields: [
+      "aprNetCashflow",
+      "mayNetCashflow",
+      "junNetCashflow",
+      "julNetCashflow",
+      "augNetCashflow",
+      "sepNetCashflow",
+      "octNetCashflow",
+      "novNetCashflow",
+      "decNetCashflow",
+      "janNetCashflow",
+      "febNetCashflow",
+      "marNetCashflow",
+    ],
+    cols: "md:grid-cols-6",
+  },
+  {
+    label: "Fund Flow",
+    fields: [
+      "fy28H1",
+      "fy28H2",
+      "fy29H1",
+      "fy29H2",
+      "fy30H1",
+      "fy30H2",
+      "fy31H1",
+      "fy31H2",
+    ],
+    cols: "md:grid-cols-4",
+  },
+  {
+    label: "C/F Fund Flow",
+    fields: [
+      "cfFy28H1",
+      "cfFy28H2",
+      "cfFy29H1",
+      "cfFy29H2",
+      "cfFy30H1",
+      "cfFy30H2",
+      "cfFy31H1",
+      "cfFy31H2",
+    ],
+    cols: "md:grid-cols-4",
+  },
+];
+
 const NonPD2 = () => {
   const textInput = "input input-bordered input-sm w-56 min-w-80 mx-auto";
 
@@ -267,6 +372,10 @@ const NonPD2 = () => {
   const [rows, setRows] = useState<NonPDRowWithId[]>([]);
   const [currentEntry, setCurrentEntry] = useState<NonPDRow>(initialRowState);
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const getField = (key: NonPDFieldKey) =>
+    NON_PD_ROW_FIELDS.find((f) => f.key === key);
 
   const numericFieldKeys = NON_PD_ROW_FIELDS.filter(
     (field) => field.inputType === "number",
@@ -343,146 +452,98 @@ const NonPD2 = () => {
 
   const handleCancelEdit = () => resetEntry();
 
+  const inputStyle =
+    "w-full h-8  px-3 text-xs border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
+
   return (
     <div className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-[1700px] bg-white rounded-2xl shadow-sm p-8">
-        <MasterInfoNonPD />
+      <div className="flex gap-x-2">
+        <NonPDHeader />
 
-        <div className="overflow-x-auto mt-6">
-          <table className="table table-zebra w-full">
-            <thead>
-              <tr className="text-center text-white">
-                <th className="bg-slate-600">Item Desc</th>
+        <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 shadow-sm self-stretch w-1/2">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
 
-                <th className="bg-blue-600">
-                  Current Scenario and Justification
-                </th>
+          <div className="overflow-x-auto rounded-lg border border-base-300 bg-white">
+            <table className="table w-full table-sm">
+              <thead>
+                <tr className="bg-base-200 ">
+                  <th className="border-r border-base-300 font-medium">
+                    Budget
+                  </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
+                  <th className="border-r border-base-300 font-medium">
+                    Budget
+                  </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
+                  <th className="border-r border-base-300 font-medium">
+                    Budget
+                  </th>
+                  <th className="border-r border-base-300 font-medium">Amt</th>
+                </tr>
+              </thead>
 
-                <th className="bg-emerald-600">Deliverables KPIs</th>
+              <tbody>
+                <tr className="hover">
+                  <td className="border border-base-300 font-medium">Capex</td>
+                  <td className="border border-base-300 font-semibold">
+                    value
+                  </td>
 
-                <th className="bg-amber-600">Budget Based on</th>
+                  <td className="border border-base-300 font-medium">
+                    Revenue
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    value
+                  </td>
 
-                <th className="bg-violet-600">Request For</th>
+                  <td className="border border-base-300 font-medium">
+                    Carry Forward
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    value
+                  </td>
+                </tr>
 
-                <th className="bg-rose-600">Financial</th>
+                <tr className="hover">
+                  <td className="border border-base-300 font-medium">
+                    Actual Revex
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    value
+                  </td>
 
-                <th className="bg-cyan-700">Project Owner</th>
+                  <td className="border border-base-300 font-medium">
+                    Actual Capex
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    value
+                  </td>
 
-                <th className="bg-cyan-600">Capex/Revex</th>
-                <th className="bg-cyan-500">Template Category</th>
-                <th className="bg-cyan-400 text-slate-900">Project Name</th>
-                <th className="bg-cyan-300 text-slate-900">Qnty</th>
+                  <td className="border border-base-300 font-medium">
+                    Fund Flow
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    value
+                  </td>
+                </tr>
 
-                <th className="bg-indigo-700">Unit of Measure</th>
-                <th className="bg-sky-600">Unit Rate</th>
-                <th className="bg-sky-600">Currency</th>
-                <th className="bg-sky-600">Exchange Rate</th>
-                <th className="bg-sky-600">Basic in Lacs</th>
-                <th className="bg-sky-600">Type of Purchase</th>
-                <th className="bg-sky-600">NR Tax Percentage</th>
-                <th className="bg-sky-600">Net Cost</th>
-                <th className="bg-sky-600">H1 PR</th>
-                <th className="bg-sky-600">H2 PR</th>
-                <th className="bg-sky-600">Total</th>
-                <th className="bg-sky-600">Year 2</th>
-                <th className="bg-sky-600">H1 Cash Flow</th>
-                <th className="bg-sky-600">H2 Cash Flow</th>
-                <th className="bg-sky-600">Total</th>
-                <th className="bg-sky-600">Year 2</th>
-                <th className="bg-sky-600">Remarks</th>
-                <th className="bg-sky-600">Proposed Qty</th>
-                <th className="bg-sky-600">Proposed Budget</th>
-                <th className="bg-sky-600">Remarks</th>
-                <th className="bg-sky-600">Contigency Factor</th>
-                <th className="bg-sky-600">Vital</th>
-                <th className="bg-sky-600">Essential</th>
-                <th className="bg-sky-600">Desirable</th>
-                <th className="bg-sky-600">Apr Net Cashflow</th>
-                <th className="bg-sky-600">May Net Cashflow</th>
-                <th className="bg-sky-600">Jun Net Cashflow</th>
-                <th className="bg-sky-600">Jul Net Cashflow</th>
-                <th className="bg-sky-600">Aug Net Cashflow</th>
-                <th className="bg-sky-600">Sep Net Cashflow</th>
-                <th className="bg-sky-600">Oct Net Cashflow</th>
-                <th className="bg-sky-600">Nov Cashflow</th>
-                <th className="bg-sky-600">Dec Cashflow</th>
-                <th className="bg-sky-600">Jan Cashflow</th>
-                <th className="bg-sky-600">Feb Cashflow</th>
-                <th className="bg-sky-600">Mar Cashflow</th>
-                <th className="bg-sky-600">FY 28 H1</th>
-                <th className="bg-sky-600">FY 28 H2</th>
-                <th className="bg-sky-600">FY 29 H1</th>
-                <th className="bg-sky-600">FY 29 H2</th>
-                <th className="bg-sky-600">FY 30 H1</th>
-                <th className="bg-sky-600">FY 30 H2</th>
-                <th className="bg-sky-600">FY 31 H1</th>
-                <th className="bg-sky-600">FY 31 H2</th>
-                <th className="bg-green-600">FY 28 H1</th>
-                <th className="bg-green-600">FY 28 H2</th>
-                <th className="bg-green-600">FY 29 H1</th>
-                <th className="bg-green-600">FY 29 H2</th>
-                <th className="bg-green-600">FY 30 H1</th>
-                <th className="bg-green-600">FY 30 H2</th>
-                <th className="bg-green-600">FY 31 H1</th>
-                <th className="bg-green-600">FY 31 H2</th>
-                <th className="bg-slate-700">Action</th>
-              </tr>
-            </thead>
+                <tr className="hover">
+                  <td className="border border-base-300 font-medium">
+                    C/F Fund Flow
+                  </td>
+                  <td className="border border-base-300 font-semibold">
+                    value
+                  </td>
 
-            <tbody>
-              <tr className="bg-slate-50">
-                {NON_PD_ROW_FIELDS.map((field) => {
-                  const value = currentEntry[field.key];
-                  return (
-                    <td key={field.key} className={rowCellClass}>
-                      {field.inputType === "textarea" ? (
-                        <textarea
-                          className={textInput}
-                          value={value}
-                          placeholder={field.placeholder}
-                          onChange={(event) =>
-                            handleEntryChange(field.key, event.target.value)
-                          }
-                        />
-                      ) : (
-                        <input
-                          type="number"
-                          className={numberInput}
-                          value={value}
-                          placeholder={field.placeholder}
-                          onChange={(event) =>
-                            handleEntryChange(field.key, event.target.value)
-                          }
-                        />
-                      )}
-                    </td>
-                  );
-                })}
+                  <td className="border border-base-300 bg-base-100"></td>
+                  <td className="border border-base-300 bg-base-100"></td>
 
-                <td className={actionCellClass}>
-                  <div className="flex flex-nowrap items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      className={`${actionButtonClass} ${isEditing ? "btn-primary" : "btn-success"}`}
-                      onClick={handleSaveRow}
-                    >
-                      <PlusSquare size={16} />
-                      {isEditing ? "Update" : "Add"}
-                    </button>
-                    {isEditing && (
-                      <button
-                        type="button"
-                        className={`${actionButtonClass} btn-ghost text-base-content/70`}
-                        onClick={handleCancelEdit}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <td className="border border-base-300 bg-base-100"></td>
+                  <td className="border border-base-300 bg-base-100"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {rows.length > 0 && (
@@ -581,6 +642,113 @@ const NonPD2 = () => {
             </div>
           </div>
         )}
+      </div>
+
+      <div className=" border-slate-200 rounded-xl">
+        {/* name of each tab group should be unique */}
+
+        <div className="border border-slate-200 rounded-xl bg-gray-50 p-4 my-4">
+          <div className="tabs tabs-xs roundex-xl flex flex-wrap gap-2 mb-4">
+            {tabs.map((tab, index) => (
+              <button
+                key={tab.label}
+                type="button"
+                onClick={() => setActiveTab(index)}
+                className={`tab ${activeTab === index ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
+            <div className={`grid grid-cols-1 ${tabs[activeTab].cols} gap-3`}>
+              {tabs[activeTab].fields.map((fieldKey) => {
+                const field = getField(fieldKey as NonPDFieldKey);
+
+                if (!field) return null;
+
+                return (
+                  <div key={field.key}>
+                    <label className="mb-2 block text-xs font-medium text-slate-700">
+                      {field.placeholder}
+                    </label>
+
+                    {field.inputType === "textarea" ? (
+                      <textarea
+                        rows={2}
+                        className="textarea textarea-sm w-full rounded-lg"
+                        value={currentEntry[field.key]}
+                        onChange={(e) =>
+                          handleEntryChange(field.key, e.target.value)
+                        }
+                      />
+                    ) : (
+                      <input
+                        type="number"
+                        className={inputStyle}
+                        value={currentEntry[field.key]}
+                        onChange={(e) =>
+                          handleEntryChange(field.key, e.target.value)
+                        }
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <p className="text-sm text-error font-semibold">
+              Please fill the entries and then click on next
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-x-4 place-content-left m-4 ">
+          <button
+            className="btn btn-sm btn-neutral"
+            // onClick={prevTab}
+            // disabled={activeTab === 0}
+          >
+            {/* <ChevronLeft /> */}
+            Back
+          </button>
+          <button
+            className="btn btn-sm btn-neutral"
+            // onClick={nextTab}
+            // disabled={activeTab === tabs.length - 1 || !isCurrentTabValid()}
+          >
+            Next
+            <ChevronRight />
+          </button>
+
+          {/* {!isRowEmpty() && (
+              <button
+                className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+                onClick={handleSave}
+                disabled={isRowEmpty()}
+              >
+                {isEditing ? "Update Row" : "Save All Entries"}
+              </button>
+            )} */}
+
+          <button
+            className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+            // onClick={handleSave}
+            // disabled={isRowEmpty()}
+          >
+            {isEditing ? "Update Row" : "Save All Entries"}
+          </button>
+
+          <button
+            className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+            // onClick={handleSubmitForApproval}
+          >
+            Submit For Approval
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,31 +1,38 @@
-interface PDHeaderProps {
-  projectID: string;
-  projectName: string;
-  deptName: string;
+interface NonPDHeaderProps {
+  projectID?: string;
+  projectName?: string;
+  deptName?: string;
   deptID?: number;
-  category: string;
-  fyYear: string;
-  pendingWith: string;
-  status: string;
+  category?: string;
+  fyYear?: string;
+  pendingWith?: string;
+  status?: string;
 }
 
-const PDHeader: React.FC<PDHeaderProps> = ({
+const NonPDHeader: React.FC<NonPDHeaderProps> = ({
   projectID,
   projectName,
   deptName,
   category,
   fyYear,
-  // pendingWith,
-  // status,
+  pendingWith,
+  status,
 }) => {
   const inputStyle =
-    "w-full h-8 px-3 text-xs bg-white border border-slate-200 rounded outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
+    "w-full h-8 px-3 text-xs bg-white border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
 
   return (
-    <div className="rounded border border-slate-200 p-4 bg-gray-200 w-1/2">
+    <div className="rounded-xl border border-slate-200 p-4 bg-slate-50 w-1/2">
       <h3 className="mb-2 text-sm font-semibold text-slate-800">
         Project Information
       </h3>
+
+      <div className="mb-4">
+        <label className="mb-2 block text-sm font-medium text-slate-700">
+          Project Name
+        </label>
+        <input value={projectName} readOnly className={inputStyle} />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4 mb-4">
         <div>
@@ -63,14 +70,7 @@ const PDHeader: React.FC<PDHeaderProps> = ({
         </div>
       </div>
 
-      <div className="mb-4">
-        <label className="mb-2 block text-sm font-medium text-slate-700">
-          Project Name
-        </label>
-        <input value={projectName} readOnly className={inputStyle} />
-      </div>
-
-      {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="mb-4">
           <label className="mb-2 block text-sm font-medium text-slate-700">
             Status
@@ -83,9 +83,9 @@ const PDHeader: React.FC<PDHeaderProps> = ({
           </label>
           <input value={pendingWith} readOnly className={inputStyle} />
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };
 
-export default PDHeader;
+export default NonPDHeader;
