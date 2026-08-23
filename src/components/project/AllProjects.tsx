@@ -7,6 +7,7 @@ export interface ProjectItem {
   projectName: string;
   projectType: string;
   financialYear: string;
+  projectTypeDesc: string;
 
   projectScope: string;
   keyAssumptions: string;
@@ -160,6 +161,7 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
                 <th>#</th>
                 <th>Project ID</th>
                 <th>Project Name</th>
+                <th>Project Type</th>
                 <th>Financial Year</th>
                 <th>Status</th>
                 <th>Duration</th>
@@ -183,6 +185,12 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
                       title={project.projectName}
                     >
                       {project.projectName}
+                    </div>
+                  </td>
+
+                  <td>
+                    <div className="badge badge-neutral">
+                      {project.projectTypeDesc}
                     </div>
                   </td>
 

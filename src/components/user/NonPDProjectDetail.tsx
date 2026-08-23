@@ -326,10 +326,10 @@ const NonPDProjectDetail = () => {
 
       if (!nonpdDetailId) {
         const response = await SaveNonPDMaster(payload);
-        setNonPDDetailId(response?.pdDetailId);
+        setNonPDDetailId(response?.nonPDDetailId);
       } else {
         const response = await UpdateNonPDMaster(payload, nonpdDetailId);
-        setNonPDDetailId(response?.pdDetailId);
+        setNonPDDetailId(response?.nonPDDetailId);
       }
 
       return true;
@@ -397,10 +397,10 @@ const NonPDProjectDetail = () => {
       } else {
         if (!nonpdDetailId) {
           const response = await SaveNonPDMaster(payload);
-          setNonPDDetailId(response?.pdDetailId);
+          setNonPDDetailId(response?.nonPDDetailId);
         } else {
           const response = await UpdateNonPDMaster(payload, nonpdDetailId);
-          setNonPDDetailId(response?.pdDetailId);
+          setNonPDDetailId(response?.nonPDDetailId);
         }
 
         console.log("Row Saved");
@@ -652,6 +652,9 @@ const NonPDProjectDetail = () => {
 
         return;
       }
+
+      alert("Please click on Save All Entries before submitting for approval.");
+
       const response = await UpdateNonPDStatus({
         projectId: data?.projectID,
         deptId: data?.deptID?.toString(),
@@ -674,12 +677,10 @@ const NonPDProjectDetail = () => {
 
   const tabs = [
     "Project Details",
-    "Budget Details",
+    "Cost Details",
+    "Proposed Budget",
+    "Net Cash Flow",
     "PR / CF",
-    "Proposed / Priority",
-    "Monthly Net CF",
-    "PR Bifurcation",
-    "CF Bifurcation",
   ];
   const inputStyle =
     "w-full h-8  px-3 text-xs border border-slate-200 rounded outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";

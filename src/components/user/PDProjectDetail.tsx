@@ -500,6 +500,9 @@ const PDProjectDetail = () => {
 
         return;
       }
+
+      alert("Please click on Save All Entries before submitting for approval.");
+
       const response = await UpdatePDStatus({
         projectId: data?.projectID,
         deptId: data?.deptID?.toString(),

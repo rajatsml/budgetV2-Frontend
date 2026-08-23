@@ -64,7 +64,7 @@ const MyProjects = () => {
   }, [projects, searchText]);
 
   const handleNavigation = async (
-    projectTypeDesc: string,
+    // projectTypeDesc: string,
     projectID: string,
     projectName: string,
     deptName: string,
@@ -253,9 +253,7 @@ const MyProjects = () => {
                   </td>
 
                   <td>
-                    <div
-                      className={`badge badge-ghost ${project.projectType === "1"}`}
-                    >
+                    <div className="badge badge-neutral">
                       {project?.projectTypeDesc}
                     </div>
                   </td>
@@ -322,7 +320,7 @@ const MyProjects = () => {
                       className="btn btn-sm bg-red-500 text-white hover:bg-red-600"
                       onClick={() =>
                         handleNavigation(
-                          project?.projectTypeDesc,
+                          // project?.projectTypeDesc,
                           project?.projectId,
                           project?.projectName,
                           project?.departmentName,

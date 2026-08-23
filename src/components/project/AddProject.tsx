@@ -191,10 +191,10 @@ const AddProject = () => {
     (_, i) => i + 1,
   );
 
-  const totalAssignedApprovers =
-    Object.keys(approvers).length + Object.keys(makers).length;
-  const totalExpectedApprovers =
-    selectedDeps.length * (hierarchyCount ?? 0) + selectedDeps.length;
+  // const totalAssignedApprovers =
+  //   Object.keys(approvers).length + Object.keys(makers).length;
+  // const totalExpectedApprovers =
+  //   selectedDeps.length * (hierarchyCount ?? 0) + selectedDeps.length;
 
   // 3. Selection handler function
   const handleSelectDepartment = (deptName: string) => {
@@ -1011,12 +1011,12 @@ const AddProject = () => {
                     </span>
                   </div>
 
-                  {totalExpectedApprovers !== totalAssignedApprovers && (
+                  {/* {totalExpectedApprovers !== totalAssignedApprovers && (
                     <div className="flex justify-between items-center text-xs text-base-content/50">
                       <span>Expected</span>
                       <span>{totalExpectedApprovers}</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="card-actions flex-col gap-2 w-full">
