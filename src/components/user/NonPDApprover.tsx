@@ -74,7 +74,7 @@ const NonPDApprover = () => {
       });
 
       alert(response.message);
-      navigate("/budgetV2/myprojects");
+      navigate("/myprojects");
     } catch (error) {
       console.error("Approval failed", error);
     }
@@ -93,7 +93,7 @@ const NonPDApprover = () => {
       });
 
       alert(response.message);
-      navigate("/budgetV2/myprojects");
+      navigate("/myprojects");
     } catch (error) {
       console.error("Review Back failed", error);
     }
@@ -524,7 +524,7 @@ const NonPDApprover = () => {
                     {/* ACTIONS */}
 
                     <td className="sticky left-0 z-20 bg-white border border-slate-200">
-                      {isPendingWithCurrentUser && (
+                      {/* {isPendingWithCurrentUser && (
                         <div className="flex gap-1 justify-center">
                           <button
                             className="btn btn-xs bg-red-500 text-white"
@@ -549,7 +549,7 @@ const NonPDApprover = () => {
                             Delete
                           </button>
                         </div>
-                      )}
+                      )} */}
                     </td>
 
                     {/* PROJECT DETAILS */}

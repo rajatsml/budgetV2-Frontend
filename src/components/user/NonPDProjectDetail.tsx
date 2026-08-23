@@ -653,7 +653,7 @@ const NonPDProjectDetail = () => {
         return;
       }
 
-      alert("Please click on Save All Entries before submitting for approval.");
+      // alert("Please click on Save All Entries before submitting for approval.");
 
       const response = await UpdateNonPDStatus({
         projectId: data?.projectID,
@@ -665,7 +665,7 @@ const NonPDProjectDetail = () => {
 
       alert(response.message);
 
-      navigate("/budgetV2/myprojects"); // your route
+      navigate("/myprojects"); // your route
     } catch (error) {
       console.error(error);
     }

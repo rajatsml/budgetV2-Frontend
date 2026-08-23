@@ -180,7 +180,7 @@ const PDProjectDetail = () => {
     CFH2: formData.cfH2,
     CFTotal: formData.cfTotal,
 
-    UserId: "13254", // replace with logged-in user
+    UserId: user?.userId, // replace with logged-in user
     FyYear: data?.FyYear,
     CategoryId: data?.categoryId || 1,
   });
@@ -501,7 +501,7 @@ const PDProjectDetail = () => {
         return;
       }
 
-      alert("Please click on Save All Entries before submitting for approval.");
+      // alert("Please click on Save All Entries before submitting for approval.");`
 
       const response = await UpdatePDStatus({
         projectId: data?.projectID,
@@ -513,7 +513,7 @@ const PDProjectDetail = () => {
 
       alert(response.message);
 
-      navigate("/budgetV2/myprojects"); // your route
+      navigate("/myprojects"); // your route
     } catch (error) {
       console.error(error);
     }

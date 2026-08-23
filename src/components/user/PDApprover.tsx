@@ -59,6 +59,8 @@ const PDApprover = () => {
 
   const handleApprove = async () => {
     if (!isPendingWithCurrentUser) return;
+
+    debugger;
     try {
       const response = await UpdatePDStatus({
         projectId: data?.projectID,
@@ -70,7 +72,7 @@ const PDApprover = () => {
 
       alert(response.message);
 
-      navigate("/budgetV2/myprojects");
+      navigate("/myprojects");
     } catch (error) {
       console.error("Approval failed", error);
     }
@@ -89,7 +91,7 @@ const PDApprover = () => {
 
       alert(response.message);
 
-      navigate("/budgetV2/myprojects");
+      navigate("/myprojects");
     } catch (error) {
       console.error("Review Back failed", error);
     }
