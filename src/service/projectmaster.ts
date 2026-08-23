@@ -252,7 +252,7 @@ const UpdateNonPDStatus = async (payload: {
   deptId: string;
   userId: string;
   actionPerformed: string;
-  remarks?: string;
+  approvalRemarks?: string;
 }) => {
   const response = await api.post(
     `${import.meta.env.VITE_API_URL}/api/NonPDMaster/UpdateNonPDStatus`,

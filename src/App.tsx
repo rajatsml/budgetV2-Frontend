@@ -16,6 +16,7 @@ import PDProjectDetail from "./components/user/PDProjectDetail";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import PDApprover from "./components/user/PDApprover";
 import NonPDProjectDetail from "./components/user/NonPDProjectDetail";
+import NonPDApprover from "./components/user/NonPDApprover";
 
 function App() {
   return (
@@ -157,6 +158,17 @@ function App() {
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <NonPDProjectDetail />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/nonpd-project-approver"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <NonPDApprover />
               <Footer />
             </RoleProtectedRoute>
           }

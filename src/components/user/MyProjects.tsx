@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../store/userStore";
-import { GetProjects, InitializePDMaster } from "../../service/projectmaster";
+import {
+  GetProjects,
+  InitializeNonPDMaster,
+  InitializePDMaster,
+} from "../../service/projectmaster";
 
 const MyProjects = () => {
   const navigate = useNavigate();
@@ -77,22 +81,36 @@ const MyProjects = () => {
     let pendingWithUser = "";
 
     try {
-      const response = await InitializePDMaster({
-        ProjectId: projectID,
-        DeptId: deptID?.toString(),
-        FyYear: FyYear,
-        CategoryId: projectType,
-        UserId: user?.userId,
-      });
+      let response: any = null;
+
+      if (projectType === "2") {
+        response = await InitializePDMaster({
+          ProjectId: projectID,
+          DeptId: deptID?.toString(),
+          FyYear: FyYear,
+          CategoryId: projectType,
+          UserId: user?.userId,
+        });
+      } else if (projectType === "3") {
+        response = await InitializeNonPDMaster({
+          ProjectId: projectID,
+          DeptId: deptID?.toString(),
+          FyYear: FyYear,
+          CategoryId: projectType,
+          UserId: user?.userId,
+        });
+      }
 
       status = response.status;
       pendingWithUser = response.pendingWithUser;
     } catch (err: any) {
       status = err?.response?.data?.status;
       pendingWithUser = err?.response?.data?.pendingWithUser;
+
       console.error("Initialization error:", err);
     }
-    if (projectTypeDesc === "PD") {
+
+    if (projectType === "2") {
       if (user?.userId === makerId) {
         navigate("/pd-project", {
           state: {
@@ -130,7 +148,7 @@ const MyProjects = () => {
           },
         });
       }
-    } else if (projectTypeDesc === "Non PD") {
+    } else if (projectType === "3") {
       if (user?.userId === makerId) {
         navigate("/nonpd-project", {
           state: {
@@ -168,9 +186,10 @@ const MyProjects = () => {
           },
         });
       }
-    } else navigate("/");
+    } else {
+      navigate("/");
+    }
   };
-
   return (
     <div className="p-6 min-h-screen">
       {/* Header */}

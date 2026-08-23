@@ -657,7 +657,7 @@ const NonPDProjectDetail = () => {
         deptId: data?.deptID?.toString(),
         userId: user?.userId!,
         actionPerformed: "POSTED",
-        remarks: "Submitted for approval",
+        approvalRemarks: "Submitted for approval",
       });
 
       alert(response.message);
@@ -2319,7 +2319,7 @@ const NonPDProjectDetail = () => {
                       </span>
                     </td>
 
-                    <td>{item.Remarks || "-"}</td>
+                    <td>{item.ApprovalRemarks || "-"}</td>
 
                     <td>{new Date(item.TDate).toLocaleString()}</td>
                   </tr>
