@@ -17,6 +17,7 @@ import RoleProtectedRoute from "./RoleProtectedRoute";
 import PDApprover from "./components/user/PDApprover";
 import NonPDProjectDetail from "./components/user/NonPDProjectDetail";
 import NonPDApprover from "./components/user/NonPDApprover";
+import ProjectDetails from "./components/dashboard/ProjectDetails";
 
 function App() {
   return (
@@ -53,6 +54,16 @@ function App() {
             <RoleProtectedRoute allowedRoles={["Admin"]}>
               <NavBar />
               <AddProject />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/project-detail"
+          element={
+            <RoleProtectedRoute allowedRoles={["Admin"]}>
+              <NavBar />
+              <ProjectDetails />
               <Footer />
             </RoleProtectedRoute>
           }

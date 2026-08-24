@@ -275,6 +275,56 @@ const GetNonPDApprovalHistory = async (projectId: string, deptId: string) => {
 
   return response.data;
 };
+
+const GetDashboardSummary = async (financialYear: string) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/BudgetDashboard/summary/${financialYear}`,
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching dashboard summary:", error);
+    return null;
+  }
+};
+
+/**
+ * Get Project Approval Hierarchy
+ */
+const GetProjectHierarchy = async (projectId: string) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/BudgetDashboard/hierarchy/${projectId}`,
+    );
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching project hierarchy:", error);
+    return [];
+  }
+};
+
+/**
+ * Get Department Details for Dashboard View
+ * Works for both PD and Non-PD projects
+ */
+const GetBudgetDashboardDetails = async (
+  projectId: string,
+  deptId: string | number,
+) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/BudgetDashboard/details/${projectId}/${deptId}`,
+    );
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching budget dashboard details:", error);
+    return [];
+  }
+};
+
 export {
   FetchAllProjectsOfUser,
   CreateProject,
@@ -300,4 +350,9 @@ export {
   DeleteNonPDMaster,
   UpdateNonPDStatus,
   GetNonPDApprovalHistory,
+
+  // Dashboard
+  GetDashboardSummary,
+  GetProjectHierarchy,
+  GetBudgetDashboardDetails,
 };

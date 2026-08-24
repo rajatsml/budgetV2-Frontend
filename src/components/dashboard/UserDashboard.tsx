@@ -1,9 +1,9 @@
-const Dashboard = () => {
+const UserDashboard = () => {
   return (
     <div className="hero bg-base-200 min-h-screen">
       <div className="hero-content text-center">
         <div className="max-w-md">
-          <h1 className="text-5xl font-bold">Dashboard</h1>
+          <h1 className="text-5xl font-bold">User Dashboard</h1>
           <p className="py-6">
             This is going to be the dashboard page where we will show the
             project details and other information. This is a placeholder for
@@ -15,4 +15,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default UserDashboard;

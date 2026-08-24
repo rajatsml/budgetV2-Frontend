@@ -47,13 +47,12 @@ const NavBar = () => {
           </Link>
 
           <div className="flex items-center gap-1.5">
-            <Link to="/home" className={navLinkClass("/home")}>
-              <LayoutDashboard size={16} />
-              Dashboard
-            </Link>
-
             {isAdmin && (
               <>
+                <Link to="/home" className={navLinkClass("/home")}>
+                  <LayoutDashboard size={16} />
+                  Dashboard
+                </Link>
                 <Link
                   to="/allprojects"
                   className={navLinkClass("/allprojects")}
@@ -71,6 +70,10 @@ const NavBar = () => {
 
             {isUser && (
               <>
+                <Link to="/home" className={navLinkClass("/home")}>
+                  <LayoutDashboard size={16} />
+                  Dashboard
+                </Link>
                 <Link to="/myprojects" className={navLinkClass("/myprojects")}>
                   <FolderKanban size={16} />
                   My Projects
