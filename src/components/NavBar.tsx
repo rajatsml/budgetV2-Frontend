@@ -53,17 +53,28 @@ const NavBar = () => {
                   <LayoutDashboard size={16} />
                   Dashboard
                 </Link>
-                <Link
+                {/* <Link
                   to="/allprojects"
                   className={navLinkClass("/allprojects")}
                 >
                   <FolderKanban size={16} />
                   All Projects
-                </Link>
+                </Link> */}
 
-                <Link to="/addproject" className={navLinkClass("/addproject")}>
+                {/* <Link to="/addproject" className={navLinkClass("/addproject")}>
                   <PlusSquare size={16} />
                   Add Project
+                </Link> */}
+                <Link
+                  to="/add-project-pd"
+                  className={navLinkClass("/add-project-pd")}
+                >
+                  <PlusSquare size={16} />
+                  Add Project
+                </Link>
+                <Link to="/pd-form" className={navLinkClass("/pd-form")}>
+                  <PlusSquare size={16} />
+                  PD Inputs
                 </Link>
               </>
             )}

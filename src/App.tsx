@@ -18,6 +18,8 @@ import PDApprover from "./components/user/PDApprover";
 import NonPDProjectDetail from "./components/user/NonPDProjectDetail";
 import NonPDApprover from "./components/user/NonPDApprover";
 import ProjectDetails from "./components/dashboard/ProjectDetails";
+import AddProjectPD from "./components/project/AddProjectPD";
+import PDInputs from "./components/user/PDInputs";
 
 function App() {
   return (
@@ -180,6 +182,26 @@ function App() {
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <NonPDApprover />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-project-pd"
+          element={
+            <RoleProtectedRoute allowedRoles={["Admin"]}>
+              <NavBar />
+              <AddProjectPD />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/pd-form"
+          element={
+            <RoleProtectedRoute allowedRoles={["Admin"]}>
+              <NavBar />
+              <PDInputs />
               <Footer />
             </RoleProtectedRoute>
           }
