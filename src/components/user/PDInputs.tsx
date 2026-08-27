@@ -1,115 +1,10 @@
 import { useState, useEffect } from "react";
-import PDHeader from "../pd/PDHeader";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-type PDFormData = {
-  capexDescription: string;
-  capexRemarks: string;
-  capexAmount: string;
-  capexTotalPR: string;
-  capexH1Fy1: string;
-  capexH2Fy1: string;
-  capexFy2: string;
-  capexFy3: string;
-
-  revenueDescription: string;
-  revenueRemarks: string;
-  revenueAmount: string;
-  revenueTotalPR: string;
-  revenueH1Fy1: string;
-  revenueH2Fy1: string;
-  revenueFy2: string;
-  revenueFy3: string;
-
-  carryForward: string;
-  actualRevex: string;
-  actualCapex: string;
-
-  fundFlowCapH1: string;
-  fundFlowCapH2: string;
-  fundFlowRevH1: string;
-  fundFlowRevH2: string;
-  fundFlowH1: string;
-  fundFlowH2: string;
-  fundFlowTotal: string;
-  fundFlow2: string;
-  fundFlow3: string;
-  fundFlow4: string;
-  fundFlow5: string;
-
-  cfCapH1: string;
-  cfCapH2: string;
-  cfRevH1: string;
-  cfRevH2: string;
-  cfH1: string;
-  cfH2: string;
-  cfTotal: string;
-};
-
-const initialFormState: PDFormData = {
-  capexDescription: "",
-  capexRemarks: "",
-  capexAmount: "",
-  capexTotalPR: "",
-  capexH1Fy1: "",
-  capexH2Fy1: "",
-  capexFy2: "",
-  capexFy3: "",
-
-  revenueDescription: "",
-  revenueRemarks: "",
-  revenueAmount: "",
-  revenueTotalPR: "",
-  revenueH1Fy1: "",
-  revenueH2Fy1: "",
-  revenueFy2: "",
-  revenueFy3: "",
-
-  carryForward: "",
-  actualRevex: "",
-  actualCapex: "",
-
-  fundFlowCapH1: "",
-  fundFlowCapH2: "",
-  fundFlowRevH1: "",
-  fundFlowRevH2: "",
-  fundFlowH1: "",
-  fundFlowH2: "",
-  fundFlowTotal: "",
-  fundFlow2: "",
-  fundFlow3: "",
-  fundFlow4: "",
-  fundFlow5: "",
-
-  cfCapH1: "",
-  cfCapH2: "",
-  cfRevH1: "",
-  cfRevH2: "",
-  cfH1: "",
-  cfH2: "",
-  cfTotal: "",
-};
+import PDHeaderNew from "./PDHeaderNew";
 
 const PDInputs = () => {
   const [activeTab, setActiveTab] = useState(0);
-
-  const mockRows = [
-    {
-      PDDetailId: 1,
-      CapexDescription: "Equipment",
-      CapexAmount: 100000,
-      RevenueAmount: 50000,
-      CarryForward: 15000,
-      ActualRevex: 10000,
-      ActualCapex: 25000,
-      FundFlowTotal: 75000,
-      CFTotal: 30000,
-    },
-  ];
-
-  const [rows] = useState(mockRows);
-
-  const [formData, setFormData] = useState(initialFormState);
 
   const canEdit = true;
 
@@ -133,79 +28,6 @@ const PDInputs = () => {
     }
   };
 
-  //   const handleChange = (key: keyof PDFormData, value: string) => {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       [key]: value,
-  //     }));
-  //   };
-
-  const getNumber = (value: string) => Number(value || 0);
-
-  //   const isCurrentTabValid = () => {
-  //     switch (activeTab) {
-  //       case 0:
-  //         return [
-  //           formData.capexDescription,
-  //           formData.capexRemarks,
-  //           formData.capexAmount,
-  //           formData.capexTotalPR,
-  //           formData.capexH1Fy1,
-  //           formData.capexH2Fy1,
-  //           formData.capexFy2,
-  //           formData.capexFy3,
-  //         ].some(hasValue);
-
-  //       case 1:
-  //         return [
-  //           formData.revenueDescription,
-  //           formData.revenueRemarks,
-  //           formData.revenueAmount,
-  //           formData.revenueTotalPR,
-  //           formData.revenueH1Fy1,
-  //           formData.revenueH2Fy1,
-  //           formData.revenueFy2,
-  //           formData.revenueFy3,
-  //         ].some(hasValue);
-
-  //       case 2:
-  //         return [
-  //           formData.carryForward,
-  //           formData.actualRevex,
-  //           formData.actualCapex,
-  //         ].some(hasValue);
-
-  //       case 3:
-  //         return [
-  //           formData.fundFlowCapH1,
-  //           formData.fundFlowCapH2,
-  //           formData.fundFlowRevH1,
-  //           formData.fundFlowRevH2,
-  //           formData.fundFlowH1,
-  //           formData.fundFlowH2,
-  //           formData.fundFlowTotal,
-  //           formData.fundFlow2,
-  //           formData.fundFlow3,
-  //           formData.fundFlow4,
-  //           formData.fundFlow5,
-  //         ].some(hasValue);
-
-  //       case 4:
-  //         return [
-  //           formData.cfCapH1,
-  //           formData.cfCapH2,
-  //           formData.cfRevH1,
-  //           formData.cfRevH2,
-  //           formData.cfH1,
-  //           formData.cfH2,
-  //           formData.cfTotal,
-  //         ].some(hasValue);
-
-  //       default:
-  //         return false;
-  //     }
-  //   };
-
   const tabs = [
     "Commitments",
     "CashFlow",
@@ -214,34 +36,11 @@ const PDInputs = () => {
     "C/F Fund Flow",
   ];
 
-  const getTotal = (field: keyof (typeof rows)[number]) =>
-    rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
-
-  const summary = canEdit
-    ? {
-        capex: getNumber(formData.capexAmount),
-        revenue: getNumber(formData.revenueAmount),
-        carryForward: getNumber(formData.carryForward),
-        actualRevex: getNumber(formData.actualRevex),
-        actualCapex: getNumber(formData.actualCapex),
-        fundFlow: getNumber(formData.fundFlowTotal),
-        cfFundFlow: getNumber(formData.cfTotal),
-      }
-    : {
-        capex: getTotal("CapexAmount"),
-        revenue: getTotal("RevenueAmount"),
-        carryForward: getTotal("CarryForward"),
-        actualRevex: getTotal("ActualRevex"),
-        actualCapex: getTotal("ActualCapex"),
-        fundFlow: getTotal("FundFlowTotal"),
-        cfFundFlow: getTotal("CFTotal"),
-      };
-
   return (
     <div className="p-4 space-y-4">
       {/* Project Info / Summary */}
       <div className="flex gap-x-2">
-        <PDHeader
+        <PDHeaderNew
           projectID="P001"
           projectName="Sample Project"
           deptName="Engineering"
@@ -250,6 +49,7 @@ const PDInputs = () => {
           fyYear="FY27"
           pendingWith="Manager"
           status="OPENED"
+          projectType="ONGOING"
         />
         <div className="border border-slate-200 rounded p-4 bg-gray-200 shadow-sm w-1/2">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
@@ -283,35 +83,7 @@ const PDInputs = () => {
               </thead>
 
               <tbody>
-                <tr className="hover">
-                  <td className="border border-base-300 font-semibold">
-                    {summary.capex}
-                  </td>
-
-                  <td className="border border-base-300 font-semibold">
-                    {summary.revenue}
-                  </td>
-
-                  <td className="border border-base-300 font-semibold">
-                    {summary.carryForward}
-                  </td>
-
-                  <td className="border border-base-300 font-semibold">
-                    {summary.actualRevex}
-                  </td>
-
-                  <td className="border border-base-300 font-semibold">
-                    {summary.actualCapex}
-                  </td>
-
-                  <td className="border border-base-300 font-semibold">
-                    {summary.fundFlow}
-                  </td>
-
-                  <td className="border border-base-300 font-semibold">
-                    {summary.cfFundFlow}
-                  </td>
-                </tr>
+                <tr className="hover"></tr>
               </tbody>
             </table>
           </div>
@@ -1086,11 +858,51 @@ const PDInputs = () => {
               aria-label="Carry Forward"
             />
             <div className="tab-content border-base-300 bg-base-100 p-4">
-              Hello World
+              <div className="overflow-x-auto border border-base-300 rounded max-w-4xl">
+                <table className="table table-xs table-zebra min-w-150">
+                  <thead className="bg-red-500 text-white">
+                    <tr>
+                      <th className="text-center">WBH</th>
+                      <th>Description</th>
+                      <th className="text-center">FY Year</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td className="min-w-45">
+                        <select className="select select-bordered select-xs w-full">
+                          <option value="">Select</option>
+                          <option value="one">One</option>
+                          <option value="two">Two</option>
+                          <option value="three">Three</option>
+                        </select>
+                      </td>
+
+                      <td className="min-w-75">
+                        <input
+                          type="text"
+                          placeholder="Enter Description"
+                          className="input input-bordered input-xs w-full"
+                        />
+                      </td>
+
+                      <td className="min-w-37.5">
+                        <select className="select select-bordered select-xs w-full">
+                          <option value="">Select</option>
+                          <option value="2025-26">2025-26</option>
+                          <option value="2026-27">2026-27</option>
+                          <option value="2027-28">2027-28</option>
+                        </select>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <p className="text-sm text-error self-center  font-semibold">
-              Please fill the entries and then click on next
+              Please fill the entries in Crores only
             </p>
           </div>
         )}
