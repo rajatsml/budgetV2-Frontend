@@ -1,6 +1,6 @@
 import axios from "../service/axios";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import useUserStore from "../store/userStore";
 
 const Login = () => {
@@ -10,6 +10,11 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  const user = useUserStore((s) => s.user);
+
+  const isAuthenticated =
+    !!user && !!user.expiresAt && user.expiresAt > Date.now();
 
   const validateInputs = (uid: string, pwd: string) => {
     const u = uid.trim();
@@ -60,6 +65,14 @@ const Login = () => {
         throw new Error(data?.message || "Invalid credentials");
       }
 
+      const roles = data.roles || [];
+
+      const isAdminRole = roles.some((r: any) =>
+        ["ADMIN"].includes(r.role?.toUpperCase()),
+      );
+
+      const userRole: "Admin" | "User" = isAdminRole ? "Admin" : "User";
+
       const userObj = {
         token: data.token,
         tokenType: data.tokenType,
@@ -71,7 +84,11 @@ const Login = () => {
         deptCode: data.deptCode,
         deptNameShort: data.deptNameShort,
         gradeCode: data.gradeCode,
-        role: data.role,
+
+        roles,
+
+        // Derived frontend role
+        role: userRole,
       };
 
       useUserStore.setState({
@@ -79,6 +96,8 @@ const Login = () => {
       });
 
       localStorage.setItem("capex_auth", JSON.stringify(userObj));
+
+      console.log("Logged in user:", userObj);
 
       navigate("/home");
     } catch (err: any) {
@@ -90,6 +109,10 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">

@@ -19,6 +19,8 @@ const NavBar = () => {
   const isAdmin = user?.role === "Admin";
   const isUser = user?.role === "User";
 
+  console.log(user);
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,28 +55,12 @@ const NavBar = () => {
                   <LayoutDashboard size={16} />
                   Dashboard
                 </Link>
-                {/* <Link
+                <Link
                   to="/allprojects"
                   className={navLinkClass("/allprojects")}
                 >
                   <FolderKanban size={16} />
                   All Projects
-                </Link> */}
-
-                {/* <Link to="/addproject" className={navLinkClass("/addproject")}>
-                  <PlusSquare size={16} />
-                  Add Project
-                </Link> */}
-                <Link
-                  to="/add-project-pd"
-                  className={navLinkClass("/add-project-pd")}
-                >
-                  <PlusSquare size={16} />
-                  Add Project
-                </Link>
-                <Link to="/pd-form" className={navLinkClass("/pd-form")}>
-                  <PlusSquare size={16} />
-                  PD Inputs
                 </Link>
               </>
             )}
@@ -89,13 +75,14 @@ const NavBar = () => {
                   <FolderKanban size={16} />
                   My Projects
                 </Link>
-                {/* <Link
-                  to="/nonpd-project"
-                  className={navLinkClass("/nonpd-project")}
+
+                <Link
+                  to="/add-project-pd"
+                  className={navLinkClass("/add-project-pd")}
                 >
-                  <FolderKanban size={16} />
-                  Non PD
-                </Link> */}
+                  <PlusSquare size={16} />
+                  Add PD Project
+                </Link>
               </>
             )}
           </div>

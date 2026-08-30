@@ -72,68 +72,6 @@ function App() {
         />
 
         <Route
-          path="/pd"
-          element={
-            <ProtectedRoute>
-              <NavBar />
-              <NewPD />
-              <Footer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/pd2"
-          element={
-            <ProtectedRoute>
-              <NavBar />
-              <PDProject />
-              <Footer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nonpd"
-          element={
-            <ProtectedRoute>
-              <NavBar />
-              <NonNewPD />
-              <Footer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nonpd2"
-          element={
-            <ProtectedRoute>
-              <NavBar />
-              <NonPDProjectDetail />
-              <Footer />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/pdform"
-          element={
-            <ProtectedRoute>
-              <NavBar />
-              <PDForm />
-              <Footer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nonpdform"
-          element={
-            <ProtectedRoute>
-              <NavBar />
-              <NonPD2 />
-              <Footer />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/myprojects"
           element={
             <RoleProtectedRoute allowedRoles={["User"]}>
@@ -189,7 +127,7 @@ function App() {
         <Route
           path="/add-project-pd"
           element={
-            <RoleProtectedRoute allowedRoles={["Admin"]}>
+            <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <AddProjectPD />
               <Footer />

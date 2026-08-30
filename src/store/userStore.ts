@@ -1,5 +1,12 @@
 import { create } from "zustand";
 
+type UserRole = {
+  projectType: string;
+  departmentId: number;
+  departmentName: string;
+  role: string;
+};
+
 type AuthUser = {
   token: string;
   tokenType: string;
@@ -11,7 +18,11 @@ type AuthUser = {
   deptCode: string;
   deptNameShort: string;
   gradeCode: string;
-  role: string;
+
+  roles: UserRole[];
+
+  // Frontend derived role
+  role: "Admin" | "User";
 } | null;
 
 interface UserState {
@@ -81,10 +92,17 @@ const useUserStore = create<UserState>((set, get) => ({
       deptCode,
       deptNameShort,
       gradeCode,
-      role,
+      roles = [],
     } = data;
 
     const expiresAt = Date.now() + (Number(expiresInSeconds) || 3600) * 1000;
+
+    // Decide frontend role based on backend roles
+    const frontendRole: "Admin" | "User" = roles.some((r: UserRole) =>
+      ["Admin"].includes(r.role?.toUpperCase()),
+    )
+      ? "Admin"
+      : "User";
 
     const userObj = {
       token,
@@ -97,7 +115,11 @@ const useUserStore = create<UserState>((set, get) => ({
       deptCode,
       deptNameShort,
       gradeCode,
-      role,
+
+      roles,
+
+      // derived frontend role
+      role: frontendRole,
     };
 
     set({ user: userObj });

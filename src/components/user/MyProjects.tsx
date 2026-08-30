@@ -230,6 +230,7 @@ const MyProjects = () => {
                 <th>Project Name</th>
                 <th>Type</th>
                 <th>Financial Year</th>
+                <th>Dept</th>
                 <th>Project Scope</th>
                 <th>Duration</th>
                 <th>Project Status</th>
@@ -259,6 +260,7 @@ const MyProjects = () => {
                   </td>
 
                   <td>{project.financialYear}</td>
+                  <td>{project.departmentName}</td>
 
                   <td>
                     <div
@@ -324,7 +326,7 @@ const MyProjects = () => {
                           project?.projectId,
                           project?.projectName,
                           project?.departmentName,
-                          project?.deptId,
+                          project?.departmentId,
                           project?.projectTypeDesc,
                           project?.financialYear,
                           project?.projectType,
