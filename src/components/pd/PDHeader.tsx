@@ -50,7 +50,7 @@ const PDHeader: React.FC<PDHeaderProps> = ({
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Category
+            Type
           </label>
           <input value={category} readOnly className={inputStyle} />
         </div>
