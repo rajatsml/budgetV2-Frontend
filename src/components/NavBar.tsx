@@ -30,7 +30,7 @@ const NavBar = () => {
   };
 
   const navLinkClass = (path: string) =>
-    `flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+    `flex items-center gap-2 rounded px-4 py-2 text-sm font-medium transition-all duration-200 ${
       location.pathname === path
         ? "bg-rose-50 text-rose-600 shadow-sm border border-rose-100"
         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
