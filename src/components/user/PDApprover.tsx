@@ -249,6 +249,8 @@ const PDApprover = () => {
   ];
 
   const subCols = [
+    "Total Value",
+    "Total FY1",
     "Apr",
     "May",
     "Jun",
@@ -276,6 +278,33 @@ const PDApprover = () => {
   // ─────────────────────────────────────────────────────────
   // Render
   // ─────────────────────────────────────────────────────────
+
+  const getGrandTotal = (row: any, prefix: string) => {
+    return (
+      Number(row[`${prefix}_H1FY1`] || 0) +
+      Number(row[`${prefix}_H2FY1`] || 0) +
+      Number(row[`${prefix}_H1FY2`] || 0) +
+      Number(row[`${prefix}_H2FY2`] || 0) +
+      Number(row[`${prefix}_H1FY3`] || 0) +
+      Number(row[`${prefix}_H2FY3`] || 0) +
+      Number(row[`${prefix}_H1FY4`] || 0) +
+      Number(row[`${prefix}_H2FY4`] || 0) +
+      Number(row[`${prefix}_H1FY5`] || 0) +
+      Number(row[`${prefix}_H2FY5`] || 0)
+    );
+  };
+
+  const getFY1Total = (row: any, prefix: string) => {
+    return (
+      Number(row[`${prefix}_H1FY1`] || 0) + Number(row[`${prefix}_H2FY1`] || 0)
+    );
+  };
+
+  const getSectionGrandTotal = (prefix: string) =>
+    rows.reduce((sum, row) => sum + getGrandTotal(row, prefix), 0);
+
+  const getSectionFY1Total = (prefix: string) =>
+    rows.reduce((sum, row) => sum + getFY1Total(row, prefix), 0);
 
   return (
     <div className="p-4 space-y-4">
@@ -345,16 +374,16 @@ const PDApprover = () => {
                   <th colSpan={2} className="text-center border">
                     General
                   </th>
-                  <th colSpan={22} className="text-center border">
+                  <th colSpan={24} className="text-center border">
                     Commitment Capex
                   </th>
-                  <th colSpan={22} className="text-center border">
+                  <th colSpan={24} className="text-center border">
                     Commitment Revex
                   </th>
-                  <th colSpan={22} className="text-center border">
+                  <th colSpan={24} className="text-center border">
                     Cash Flow Capex
                   </th>
-                  <th colSpan={22} className="text-center border">
+                  <th colSpan={24} className="text-center border">
                     Cash Flow Revex
                   </th>
                   <th colSpan={3} className="text-center border">
@@ -437,6 +466,14 @@ const PDApprover = () => {
                     </td>
 
                     {/* Commitment Capex */}
+                    <td className="border border-slate-200 text-right">
+                      {getGrandTotal(row, "CommCapex").toFixed(2)}
+                    </td>
+
+                    <td className="border border-slate-200 text-right">
+                      {getFY1Total(row, "CommCapex").toFixed(2)}
+                    </td>
+
                     {commCapexFields.map((f) => (
                       <td
                         key={f}
@@ -447,6 +484,13 @@ const PDApprover = () => {
                     ))}
 
                     {/* Commitment Revex */}
+                    <td className="border border-slate-200 text-right">
+                      {getGrandTotal(row, "CommRevex").toFixed(2)}
+                    </td>
+
+                    <td className="border border-slate-200 text-right">
+                      {getFY1Total(row, "CommRevex").toFixed(2)}
+                    </td>
                     {commRevexFields.map((f) => (
                       <td
                         key={f}
@@ -457,6 +501,13 @@ const PDApprover = () => {
                     ))}
 
                     {/* Cash Capex */}
+                    <td className="border border-slate-200 text-right">
+                      {getGrandTotal(row, "CashCapex").toFixed(2)}
+                    </td>
+
+                    <td className="border border-slate-200 text-right">
+                      {getFY1Total(row, "CashCapex").toFixed(2)}
+                    </td>
                     {cashCapexFields.map((f) => (
                       <td
                         key={f}
@@ -467,6 +518,13 @@ const PDApprover = () => {
                     ))}
 
                     {/* Cash Revex */}
+                    <td className="border border-slate-200 text-right">
+                      {getGrandTotal(row, "CashRevex").toFixed(2)}
+                    </td>
+
+                    <td className="border border-slate-200 text-right">
+                      {getFY1Total(row, "CashRevex").toFixed(2)}
+                    </td>
                     {cashRevexFields.map((f) => (
                       <td
                         key={f}
@@ -502,6 +560,14 @@ const PDApprover = () => {
                   </td>
 
                   {/* Commitment Capex totals */}
+                  <td className="border border-slate-300 text-right">
+                    {getSectionGrandTotal("CommCapex").toFixed(2)}
+                  </td>
+
+                  <td className="border border-slate-300 text-right">
+                    {getSectionFY1Total("CommCapex").toFixed(2)}
+                  </td>
+
                   {commCapexFields.map((f) => (
                     <td
                       key={`t-${f}`}
@@ -512,6 +578,13 @@ const PDApprover = () => {
                   ))}
 
                   {/* Commitment Revex totals */}
+                  <td className="border border-slate-300 text-right">
+                    {getSectionGrandTotal("CommRevex").toFixed(2)}
+                  </td>
+
+                  <td className="border border-slate-300 text-right">
+                    {getSectionFY1Total("CommRevex").toFixed(2)}
+                  </td>
                   {commRevexFields.map((f) => (
                     <td
                       key={`t-${f}`}
@@ -522,6 +595,13 @@ const PDApprover = () => {
                   ))}
 
                   {/* Cash Capex totals */}
+                  <td className="border border-slate-300 text-right">
+                    {getSectionGrandTotal("CashCapex").toFixed(2)}
+                  </td>
+
+                  <td className="border border-slate-300 text-right">
+                    {getSectionFY1Total("CashCapex").toFixed(2)}
+                  </td>
                   {cashCapexFields.map((f) => (
                     <td
                       key={`t-${f}`}
@@ -532,6 +612,13 @@ const PDApprover = () => {
                   ))}
 
                   {/* Cash Revex totals */}
+                  <td className="border border-slate-300 text-right">
+                    {getSectionGrandTotal("CashRevex").toFixed(2)}
+                  </td>
+
+                  <td className="border border-slate-300 text-right">
+                    {getSectionFY1Total("CashRevex").toFixed(2)}
+                  </td>
                   {cashRevexFields.map((f) => (
                     <td
                       key={`t-${f}`}

@@ -432,6 +432,32 @@ const PDProjectDetail = () => {
     }
   };
 
+  const getGrandTotal = (prefix: string) =>
+    rows.reduce(
+      (sum, row) =>
+        sum +
+        Number(row[`${prefix}_H1FY1`] || 0) +
+        Number(row[`${prefix}_H2FY1`] || 0) +
+        Number(row[`${prefix}_H1FY2`] || 0) +
+        Number(row[`${prefix}_H2FY2`] || 0) +
+        Number(row[`${prefix}_H1FY3`] || 0) +
+        Number(row[`${prefix}_H2FY3`] || 0) +
+        Number(row[`${prefix}_H1FY4`] || 0) +
+        Number(row[`${prefix}_H2FY4`] || 0) +
+        Number(row[`${prefix}_H1FY5`] || 0) +
+        Number(row[`${prefix}_H2FY5`] || 0),
+      0,
+    );
+
+  const getFY1Total = (prefix: string) =>
+    rows.reduce(
+      (sum, row) =>
+        sum +
+        Number(row[`${prefix}_H1FY1`] || 0) +
+        Number(row[`${prefix}_H2FY1`] || 0),
+      0,
+    );
+
   const changeTab = (tabIndex: number) => {
     setActiveTab(tabIndex);
   };
@@ -1117,16 +1143,16 @@ const PDProjectDetail = () => {
                   <th colSpan={2} className="text-center border">
                     General
                   </th>
-                  <th colSpan={22} className="text-center border">
+                  <th colSpan={24} className="text-center border">
                     Commitment Capex
                   </th>
-                  <th colSpan={22} className="text-center border">
+                  <th colSpan={24} className="text-center border">
                     Commitment Revex
                   </th>
-                  <th colSpan={22} className="text-center border">
+                  <th colSpan={24} className="text-center border">
                     Cash Flow Capex
                   </th>
-                  <th colSpan={22} className="text-center border">
+                  <th colSpan={24} className="text-center border">
                     Cash Flow Revex
                   </th>
                   <th colSpan={3} className="text-center border">
@@ -1148,6 +1174,8 @@ const PDProjectDetail = () => {
 
                   {/* Commitment Capex columns */}
                   {[
+                    "Total Commitment Value in CR",
+                    "Total Commitment Value FY1 in CR",
                     "Apr",
                     "May",
                     "Jun",
@@ -1181,6 +1209,8 @@ const PDProjectDetail = () => {
 
                   {/* Commitment Revex columns */}
                   {[
+                    "Total Commitment Value in CR",
+                    "Total Commitment Value FY1 in CR",
                     "Apr",
                     "May",
                     "Jun",
@@ -1214,6 +1244,8 @@ const PDProjectDetail = () => {
 
                   {/* Cash Capex columns */}
                   {[
+                    "Total Cash Flow Value in CR",
+                    "Total Cash Flow Value FY1 in CR",
                     "Apr",
                     "May",
                     "Jun",
@@ -1247,6 +1279,8 @@ const PDProjectDetail = () => {
 
                   {/* Cash Revex columns */}
                   {[
+                    "Total Cash Flow Value in CR",
+                    "Total Cash Flow Value FY1 in CR",
                     "Apr",
                     "May",
                     "Jun",
@@ -1324,6 +1358,8 @@ const PDProjectDetail = () => {
 
                     {/* Commitment Capex */}
                     {[
+                      "CommCapex_Total",
+                      "CommCapex_TotalF1",
                       "CommCapex_AprFY1",
                       "CommCapex_MayFY1",
                       "CommCapex_JunFY1",
@@ -1347,16 +1383,50 @@ const PDProjectDetail = () => {
                       "CommCapex_H1FY5",
                       "CommCapex_H2FY5",
                     ].map((f) => (
-                      <td
-                        key={f}
-                        className="border border-slate-200 text-right"
-                      >
-                        {row[f]}
-                      </td>
+                      <>
+                        {f === "CommCapex_Total" ? (
+                          <td
+                            key={f}
+                            className="border border-slate-200 text-right"
+                          >
+                            {Number(row["CommCapex_H1FY1"]) +
+                              Number(row["CommCapex_H2FY1"]) +
+                              Number(row["CommCapex_H1FY2"]) +
+                              Number(row["CommCapex_H2FY2"]) +
+                              Number(row["CommCapex_H1FY3"]) +
+                              Number(row["CommCapex_H2FY3"]) +
+                              Number(row["CommCapex_H1FY4"]) +
+                              Number(row["CommCapex_H2FY4"]) +
+                              Number(row["CommCapex_H1FY5"]) +
+                              Number(row["CommCapex_H2FY5"])}
+                          </td>
+                        ) : (
+                          <>
+                            {f === "CommCapex_TotalF1" ? (
+                              <td
+                                key={f}
+                                className="border border-slate-200 text-right"
+                              >
+                                {Number(row["CommCapex_H1FY1"]) +
+                                  Number(row["CommCapex_H2FY1"])}
+                              </td>
+                            ) : (
+                              <td
+                                key={f}
+                                className="border border-slate-200 text-right"
+                              >
+                                {row[f]}
+                              </td>
+                            )}
+                          </>
+                        )}
+                      </>
                     ))}
 
                     {/* Commitment Revex */}
                     {[
+                      "CommRevex_Total",
+                      "CommRevex_TotalF1",
                       "CommRevex_AprFY1",
                       "CommRevex_MayFY1",
                       "CommRevex_JunFY1",
@@ -1380,16 +1450,50 @@ const PDProjectDetail = () => {
                       "CommRevex_H1FY5",
                       "CommRevex_H2FY5",
                     ].map((f) => (
-                      <td
-                        key={f}
-                        className="border border-slate-200 text-right"
-                      >
-                        {row[f]}
-                      </td>
+                      <>
+                        {f === "CommRevex_Total" ? (
+                          <td
+                            key={f}
+                            className="border border-slate-200 text-right"
+                          >
+                            {Number(row["CommRevex_H1FY1"]) +
+                              Number(row["CommRevex_H2FY1"]) +
+                              Number(row["CommRevex_H1FY2"]) +
+                              Number(row["CommRevex_H2FY2"]) +
+                              Number(row["CommRevex_H1FY3"]) +
+                              Number(row["CommRevex_H2FY3"]) +
+                              Number(row["CommRevex_H1FY4"]) +
+                              Number(row["CommRevex_H2FY4"]) +
+                              Number(row["CommRevex_H1FY5"]) +
+                              Number(row["CommRevex_H2FY5"])}
+                          </td>
+                        ) : (
+                          <>
+                            {f === "CommRevex_TotalF1" ? (
+                              <td
+                                key={f}
+                                className="border border-slate-200 text-right"
+                              >
+                                {Number(row["CommRevex_H1FY1"]) +
+                                  Number(row["CommRevex_H2FY1"])}
+                              </td>
+                            ) : (
+                              <td
+                                key={f}
+                                className="border border-slate-200 text-right"
+                              >
+                                {row[f]}
+                              </td>
+                            )}
+                          </>
+                        )}
+                      </>
                     ))}
 
                     {/* Cash Capex */}
                     {[
+                      "CashCapex_Total",
+                      "CashCapex_TotalF1",
                       "CashCapex_AprFY1",
                       "CashCapex_MayFY1",
                       "CashCapex_JunFY1",
@@ -1413,16 +1517,50 @@ const PDProjectDetail = () => {
                       "CashCapex_H1FY5",
                       "CashCapex_H2FY5",
                     ].map((f) => (
-                      <td
-                        key={f}
-                        className="border border-slate-200 text-right"
-                      >
-                        {row[f]}
-                      </td>
+                      <>
+                        {f === "CashCapex_Total" ? (
+                          <td
+                            key={f}
+                            className="border border-slate-200 text-right"
+                          >
+                            {Number(row["CashCapex_H1FY1"]) +
+                              Number(row["CashCapex_H2FY1"]) +
+                              Number(row["CashCapex_H1FY2"]) +
+                              Number(row["CashCapex_H2FY2"]) +
+                              Number(row["CashCapex_H1FY3"]) +
+                              Number(row["CashCapex_H2FY3"]) +
+                              Number(row["CashCapex_H1FY4"]) +
+                              Number(row["CashCapex_H2FY4"]) +
+                              Number(row["CashCapex_H1FY5"]) +
+                              Number(row["CashCapex_H2FY5"])}
+                          </td>
+                        ) : (
+                          <>
+                            {f === "CashCapex_TotalF1" ? (
+                              <td
+                                key={f}
+                                className="border border-slate-200 text-right"
+                              >
+                                {Number(row["CashCapex_H1FY1"]) +
+                                  Number(row["CashCapex_H2FY1"])}
+                              </td>
+                            ) : (
+                              <td
+                                key={f}
+                                className="border border-slate-200 text-right"
+                              >
+                                {row[f]}
+                              </td>
+                            )}
+                          </>
+                        )}
+                      </>
                     ))}
 
                     {/* Cash Revex */}
                     {[
+                      "CashRevex_Total",
+                      "CashRevex_TotalF1",
                       "CashRevex_AprFY1",
                       "CashRevex_MayFY1",
                       "CashRevex_JunFY1",
@@ -1446,12 +1584,44 @@ const PDProjectDetail = () => {
                       "CashRevex_H1FY5",
                       "CashRevex_H2FY5",
                     ].map((f) => (
-                      <td
-                        key={f}
-                        className="border border-slate-200 text-right"
-                      >
-                        {row[f]}
-                      </td>
+                      <>
+                        {f === "CashRevex_Total" ? (
+                          <td
+                            key={f}
+                            className="border border-slate-200 text-right"
+                          >
+                            {Number(row["CashRevex_H1FY1"]) +
+                              Number(row["CashRevex_H2FY1"]) +
+                              Number(row["CashRevex_H1FY2"]) +
+                              Number(row["CashRevex_H2FY2"]) +
+                              Number(row["CashRevex_H1FY3"]) +
+                              Number(row["CashRevex_H2FY3"]) +
+                              Number(row["CashRevex_H1FY4"]) +
+                              Number(row["CashRevex_H2FY4"]) +
+                              Number(row["CashRevex_H1FY5"]) +
+                              Number(row["CashRevex_H2FY5"])}
+                          </td>
+                        ) : (
+                          <>
+                            {f === "CashRevex_TotalF1" ? (
+                              <td
+                                key={f}
+                                className="border border-slate-200 text-right"
+                              >
+                                {Number(row["CashRevex_H1FY1"]) +
+                                  Number(row["CashRevex_H2FY1"])}
+                              </td>
+                            ) : (
+                              <td
+                                key={f}
+                                className="border border-slate-200 text-right"
+                              >
+                                {row[f]}
+                              </td>
+                            )}
+                          </>
+                        )}
+                      </>
                     ))}
 
                     {/* Carry Forward */}
@@ -1474,12 +1644,16 @@ const PDProjectDetail = () => {
                   <td className="sticky left-0 z-40 bg-amber-100 font-semibold text-center">
                     Total
                   </td>
-
                   {/* General — no totals */}
                   <td className="border border-slate-300"></td>
                   <td className="border border-slate-300"></td>
-
                   {/* Commitment Capex totals */}
+                  <td className="border border-slate-300 text-right">
+                    {getGrandTotal("CommCapex")}
+                  </td>
+                  <td className="border border-slate-300 text-right">
+                    {getFY1Total("CommCapex")}
+                  </td>
                   {[
                     "CommCapex_AprFY1",
                     "CommCapex_MayFY1",
@@ -1511,8 +1685,15 @@ const PDProjectDetail = () => {
                       {getTotal(f)}
                     </td>
                   ))}
-
                   {/* Commitment Revex totals */}
+                  <td className="border border-slate-300 text-right">
+                    {getGrandTotal("CommRevex")}
+                  </td>
+
+                  <td className="border border-slate-300 text-right">
+                    {getFY1Total("CommRevex")}
+                  </td>
+
                   {[
                     "CommRevex_AprFY1",
                     "CommRevex_MayFY1",
@@ -1544,8 +1725,14 @@ const PDProjectDetail = () => {
                       {getTotal(f)}
                     </td>
                   ))}
-
                   {/* Cash Capex totals */}
+                  <td className="border border-slate-300 text-right">
+                    {getGrandTotal("CashCapex")}
+                  </td>
+
+                  <td className="border border-slate-300 text-right">
+                    {getFY1Total("CashCapex")}
+                  </td>
                   {[
                     "CashCapex_AprFY1",
                     "CashCapex_MayFY1",
@@ -1577,8 +1764,14 @@ const PDProjectDetail = () => {
                       {getTotal(f)}
                     </td>
                   ))}
-
                   {/* Cash Revex totals */}
+                  <td className="border border-slate-300 text-right">
+                    {getGrandTotal("CashRevex")}
+                  </td>
+
+                  <td className="border border-slate-300 text-right">
+                    {getFY1Total("CashRevex")}
+                  </td>
                   {[
                     "CashRevex_AprFY1",
                     "CashRevex_MayFY1",
@@ -1610,7 +1803,6 @@ const PDProjectDetail = () => {
                       {getTotal(f)}
                     </td>
                   ))}
-
                   {/* Carry Forward — no totals */}
                   <td className="border border-slate-300"></td>
                   <td className="border border-slate-300"></td>
