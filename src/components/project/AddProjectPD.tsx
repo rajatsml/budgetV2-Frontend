@@ -53,6 +53,40 @@ const AddProjectPD = () => {
     setEndDate(value);
   };
 
+  const getCurrentFinancialYear = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1; // Jan = 1
+
+    // FY starts from April
+    const startYear = month >= 4 ? year : year - 1;
+
+    return startYear;
+  };
+
+  const getFinancialYearOptions = () => {
+    const currentFY = getCurrentFinancialYear();
+
+    let years: number[] = [];
+
+    if (projectType === "ONGOING") {
+      // n-1 to n+5
+      for (let i = -1; i <= 5; i++) {
+        years.push(currentFY + i);
+      }
+    } else {
+      // n+1 to n+5
+      for (let i = 1; i <= 5; i++) {
+        years.push(currentFY + i);
+      }
+    }
+
+    return years.map((startYear) => ({
+      value: `${startYear}-${String(startYear + 1).slice(-2)}`,
+      label: `${startYear}-${String(startYear + 1).slice(-2)}`,
+    }));
+  };
+
   const handleSubmit = async (status: string) => {
     try {
       if (!projectName.trim()) {
@@ -108,6 +142,7 @@ const AddProjectPD = () => {
       alert("Failed to create project");
     }
   };
+  const financialYearOptions = getFinancialYearOptions();
 
   return (
     <div className="min-h-screen bg-base-200 p-4">
@@ -174,12 +209,13 @@ const AddProjectPD = () => {
                   value={projectType}
                   onChange={(e) => {
                     setProjectType(e.target.value);
+                    setFinancialYear("");
                     setStartDate("");
                     setEndDate("");
                   }}
                 >
                   <option value="NEW">NEW</option>
-                  <option value="EXISTING">EXISTING</option>
+                  <option value="ONGOING">ONGOING</option>
                 </select>
               </div>
 
@@ -201,9 +237,12 @@ const AddProjectPD = () => {
                   }}
                 >
                   <option value="">Select Financial Year</option>
-                  <option value="2025-26">2025-26</option>
-                  <option value="2026-27">2026-27</option>
-                  <option value="2027-28">2027-28</option>
+
+                  {financialYearOptions.map((fy) => (
+                    <option key={fy.value} value={fy.value}>
+                      {fy.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 

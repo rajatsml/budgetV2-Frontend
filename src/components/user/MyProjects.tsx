@@ -221,7 +221,7 @@ const MyProjects = () => {
           <span>No projects found.</span>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100 shadow">
+        <div className="overflow-x-auto rounded border border-base-300 bg-base-100 shadow">
           <table className="table table-zebra table-pin-rows">
             <thead>
               <tr>
