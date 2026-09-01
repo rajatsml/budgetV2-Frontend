@@ -796,17 +796,56 @@ const PDProjectDetail = () => {
   // Shared table header for Commitments / Cash Flow tabs
   // ─────────────────────────────────────────────────────────
 
-  const financialTableHeader = (
+  const financialTableHeaderComm = (
     <thead className="text-xs bg-red-500 text-white">
       <tr>
         <th className="align-middle">Description</th>
         <th className="align-middle">Basis</th>
         <th className="align-middle">Type</th>
         <th>
-          Total Value <br /> in CR.
+          Total Commitment
+          <br /> Value in CR.
         </th>
         <th>
-          Total FY1 <br /> in CR.
+          Total Commitment <br /> Value FY1 in CR.
+        </th>
+        <th>Apr FY1</th>
+        <th>May FY1</th>
+        <th>Jun FY1</th>
+        <th>Jul FY1</th>
+        <th>Aug FY1</th>
+        <th>Sep FY1</th>
+        <th>Oct FY1</th>
+        <th>Nov FY1</th>
+        <th>Dec FY1</th>
+        <th>Jan FY1</th>
+        <th>Feb FY1</th>
+        <th>Mar FY1</th>
+        <th>H1 FY1</th>
+        <th>H2 FY1</th>
+        <th>H1 FY2</th>
+        <th>H2 FY2</th>
+        <th>H1 FY3</th>
+        <th>H2 FY3</th>
+        <th>H1 FY4</th>
+        <th>H2 FY4</th>
+        <th>H1 FY5</th>
+        <th>H2 FY5</th>
+      </tr>
+    </thead>
+  );
+  const financialTableHeaderCash = (
+    <thead className="text-xs bg-red-500 text-white">
+      <tr>
+        <th className="align-middle">Description</th>
+        <th className="align-middle">Basis</th>
+        <th className="align-middle">Type</th>
+        <th>
+          Total Cash Flow
+          <br /> Value in CR.
+        </th>
+        <th>
+          Total Cash Flow <br /> Value FY1 in CR.
         </th>
         <th>Apr FY1</th>
         <th>May FY1</th>
@@ -911,7 +950,7 @@ const PDProjectDetail = () => {
             <div className="tab-content border-base-300 bg-base-100 p-4">
               <div className="overflow-x-auto border border-base-300 rounded">
                 <table className="table table-xs table-zebra min-w-max">
-                  {financialTableHeader}
+                  {financialTableHeaderComm}
                   <tbody>
                     {/* Capex row */}
                     <tr>
@@ -968,7 +1007,7 @@ const PDProjectDetail = () => {
             <div className="tab-content border-base-300 bg-base-100 p-4">
               <div className="overflow-x-auto border border-base-300 rounded">
                 <table className="table table-xs table-zebra min-w-max">
-                  {financialTableHeader}
+                  {financialTableHeaderCash}
                   <tbody>
                     {/* Capex row */}
                     <tr>
@@ -1389,7 +1428,8 @@ const PDProjectDetail = () => {
                             key={f}
                             className="border border-slate-200 text-right"
                           >
-                            {Number(row["CommCapex_H1FY1"]) +
+                            {(
+                              Number(row["CommCapex_H1FY1"]) +
                               Number(row["CommCapex_H2FY1"]) +
                               Number(row["CommCapex_H1FY2"]) +
                               Number(row["CommCapex_H2FY2"]) +
@@ -1398,7 +1438,8 @@ const PDProjectDetail = () => {
                               Number(row["CommCapex_H1FY4"]) +
                               Number(row["CommCapex_H2FY4"]) +
                               Number(row["CommCapex_H1FY5"]) +
-                              Number(row["CommCapex_H2FY5"])}
+                              Number(row["CommCapex_H2FY5"])
+                            ).toFixed(2)}
                           </td>
                         ) : (
                           <>
@@ -1407,8 +1448,10 @@ const PDProjectDetail = () => {
                                 key={f}
                                 className="border border-slate-200 text-right"
                               >
-                                {Number(row["CommCapex_H1FY1"]) +
-                                  Number(row["CommCapex_H2FY1"])}
+                                {(
+                                  Number(row["CommCapex_H1FY1"]) +
+                                  Number(row["CommCapex_H2FY1"])
+                                ).toFixed(2)}
                               </td>
                             ) : (
                               <td
@@ -1456,7 +1499,8 @@ const PDProjectDetail = () => {
                             key={f}
                             className="border border-slate-200 text-right"
                           >
-                            {Number(row["CommRevex_H1FY1"]) +
+                            {(
+                              Number(row["CommRevex_H1FY1"]) +
                               Number(row["CommRevex_H2FY1"]) +
                               Number(row["CommRevex_H1FY2"]) +
                               Number(row["CommRevex_H2FY2"]) +
@@ -1465,7 +1509,8 @@ const PDProjectDetail = () => {
                               Number(row["CommRevex_H1FY4"]) +
                               Number(row["CommRevex_H2FY4"]) +
                               Number(row["CommRevex_H1FY5"]) +
-                              Number(row["CommRevex_H2FY5"])}
+                              Number(row["CommRevex_H2FY5"])
+                            ).toFixed(2)}
                           </td>
                         ) : (
                           <>
@@ -1474,8 +1519,10 @@ const PDProjectDetail = () => {
                                 key={f}
                                 className="border border-slate-200 text-right"
                               >
-                                {Number(row["CommRevex_H1FY1"]) +
-                                  Number(row["CommRevex_H2FY1"])}
+                                {(
+                                  Number(row["CommRevex_H1FY1"]) +
+                                  Number(row["CommRevex_H2FY1"])
+                                ).toFixed(2)}
                               </td>
                             ) : (
                               <td
@@ -1523,7 +1570,8 @@ const PDProjectDetail = () => {
                             key={f}
                             className="border border-slate-200 text-right"
                           >
-                            {Number(row["CashCapex_H1FY1"]) +
+                            {(
+                              Number(row["CashCapex_H1FY1"]) +
                               Number(row["CashCapex_H2FY1"]) +
                               Number(row["CashCapex_H1FY2"]) +
                               Number(row["CashCapex_H2FY2"]) +
@@ -1532,7 +1580,8 @@ const PDProjectDetail = () => {
                               Number(row["CashCapex_H1FY4"]) +
                               Number(row["CashCapex_H2FY4"]) +
                               Number(row["CashCapex_H1FY5"]) +
-                              Number(row["CashCapex_H2FY5"])}
+                              Number(row["CashCapex_H2FY5"])
+                            ).toFixed(2)}
                           </td>
                         ) : (
                           <>
@@ -1541,8 +1590,10 @@ const PDProjectDetail = () => {
                                 key={f}
                                 className="border border-slate-200 text-right"
                               >
-                                {Number(row["CashCapex_H1FY1"]) +
-                                  Number(row["CashCapex_H2FY1"])}
+                                {(
+                                  Number(row["CashCapex_H1FY1"]) +
+                                  Number(row["CashCapex_H2FY1"])
+                                ).toFixed(2)}
                               </td>
                             ) : (
                               <td
@@ -1590,7 +1641,8 @@ const PDProjectDetail = () => {
                             key={f}
                             className="border border-slate-200 text-right"
                           >
-                            {Number(row["CashRevex_H1FY1"]) +
+                            {(
+                              Number(row["CashRevex_H1FY1"]) +
                               Number(row["CashRevex_H2FY1"]) +
                               Number(row["CashRevex_H1FY2"]) +
                               Number(row["CashRevex_H2FY2"]) +
@@ -1599,7 +1651,8 @@ const PDProjectDetail = () => {
                               Number(row["CashRevex_H1FY4"]) +
                               Number(row["CashRevex_H2FY4"]) +
                               Number(row["CashRevex_H1FY5"]) +
-                              Number(row["CashRevex_H2FY5"])}
+                              Number(row["CashRevex_H2FY5"])
+                            ).toFixed(2)}
                           </td>
                         ) : (
                           <>
@@ -1608,8 +1661,10 @@ const PDProjectDetail = () => {
                                 key={f}
                                 className="border border-slate-200 text-right"
                               >
-                                {Number(row["CashRevex_H1FY1"]) +
-                                  Number(row["CashRevex_H2FY1"])}
+                                {(
+                                  Number(row["CashRevex_H1FY1"]) +
+                                  Number(row["CashRevex_H2FY1"])
+                                ).toFixed(2)}
                               </td>
                             ) : (
                               <td
