@@ -1,17 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { Building2, FolderOpen } from "lucide-react";
-import { CreateProject } from "../../service/projectmaster"; // Update path accordingly
+import {
+  CreateProject,
+  UpdateProject,
+  GetProjectById,
+  GetDropdownData,
+} from "../../service/projectmaster";
 import useUserStore from "../../store/userStore";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const AddProjectPD = () => {
   const [projectType, setProjectType] = useState("NEW");
   const [financialYear, setFinancialYear] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const user = useUserStore();
   const [projectName, setProjectName] = useState("");
   const [projectScope, setProjectScope] = useState("");
   const [keyAssumptions, setKeyAssumptions] = useState("");
+  const [projectOwnerName, setProjectOwnerName] = useState("");
+  const [projectOwnerId, setProjectOwnerId] = useState("");
+  const [category, setCategory] = useState("");
+  const [projectObjective, setProjectObjective] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [projectStatus, setProjectStatus] = useState<string>("");
+  const [projectCreatedBy, setProjectCreatedBy] = useState<string>("");
+  const { projectId } = useParams();
+  const isEditMode = Boolean(projectId);
+
+  const currentUserId = String(user?.user?.userId ?? "");
+  const normalizedStatus = projectStatus?.toLowerCase().trim();
+  const isCurrentUserOwner = currentUserId === String(projectCreatedBy ?? "");
+  const canEdit =
+    !isEditMode || (normalizedStatus === "draft" && isCurrentUserOwner);
 
   const getFinancialYearRange = (fy: string) => {
     if (!fy) {
@@ -24,34 +47,49 @@ const AddProjectPD = () => {
     const [startYear] = fy.split("-");
 
     return {
-      minDate: `${startYear}-04-01`,
-      maxDate: `${Number(startYear) + 1}-03-31`,
+      minDate: new Date(`${startYear}-04-01`),
+      maxDate: new Date(`${Number(startYear) + 1}-03-31`),
     };
   };
 
+  const loadProject = async () => {
+    try {
+      if (!projectId) return;
+
+      const data = await GetProjectById(projectId);
+
+      if (!data) return;
+
+      setProjectName(data.projectName || "");
+      setProjectType(data.isOngoing ? "ONGOING" : "NEW");
+      setFinancialYear(data.financialYear || "");
+      setProjectScope(data.projectScope || "");
+      setKeyAssumptions(data.keyAssumptions || "");
+      setProjectOwnerName(data.projectOwner || "");
+      setProjectOwnerId(data.projectOwnerID || "");
+      setCategory(data.projectCategoryType || "");
+      setProjectObjective(data.projectObjective || "");
+      setProjectStatus(data.status || "");
+      setProjectCreatedBy(String(data.createdBy ?? ""));
+
+      setStartDate(data.startDate ? new Date(data.startDate) : null);
+      setEndDate(data.endDate ? new Date(data.endDate) : null);
+    } catch (error) {
+      console.error("Error loading project:", error);
+    }
+  };
+
+  const formatDateForApi = (date: Date | null) => {
+    if (!date) return null;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   const { minDate, maxDate } = getFinancialYearRange(financialYear);
-
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    if (endDate && value > endDate) {
-      alert("Start Date cannot be greater than End Date");
-      return;
-    }
-
-    setStartDate(value);
-  };
-
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-
-    if (startDate && value < startDate) {
-      alert("End Date cannot be earlier than Start Date");
-      return;
-    }
-
-    setEndDate(value);
-  };
 
   const getCurrentFinancialYear = () => {
     const today = new Date();
@@ -89,6 +127,11 @@ const AddProjectPD = () => {
 
   const handleSubmit = async (status: string) => {
     try {
+      if (!canEdit) {
+        alert("You do not have permission to edit this project.");
+        return;
+      }
+
       if (!projectName.trim()) {
         alert("Project Name is required");
         return;
@@ -110,39 +153,90 @@ const AddProjectPD = () => {
       }
 
       const payload = {
+        projectId,
         projectName,
         projectType: "2",
         financialYear,
         projectScope,
+        projectObjective,
+        projectOwner: projectOwnerName,
+        projectOwnerID: projectOwnerId,
+        projectCategoryType: category,
         keyAssumptions,
         createdBy: user?.user?.userId,
-        isOngoing: projectType == "NEW" ? false : true,
-        createdByDept: user?.user?.roles[0].departmentName,
-        startDate,
-        status: status,
-        endDate,
+        createdByDept: user?.user?.roles?.[0]?.departmentName,
+        isOngoing: projectType === "ONGOING",
+        startDate: formatDateForApi(startDate),
+        endDate: formatDateForApi(endDate),
+        status,
       };
 
-      const response = await CreateProject(payload);
+      let response;
 
-      console.log("Project Created:", response);
+      if (isEditMode) {
+        response = await UpdateProject(projectId!, payload);
+        alert("Project updated successfully");
+      } else {
+        response = await CreateProject(payload);
+        alert("Project created successfully");
 
-      alert("Project created successfully");
+        setProjectName("");
+        setProjectType("NEW");
+        setFinancialYear("");
+        setProjectScope("");
+        setKeyAssumptions("");
+        setProjectOwnerName("");
+        setProjectOwnerId("");
+        setCategory("");
+        setProjectObjective("");
+        setStartDate(null);
+        setEndDate(null);
+      }
 
-      // Reset Form
-      setProjectName("");
-      setProjectType("NEW");
-      setFinancialYear("");
-      setProjectScope("");
-      setKeyAssumptions("");
-      setStartDate("");
-      setEndDate("");
+      console.log(response);
     } catch (error) {
-      console.error("Error creating project:", error);
-      alert("Failed to create project");
+      console.error("Error saving project:", error);
+      alert(
+        isEditMode ? "Failed to update project" : "Failed to create project",
+      );
     }
   };
   const financialYearOptions = getFinancialYearOptions();
+
+  const resetFormFields = () => {
+    setProjectName("");
+    setProjectType("NEW");
+    setFinancialYear("");
+    setProjectScope("");
+    setKeyAssumptions("");
+    setProjectOwnerName("");
+    setProjectOwnerId("");
+    setCategory("");
+    setProjectObjective("");
+    setProjectStatus("");
+    setProjectCreatedBy("");
+    setStartDate(null);
+    setEndDate(null);
+  };
+
+  useEffect(() => {
+    const initializePage = async () => {
+      try {
+        const dropdownData = await GetDropdownData("5");
+        setCategories(dropdownData || []);
+
+        if (projectId) {
+          await loadProject();
+        } else {
+          resetFormFields();
+        }
+      } catch (error) {
+        console.error("Error initializing page:", error);
+      }
+    };
+
+    initializePage();
+  }, [projectId]);
 
   return (
     <div className="min-h-screen bg-base-200 p-4">
@@ -156,13 +250,34 @@ const AddProjectPD = () => {
 
             <div>
               <h1 className="text-lg font-bold text-base-content">
-                Add Project PD
+                {isEditMode ? "Update Project PD" : "Add Project PD"}
               </h1>
               <p className="text-sm text-base-content/60">
                 Create and manage project details
               </p>
             </div>
           </div>
+          {isEditMode && projectStatus && (
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-xs uppercase tracking-wide text-base-content/60">
+                Status
+              </span>
+              <div
+                className={`badge ${
+                  normalizedStatus === "draft" ? "badge-warning" : "badge-error"
+                } text-white font-semibold`}
+              >
+                {projectStatus.toUpperCase()}
+              </div>
+              {!canEdit && (
+                <span className="text-xs text-error mt-1">
+                  {normalizedStatus === "draft" && !isCurrentUserOwner
+                    ? "Only project owner can edit"
+                    : "Cannot edit posted projects"}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -182,9 +297,9 @@ const AddProjectPD = () => {
               Basic Information
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 xl:grid-cols-6 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-4 gap-5">
               {/* Project Name */}
-              <div className="col-span-2">
+              <div>
                 <label className="label">
                   <span className="label-text font-semibold">Project Name</span>
                 </label>
@@ -195,6 +310,7 @@ const AddProjectPD = () => {
                   className="input input-bordered w-full input-sm"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
+                  disabled={!canEdit}
                 />
               </div>
 
@@ -210,86 +326,165 @@ const AddProjectPD = () => {
                   onChange={(e) => {
                     setProjectType(e.target.value);
                     setFinancialYear("");
-                    setStartDate("");
-                    setEndDate("");
+                    setStartDate(null);
+                    setEndDate(null);
                   }}
+                  disabled={!canEdit}
                 >
                   <option value="NEW">NEW</option>
                   <option value="ONGOING">ONGOING</option>
                 </select>
               </div>
 
-              {/* Financial Year */}
+              {/* Project Owner Name */}
               <div>
                 <label className="label">
                   <span className="label-text font-semibold">
-                    Financial Year
+                    Project Owner Name
                   </span>
                 </label>
 
-                <select
-                  className="select select-bordered w-full select-sm"
-                  value={financialYear}
-                  onChange={(e) => {
-                    setFinancialYear(e.target.value);
-                    setStartDate("");
-                    setEndDate("");
-                  }}
-                >
-                  <option value="">Select Financial Year</option>
-
-                  {financialYearOptions.map((fy) => (
-                    <option key={fy.value} value={fy.value}>
-                      {fy.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Start Date */}
-              <div>
-                <label className="label">
-                  <span className="label-text font-semibold">Start Date</span>
-                </label>
-
                 <input
-                  type="date"
+                  type="text"
+                  placeholder="Enter Owner Name"
                   className="input input-bordered w-full input-sm"
-                  value={startDate}
-                  onChange={handleStartDateChange}
-                  min={projectType === "NEW" ? minDate : undefined}
-                  max={
-                    projectType === "NEW"
-                      ? endDate || maxDate
-                      : endDate || undefined
-                  }
+                  value={projectOwnerName}
+                  onChange={(e) => setProjectOwnerName(e.target.value)}
+                  disabled={!canEdit}
                 />
               </div>
 
-              {/* End Date */}
+              {/* Project Owner ID */}
               <div>
                 <label className="label">
-                  <span className="label-text font-semibold">End Date</span>
+                  <span className="label-text font-semibold">
+                    Project Owner Id
+                  </span>
                 </label>
 
                 <input
-                  type="date"
+                  type="text"
+                  placeholder="Enter Owner Id"
                   className="input input-bordered w-full input-sm"
-                  value={endDate}
-                  onChange={handleEndDateChange}
-                  min={
-                    projectType === "NEW"
-                      ? startDate || minDate
-                      : startDate || undefined
-                  }
-                  max={projectType === "NEW" ? maxDate : undefined}
+                  value={projectOwnerId}
+                  onChange={(e) => setProjectOwnerId(e.target.value)}
+                  disabled={!canEdit}
                 />
               </div>
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-4 gap-5">
+            {/* Financial Year */}
+            <div>
+              <label className="label">
+                <span className="label-text font-semibold">Financial Year</span>
+              </label>
+
+              <select
+                className="select select-bordered w-full select-sm"
+                value={financialYear}
+                onChange={(e) => {
+                  setFinancialYear(e.target.value);
+                  setStartDate(null);
+                  setEndDate(null);
+                }}
+                disabled={!canEdit}
+              >
+                <option value="">Select Financial Year</option>
+
+                {financialYearOptions.map((fy) => (
+                  <option key={fy.value} value={fy.value}>
+                    {fy.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Start Date */}
+            <div>
+              <label className="label">
+                <span className="label-text font-semibold">Start Date</span>
+              </label>
+
+              <DatePicker
+                selected={startDate}
+                onChange={(date: Date | null) => {
+                  if (date && endDate && date > endDate) {
+                    alert("Start Date cannot be greater than End Date");
+                    return;
+                  }
+
+                  setStartDate(date);
+                }}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Select Start Date"
+                className="input input-bordered w-full input-sm"
+                wrapperClassName="w-full"
+                minDate={projectType === "NEW" ? minDate : undefined}
+                maxDate={
+                  projectType === "NEW"
+                    ? endDate || maxDate
+                    : endDate || undefined
+                }
+                disabled={!canEdit}
+              />
+            </div>
+
+            {/* End Date */}
+            <div>
+              <label className="label">
+                <span className="label-text font-semibold">End Date</span>
+              </label>
+
+              <DatePicker
+                selected={endDate}
+                onChange={(date: Date | null) => {
+                  if (date && startDate && date < startDate) {
+                    alert("End Date cannot be earlier than Start Date");
+                    return;
+                  }
+
+                  setEndDate(date);
+                }}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Select End Date"
+                className="input input-bordered w-full input-sm"
+                wrapperClassName="w-full"
+                minDate={
+                  projectType === "NEW"
+                    ? startDate || minDate
+                    : startDate || undefined
+                }
+                maxDate={projectType === "NEW" ? maxDate : undefined}
+                disabled={!canEdit}
+              />
+            </div>
+            {/* Category */}
+            <div>
+              <label className="label">
+                <span className="label-text font-semibold">Category</span>
+              </label>
+
+              <select
+                className="select select-bordered w-full select-sm"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                disabled={!canEdit}
+              >
+                <option value="">Select Category</option>
+
+                {categories.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.text}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {/* Project Scope */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8 mt-4">
             <div>
               <label className="label">
                 <span className="label-text font-semibold">Project Scope</span>
@@ -301,13 +496,15 @@ const AddProjectPD = () => {
                 placeholder="Describe project scope..."
                 value={projectScope}
                 onChange={(e) => setProjectScope(e.target.value)}
+                disabled={!canEdit}
               />
             </div>
 
             <div>
               <label className="label">
                 <span className="label-text font-semibold">
-                  Key Assumptions
+                  Key Assumptions/Application Model/Activites Currently
+                  Undertaken
                 </span>
               </label>
 
@@ -317,6 +514,23 @@ const AddProjectPD = () => {
                 placeholder="Enter key assumptions..."
                 value={keyAssumptions}
                 onChange={(e) => setKeyAssumptions(e.target.value)}
+                disabled={!canEdit}
+              />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text font-semibold">
+                  Project Objective
+                </span>
+              </label>
+
+              <textarea
+                rows={3}
+                className="textarea textarea-bordered w-full textarea-sm"
+                placeholder="Describe project objective..."
+                value={projectObjective}
+                onChange={(e) => setProjectObjective(e.target.value)}
+                disabled={!canEdit}
               />
             </div>
           </div>
@@ -324,21 +538,19 @@ const AddProjectPD = () => {
           {/* Actions */}
           <div className="flex justify-end gap-3">
             <button
-              onClick={() => {
-                handleSubmit("Draft");
-              }}
+              onClick={() => handleSubmit("Draft")}
               className="btn btn-sm btn-error text-white"
+              disabled={!canEdit}
             >
               Save Draft
             </button>
 
             <button
               className="btn btn-sm btn-neutral"
-              onClick={() => {
-                handleSubmit("Posted");
-              }}
+              onClick={() => handleSubmit("Posted")}
+              disabled={!canEdit}
             >
-              Submit
+              {isEditMode ? "Update" : "Submit"}
             </button>
           </div>
         </div>

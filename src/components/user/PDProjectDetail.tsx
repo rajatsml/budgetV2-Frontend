@@ -1130,7 +1130,7 @@ const PDProjectDetail = () => {
         {/* ── Action Buttons ──────────────────────────── */}
         {canEdit && (
           <div className="flex gap-x-4 place-content-left m-4">
-            <button
+            {/* <button
               className="btn btn-sm btn-neutral"
               onClick={prevTab}
               disabled={activeTab === 0}
@@ -1146,14 +1146,14 @@ const PDProjectDetail = () => {
             >
               Next
               <ChevronRight className="w-4 h-4 ml-1" />
-            </button>
+            </button> */}
 
             {!isRowEmpty() && (
               <button
                 className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
                 onClick={handleSave}
               >
-                {isEditing ? "Update Row" : "Save All Entries"}
+                {isEditing ? "Update Row" : "Save"}
               </button>
             )}
 

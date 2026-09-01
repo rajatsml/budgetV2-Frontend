@@ -20,6 +20,7 @@ import NonPDApprover from "./components/user/NonPDApprover";
 import ProjectDetails from "./components/dashboard/ProjectDetails";
 import AddProjectPD from "./components/project/AddProjectPD";
 import PDInputs from "./components/user/PDInputs";
+import PostedProjects from "./components/user/PostedProjects";
 
 function App() {
   return (
@@ -125,7 +126,28 @@ function App() {
           }
         />
         <Route
+          path="/posted-projects"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <PostedProjects />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
           path="/add-project-pd"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <AddProjectPD />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/add-project-pd/:projectId?"
           element={
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />

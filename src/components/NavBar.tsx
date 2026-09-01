@@ -75,6 +75,13 @@ const NavBar = () => {
                   <FolderKanban size={16} />
                   My Projects
                 </Link>
+                <Link
+                  to="/posted-projects"
+                  className={navLinkClass("/posted-projects")}
+                >
+                  <FolderKanban size={16} />
+                  Posted Projects
+                </Link>
 
                 <Link
                   to="/add-project-pd"

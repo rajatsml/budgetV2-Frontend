@@ -24,6 +24,20 @@ const CreateProject = async (payload: any) => {
   }
 };
 
+// GET DROPDOWN DATA FOR PROJECT MASTER
+const GetDropdownData = async (type: string) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/Dropdowns/${type}`,
+    );
+
+    return response.data.items || [];
+  } catch (error) {
+    console.error("Error fetching dropdown data:", error);
+    return [];
+  }
+};
+
 /**
  * Get projects based on logged-in user.
  * Backend will automatically:
@@ -325,6 +339,19 @@ const GetBudgetDashboardDetails = async (
   }
 };
 
+const GetUserProjects = async (userid: string) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/Projects/GetUserProjects?userId=${userid}`,
+    );
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching user projects:", error);
+    return [];
+  }
+};
+
 export {
   FetchAllProjectsOfUser,
   CreateProject,
@@ -332,6 +359,8 @@ export {
   GetProjectById,
   UpdateProject,
   DeleteProject,
+  GetDropdownData,
+  GetUserProjects,
 
   // PD Master
   InitializePDMaster,
