@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import PDHeader from "../pd/PDHeader";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+// import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import {
   SavePDMaster,
@@ -138,7 +138,7 @@ const PDProjectDetail = () => {
 
   const { user } = useUserStore();
 
-  const tabs = ["Commitments", "Cash Flow", "Carry Forward"];
+  // const tabs = ["Commitments", "Cash Flow", "Carry Forward"];
 
   // ─────────────────────────────────────────────────────────
   // Calculation helpers
@@ -185,6 +185,48 @@ const PDProjectDetail = () => {
       fy1Total: fy1Total.toFixed(2),
       valueTotal: valueTotal.toFixed(2),
     };
+  };
+
+  const getCommTotal = (row: any, prefix: "CommCapex" | "CommRevex") => {
+    return (
+      Number(row[`${prefix}_H1FY1`] || 0) +
+      Number(row[`${prefix}_H2FY1`] || 0) +
+      Number(row[`${prefix}_H1FY2`] || 0) +
+      Number(row[`${prefix}_H2FY2`] || 0) +
+      Number(row[`${prefix}_H1FY3`] || 0) +
+      Number(row[`${prefix}_H2FY3`] || 0) +
+      Number(row[`${prefix}_H1FY4`] || 0) +
+      Number(row[`${prefix}_H2FY4`] || 0) +
+      Number(row[`${prefix}_H1FY5`] || 0) +
+      Number(row[`${prefix}_H2FY5`] || 0)
+    ).toFixed(2);
+  };
+
+  const getCommFY1Total = (row: any, prefix: "CommCapex" | "CommRevex") => {
+    return (
+      Number(row[`${prefix}_H1FY1`] || 0) + Number(row[`${prefix}_H2FY1`] || 0)
+    ).toFixed(2);
+  };
+
+  const getCashFlowTotal = (row: any, prefix: "CashCapex" | "CashRevex") => {
+    return (
+      Number(row[`${prefix}_H1FY1`] || 0) +
+      Number(row[`${prefix}_H2FY1`] || 0) +
+      Number(row[`${prefix}_H1FY2`] || 0) +
+      Number(row[`${prefix}_H2FY2`] || 0) +
+      Number(row[`${prefix}_H1FY3`] || 0) +
+      Number(row[`${prefix}_H2FY3`] || 0) +
+      Number(row[`${prefix}_H1FY4`] || 0) +
+      Number(row[`${prefix}_H2FY4`] || 0) +
+      Number(row[`${prefix}_H1FY5`] || 0) +
+      Number(row[`${prefix}_H2FY5`] || 0)
+    ).toFixed(2);
+  };
+
+  const getCashFlowFY1Total = (row: any, prefix: "CashCapex" | "CashRevex") => {
+    return (
+      Number(row[`${prefix}_H1FY1`] || 0) + Number(row[`${prefix}_H2FY1`] || 0)
+    ).toFixed(2);
   };
 
   // Live computed totals for the summary panel
@@ -410,27 +452,27 @@ const PDProjectDetail = () => {
   // Tab navigation
   // ─────────────────────────────────────────────────────────
 
-  const savePDData = async () => {
-    try {
-      if (isRowEmpty()) {
-        return false;
-      }
-      const payload = buildPayload("DRAFT");
+  // const savePDData = async () => {
+  //   try {
+  //     if (isRowEmpty()) {
+  //       return false;
+  //     }
+  //     const payload = buildPayload("DRAFT");
 
-      if (!pdDetailId) {
-        const response = await SavePDMaster(payload);
-        setPDDetailId(response?.pdDetailId);
-      } else {
-        const response = await UpdatePDMaster(payload, pdDetailId);
-        setPDDetailId(response?.pdDetailId);
-      }
+  //     if (!pdDetailId) {
+  //       const response = await SavePDMaster(payload);
+  //       setPDDetailId(response?.pdDetailId);
+  //     } else {
+  //       const response = await UpdatePDMaster(payload, pdDetailId);
+  //       setPDDetailId(response?.pdDetailId);
+  //     }
 
-      return true;
-    } catch (error) {
-      console.error("PD Save Failed", error);
-      return false;
-    }
-  };
+  //     return true;
+  //   } catch (error) {
+  //     console.error("PD Save Failed", error);
+  //     return false;
+  //   }
+  // };
 
   const getGrandTotal = (prefix: string) =>
     rows.reduce(
@@ -462,29 +504,29 @@ const PDProjectDetail = () => {
     setActiveTab(tabIndex);
   };
 
-  const nextTab = async () => {
-    const success = await savePDData();
-    if (!success) return;
+  // const nextTab = async () => {
+  //   const success = await savePDData();
+  //   if (!success) return;
 
-    console.log("This is success - NEXT", success);
+  //   console.log("This is success - NEXT", success);
 
-    if (activeTab < tabs.length - 1) {
-      setActiveTab((prev) => prev + 1);
-    }
-    fetchPDDetails();
-  };
+  //   if (activeTab < tabs.length - 1) {
+  //     setActiveTab((prev) => prev + 1);
+  //   }
+  //   fetchPDDetails();
+  // };
 
-  const prevTab = async () => {
-    const success = await savePDData();
-    if (!success) return;
+  // const prevTab = async () => {
+  //   const success = await savePDData();
+  //   if (!success) return;
 
-    console.log("This is success - PREV", success);
+  //   console.log("This is success - PREV", success);
 
-    if (activeTab > 0) {
-      setActiveTab((prev) => prev - 1);
-    }
-    fetchPDDetails();
-  };
+  //   if (activeTab > 0) {
+  //     setActiveTab((prev) => prev - 1);
+  //   }
+  //   fetchPDDetails();
+  // };
 
   // ─────────────────────────────────────────────────────────
   // CRUD handlers
@@ -515,7 +557,7 @@ const PDProjectDetail = () => {
       await fetchPDDetails();
       resetForm();
       setPDDetailId(null);
-      setActiveTab(0);
+      // setActiveTab(0);
     } catch (error) {
       console.error("Error saving row:", error);
     }
@@ -637,7 +679,7 @@ const PDProjectDetail = () => {
     });
 
     setEditingRowId(id.toString());
-    setActiveTab(0);
+    // setActiveTab(0);
   };
 
   const handleDelete = async (id: number) => {
@@ -877,6 +919,542 @@ const PDProjectDetail = () => {
   // Render
   // ─────────────────────────────────────────────────────────
 
+  const CommitmentTable = () => {
+    return (
+      <div className="overflow-x-auto border border-base-300 rounded">
+        <table className="table table-xs table-zebra min-w-max">
+          <thead className="text-xs text-white">
+            <tr className="bg-red-500   ">
+              <th className="text-center border">Actions</th>
+              <th className="text-center border" colSpan={2}>
+                General
+              </th>
+              <th className="text-center border" colSpan={5}>
+                Totals
+              </th>
+              <th className="text-center border" colSpan={22}>
+                Commitment Capex
+              </th>
+              <th className="text-center border" colSpan={22}>
+                Commitment Revex
+              </th>
+            </tr>
+            <tr className="bg-red-400">
+              <th></th>
+              <th className="align-middle border border-slate-300 ">
+                Description
+              </th>
+              <th className="align-middle border border-slate-300">Basis</th>
+              <th className="border border-slate-300">
+                Total Commitment
+                <br /> Value in CR.
+              </th>
+              <th className="border border-slate-300">
+                Total Commitment <br /> Capex in CR.
+              </th>
+              <th className="border border-slate-300">
+                Total Commitment <br /> Revex in CR.
+              </th>
+              <th className="border border-slate-300">
+                Total Commitment <br /> Capex F1 in CR.
+              </th>
+              <th className="border border-slate-300">
+                Total Commitment <br /> Revex F1 in CR.
+              </th>
+
+              <th className="border border-slate-300">Apr FY1</th>
+              <th className="border border-slate-300">May FY1</th>
+              <th className="border border-slate-300">Jun FY1</th>
+              <th className="border border-slate-300">Jul FY1</th>
+              <th className="border border-slate-300">Aug FY1</th>
+              <th className="border border-slate-300">Sep FY1</th>
+              <th className="border border-slate-300">Oct FY1</th>
+              <th className="border border-slate-300">Nov FY1</th>
+              <th className="border border-slate-300">Dec FY1</th>
+              <th className="border border-slate-300">Jan FY1</th>
+              <th className="border border-slate-300">Feb FY1</th>
+              <th className="border border-slate-300">Mar FY1</th>
+              <th className="border border-slate-300">H1 FY1</th>
+              <th className="border border-slate-300">H2 FY1</th>
+              <th className="border border-slate-300">H1 FY2</th>
+              <th className="border border-slate-300">H2 FY2</th>
+              <th className="border border-slate-300">H1 FY3</th>
+              <th className="border border-slate-300">H2 FY3</th>
+              <th className="border border-slate-300">H1 FY4</th>
+              <th className="border border-slate-300">H2 FY4</th>
+              <th className="border border-slate-300">H1 FY5</th>
+              <th className="border border-slate-300">H2 FY5</th>
+
+              <th className="border border-slate-300">Apr FY1</th>
+              <th className="border border-slate-300">May FY1</th>
+              <th className="border border-slate-300">Jun FY1</th>
+              <th className="border border-slate-300">Jul FY1</th>
+              <th className="border border-slate-300">Aug FY1</th>
+              <th className="border border-slate-300">Sep FY1</th>
+              <th className="border border-slate-300">Oct FY1</th>
+              <th className="border border-slate-300">Nov FY1</th>
+              <th className="border border-slate-300">Dec FY1</th>
+              <th className="border border-slate-300">Jan FY1</th>
+              <th className="border border-slate-300">Feb FY1</th>
+              <th className="border border-slate-300">Mar FY1</th>
+              <th className="border border-slate-300">H1 FY1</th>
+              <th className="border border-slate-300">H2 FY1</th>
+              <th className="border border-slate-300">H1 FY2</th>
+              <th className="border border-slate-300">H2 FY2</th>
+              <th className="border border-slate-300">H1 FY3</th>
+              <th className="border border-slate-300">H2 FY3</th>
+              <th className="border border-slate-300">H1 FY4</th>
+              <th className="border border-slate-300">H2 FY4</th>
+              <th className="border border-slate-300">H1 FY5</th>
+              <th className="border border-slate-300">H2 FY5</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.PDDetailId} className="hover ">
+                <td className="border border-slate-300">
+                  <button
+                    className="btn btn-xs mr-2 btn-neutral"
+                    onClick={() => handleEdit(row.PDDetailId)}
+                  >
+                    Edit Commitment
+                  </button>
+                  <button
+                    className="btn btn-xs"
+                    onClick={() => handleDelete(row.PDDetailId)}
+                  >
+                    Delete
+                  </button>
+                </td>
+                <td className="border border-slate-300">{row.Description}</td>
+                <td className="border border-slate-300">{row.Basis}</td>
+                <td className="border border-slate-300">
+                  {(
+                    Number(getCommTotal(row, "CommCapex")) +
+                    Number(getCommTotal(row, "CommRevex"))
+                  ).toFixed(2)}
+                </td>
+
+                <td className="border border-slate-300">
+                  {getCommTotal(row, "CommCapex")}
+                </td>
+                <td className="border border-slate-300">
+                  {getCommTotal(row, "CommRevex")}
+                </td>
+
+                <td className="border border-slate-300">
+                  {getCommFY1Total(row, "CommCapex")}
+                </td>
+                <td className="border border-slate-300">
+                  {getCommFY1Total(row, "CommRevex")}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_AprFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_MayFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_JunFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_JulFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_AugFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_SepFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_OctFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_NovFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_DecFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_JanFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_FebFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_MarFY1}
+                </td>
+
+                <td className="border border-slate-300">
+                  {row.CommCapex_H1FY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H2FY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H1FY2}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H2FY2}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H1FY3}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H2FY3}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H1FY4}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H2FY4}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H1FY5}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommCapex_H2FY5}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_AprFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_MayFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_JunFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_JulFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_AugFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_SepFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_OctFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_NovFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_DecFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_JanFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_FebFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_MarFY1}
+                </td>
+
+                <td className="border border-slate-300">
+                  {row.CommRevex_H1FY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H2FY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H1FY2}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H2FY2}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H1FY3}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H2FY3}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H1FY4}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H2FY4}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H1FY5}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CommRevex_H2FY5}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const CashFlowTable = () => {
+    return (
+      <div className="overflow-x-auto border border-base-300 rounded">
+        <table className="table table-xs table-zebra min-w-max">
+          <thead className="text-xs  text-white">
+            <tr className="bg-red-500">
+              <th className="text-center border">Actions</th>
+              <th className="text-center border" colSpan={2}>
+                General
+              </th>
+              <th className="text-center border" colSpan={5}>
+                Totals
+              </th>
+              <th className="text-center border" colSpan={22}>
+                CashFlow Capex
+              </th>
+              <th className="text-center border" colSpan={22}>
+                CashFlow Revex
+              </th>
+            </tr>
+            <tr className="bg-red-400">
+              <th></th>
+              <th className="align-middle border border-slate-300">
+                Description
+              </th>
+              <th className="align-middle border border-slate-300">Basis</th>
+              <th className="border border-slate-300">
+                Total CashFlow
+                <br /> Value in CR.
+              </th>
+              <th className="border border-slate-300">
+                Total CashFlow <br /> Capex in CR.
+              </th>
+              <th className="border border-slate-300">
+                Total CashFlow <br /> Revex in CR.
+              </th>
+              <th className="border border-slate-300">
+                Total CashFlow <br /> Capex F1 in CR.
+              </th>
+              <th className="border border-slate-300">
+                Total CashFlow <br /> Revex F1 in CR.
+              </th>
+
+              <th className="border border-slate-300">Apr FY1</th>
+              <th className="border border-slate-300">May FY1</th>
+              <th className="border border-slate-300">Jun FY1</th>
+              <th className="border border-slate-300">Jul FY1</th>
+              <th className="border border-slate-300">Aug FY1</th>
+              <th className="border border-slate-300">Sep FY1</th>
+              <th className="border border-slate-300">Oct FY1</th>
+              <th className="border border-slate-300">Nov FY1</th>
+              <th className="border border-slate-300">Dec FY1</th>
+              <th className="border border-slate-300">Jan FY1</th>
+              <th className="border border-slate-300">Feb FY1</th>
+              <th className="border border-slate-300">Mar FY1</th>
+              <th className="border border-slate-300">H1 FY1</th>
+              <th className="border border-slate-300">H2 FY1</th>
+              <th className="border border-slate-300">H1 FY2</th>
+              <th className="border border-slate-300">H2 FY2</th>
+              <th className="border border-slate-300">H1 FY3</th>
+              <th className="border border-slate-300">H2 FY3</th>
+              <th className="border border-slate-300">H1 FY4</th>
+              <th className="border border-slate-300">H2 FY4</th>
+              <th className="border border-slate-300">H1 FY5</th>
+              <th className="border border-slate-300">H2 FY5</th>
+
+              <th className="border border-slate-300">Apr FY1</th>
+              <th className="border border-slate-300">May FY1</th>
+              <th className="border border-slate-300">Jun FY1</th>
+              <th className="border border-slate-300">Jul FY1</th>
+              <th className="border border-slate-300">Aug FY1</th>
+              <th className="border border-slate-300">Sep FY1</th>
+              <th className="border border-slate-300">Oct FY1</th>
+              <th className="border border-slate-300">Nov FY1</th>
+              <th className="border border-slate-300">Dec FY1</th>
+              <th className="border border-slate-300">Jan FY1</th>
+              <th className="border border-slate-300">Feb FY1</th>
+              <th className="border border-slate-300">Mar FY1</th>
+              <th className="border border-slate-300">H1 FY1</th>
+              <th className="border border-slate-300">H2 FY1</th>
+              <th className="border border-slate-300">H1 FY2</th>
+              <th className="border border-slate-300">H2 FY2</th>
+              <th className="border border-slate-300">H1 FY3</th>
+              <th className="border border-slate-300">H2 FY3</th>
+              <th className="border border-slate-300">H1 FY4</th>
+              <th className="border border-slate-300">H2 FY4</th>
+              <th className="border border-slate-300">H1 FY5</th>
+              <th className="border border-slate-300">H2 FY5</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, idx) => (
+              <tr key={row.PDDetailId} className="hover">
+                <td className="border border-slate-300">
+                  <button
+                    className="btn btn-xs mr-2 btn-neutral"
+                    onClick={() => handleEdit(row.PDDetailId)}
+                  >
+                    Add/Update Commitment {idx + 1} Budget
+                  </button>
+                </td>
+                <td className="border border-slate-300">{row.Description}</td>
+                <td className="border border-slate-300">{row.Basis}</td>
+                <td className="border border-slate-300">
+                  {(
+                    Number(getCashFlowTotal(row, "CashCapex")) +
+                    Number(getCashFlowTotal(row, "CashRevex"))
+                  ).toFixed(2)}
+                </td>
+
+                <td className="border border-slate-300">
+                  {getCashFlowTotal(row, "CashCapex")}
+                </td>
+                <td className="border border-slate-300">
+                  {getCashFlowTotal(row, "CashRevex")}
+                </td>
+
+                <td className="border border-slate-300">
+                  {getCashFlowFY1Total(row, "CashCapex")}
+                </td>
+                <td className="border border-slate-300">
+                  {getCashFlowFY1Total(row, "CashRevex")}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_AprFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_MayFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_JunFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_JulFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_AugFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_SepFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_OctFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_NovFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_DecFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_JanFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_FebFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_MarFY1}
+                </td>
+
+                <td className="border border-slate-300">
+                  {row.CashCapex_H1FY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H2FY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H1FY2}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H2FY2}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H1FY3}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H2FY3}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H1FY4}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H2FY4}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H1FY5}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashCapex_H2FY5}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_AprFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_MayFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_JunFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_JulFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_AugFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_SepFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_OctFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_NovFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_DecFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_JanFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_FebFY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_MarFY1}
+                </td>
+
+                <td className="border border-slate-300">
+                  {row.CashRevex_H1FY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H2FY1}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H1FY2}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H2FY2}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H1FY3}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H2FY3}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H1FY4}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H2FY4}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H1FY5}
+                </td>
+                <td className="border border-slate-300">
+                  {row.CashRevex_H2FY5}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 space-y-4">
       {/* ── Project Info / Summary ──────────────────────── */}
@@ -916,10 +1494,10 @@ const PDProjectDetail = () => {
               <tbody>
                 <tr className="hover text-center font-bold text-sm text-slate-800 bg-slate-50">
                   <td className="border-r border-base-300 py-3">
-                    {commCapexTotals.valueTotal} Cr
+                    {cfCapexTotals.valueTotal} Cr
                   </td>
                   <td className="border-r border-base-300 py-3">
-                    {commRevexTotals.valueTotal} Cr
+                    {cfRevexTotals.valueTotal} Cr
                   </td>
                   <td className="border-r border-base-300 py-3">
                     {cfCapexTotals.valueTotal} Cr
@@ -1172,699 +1750,11 @@ const PDProjectDetail = () => {
       {rows.length > 0 && (
         <div className="mt-6 border border-slate-300 font-medium text-xs bg-white overflow-hidden">
           <div className="max-h-175 overflow-auto">
-            <table className="table table-zebra table-xs w-full">
-              <thead className="sticky top-0 z-30">
-                {/* Group header */}
-                <tr className="bg-red-500 text-white text-xs">
-                  <th className="sticky left-0 z-40 bg-red-500 border text-center">
-                    Actions
-                  </th>
-                  <th colSpan={2} className="text-center border">
-                    General
-                  </th>
-                  <th colSpan={24} className="text-center border">
-                    Commitment Capex
-                  </th>
-                  <th colSpan={24} className="text-center border">
-                    Commitment Revex
-                  </th>
-                  <th colSpan={24} className="text-center border">
-                    Cash Flow Capex
-                  </th>
-                  <th colSpan={24} className="text-center border">
-                    Cash Flow Revex
-                  </th>
-                  <th colSpan={3} className="text-center border">
-                    Carry Forward
-                  </th>
-                </tr>
+            {rows.length > 0 && activeTab === 0 && <CommitmentTable />}
 
-                {/* Sub header */}
-                <tr className="bg-slate-100 text-slate-800">
-                  <th className="sticky left-0 z-40 bg-slate-100"></th>
+            {rows.length > 0 && activeTab === 1 && <CashFlowTable />}
 
-                  {/* General */}
-                  <th className="border border-slate-300 text-xs font-medium">
-                    Description
-                  </th>
-                  <th className="border border-slate-300 text-xs font-medium">
-                    Basis
-                  </th>
-
-                  {/* Commitment Capex columns */}
-                  {[
-                    "Total Commitment Value in CR",
-                    "Total Commitment Value FY1 in CR",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "H1 FY1",
-                    "H2 FY1",
-                    "H1 FY2",
-                    "H2 FY2",
-                    "H1 FY3",
-                    "H2 FY3",
-                    "H1 FY4",
-                    "H2 FY4",
-                    "H1 FY5",
-                    "H2 FY5",
-                  ].map((col) => (
-                    <th
-                      key={`cc-${col}`}
-                      className="border border-slate-300 text-xs font-medium whitespace-nowrap"
-                    >
-                      {col}
-                    </th>
-                  ))}
-
-                  {/* Commitment Revex columns */}
-                  {[
-                    "Total Commitment Value in CR",
-                    "Total Commitment Value FY1 in CR",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "H1 FY1",
-                    "H2 FY1",
-                    "H1 FY2",
-                    "H2 FY2",
-                    "H1 FY3",
-                    "H2 FY3",
-                    "H1 FY4",
-                    "H2 FY4",
-                    "H1 FY5",
-                    "H2 FY5",
-                  ].map((col) => (
-                    <th
-                      key={`cr-${col}`}
-                      className="border border-slate-300 text-xs font-medium whitespace-nowrap"
-                    >
-                      {col}
-                    </th>
-                  ))}
-
-                  {/* Cash Capex columns */}
-                  {[
-                    "Total Cash Flow Value in CR",
-                    "Total Cash Flow Value FY1 in CR",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "H1 FY1",
-                    "H2 FY1",
-                    "H1 FY2",
-                    "H2 FY2",
-                    "H1 FY3",
-                    "H2 FY3",
-                    "H1 FY4",
-                    "H2 FY4",
-                    "H1 FY5",
-                    "H2 FY5",
-                  ].map((col) => (
-                    <th
-                      key={`cashc-${col}`}
-                      className="border border-slate-300 text-xs font-medium whitespace-nowrap"
-                    >
-                      {col}
-                    </th>
-                  ))}
-
-                  {/* Cash Revex columns */}
-                  {[
-                    "Total Cash Flow Value in CR",
-                    "Total Cash Flow Value FY1 in CR",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "H1 FY1",
-                    "H2 FY1",
-                    "H1 FY2",
-                    "H2 FY2",
-                    "H1 FY3",
-                    "H2 FY3",
-                    "H1 FY4",
-                    "H2 FY4",
-                    "H1 FY5",
-                    "H2 FY5",
-                  ].map((col) => (
-                    <th
-                      key={`cashr-${col}`}
-                      className="border border-slate-300 text-xs font-medium whitespace-nowrap"
-                    >
-                      {col}
-                    </th>
-                  ))}
-
-                  {/* Carry Forward */}
-                  <th className="border border-slate-300 text-xs font-medium">
-                    WBS
-                  </th>
-                  <th className="border border-slate-300 text-xs font-medium">
-                    CF Description
-                  </th>
-                  <th className="border border-slate-300 text-xs font-medium">
-                    FY Year
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.PDDetailId} className="text-xs">
-                    {/* Actions */}
-                    <td className="sticky left-0 z-20 bg-white border border-slate-200">
-                      {canEdit && (
-                        <div className="flex gap-1 justify-center">
-                          <button
-                            className="btn btn-xs bg-red-500 text-white"
-                            onClick={() => handleEdit(row.PDDetailId)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-xs bg-red-500 text-white"
-                            onClick={() => handleDelete(row.PDDetailId)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </td>
-
-                    {/* General */}
-                    <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
-                      {row.Description}
-                    </td>
-                    <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
-                      {row.Basis}
-                    </td>
-
-                    {/* Commitment Capex */}
-                    {[
-                      "CommCapex_Total",
-                      "CommCapex_TotalF1",
-                      "CommCapex_AprFY1",
-                      "CommCapex_MayFY1",
-                      "CommCapex_JunFY1",
-                      "CommCapex_JulFY1",
-                      "CommCapex_AugFY1",
-                      "CommCapex_SepFY1",
-                      "CommCapex_OctFY1",
-                      "CommCapex_NovFY1",
-                      "CommCapex_DecFY1",
-                      "CommCapex_JanFY1",
-                      "CommCapex_FebFY1",
-                      "CommCapex_MarFY1",
-                      "CommCapex_H1FY1",
-                      "CommCapex_H2FY1",
-                      "CommCapex_H1FY2",
-                      "CommCapex_H2FY2",
-                      "CommCapex_H1FY3",
-                      "CommCapex_H2FY3",
-                      "CommCapex_H1FY4",
-                      "CommCapex_H2FY4",
-                      "CommCapex_H1FY5",
-                      "CommCapex_H2FY5",
-                    ].map((f) => (
-                      <>
-                        {f === "CommCapex_Total" ? (
-                          <td
-                            key={f}
-                            className="border border-slate-200 text-right"
-                          >
-                            {(
-                              Number(row["CommCapex_H1FY1"]) +
-                              Number(row["CommCapex_H2FY1"]) +
-                              Number(row["CommCapex_H1FY2"]) +
-                              Number(row["CommCapex_H2FY2"]) +
-                              Number(row["CommCapex_H1FY3"]) +
-                              Number(row["CommCapex_H2FY3"]) +
-                              Number(row["CommCapex_H1FY4"]) +
-                              Number(row["CommCapex_H2FY4"]) +
-                              Number(row["CommCapex_H1FY5"]) +
-                              Number(row["CommCapex_H2FY5"])
-                            ).toFixed(2)}
-                          </td>
-                        ) : (
-                          <>
-                            {f === "CommCapex_TotalF1" ? (
-                              <td
-                                key={f}
-                                className="border border-slate-200 text-right"
-                              >
-                                {(
-                                  Number(row["CommCapex_H1FY1"]) +
-                                  Number(row["CommCapex_H2FY1"])
-                                ).toFixed(2)}
-                              </td>
-                            ) : (
-                              <td
-                                key={f}
-                                className="border border-slate-200 text-right"
-                              >
-                                {row[f]}
-                              </td>
-                            )}
-                          </>
-                        )}
-                      </>
-                    ))}
-
-                    {/* Commitment Revex */}
-                    {[
-                      "CommRevex_Total",
-                      "CommRevex_TotalF1",
-                      "CommRevex_AprFY1",
-                      "CommRevex_MayFY1",
-                      "CommRevex_JunFY1",
-                      "CommRevex_JulFY1",
-                      "CommRevex_AugFY1",
-                      "CommRevex_SepFY1",
-                      "CommRevex_OctFY1",
-                      "CommRevex_NovFY1",
-                      "CommRevex_DecFY1",
-                      "CommRevex_JanFY1",
-                      "CommRevex_FebFY1",
-                      "CommRevex_MarFY1",
-                      "CommRevex_H1FY1",
-                      "CommRevex_H2FY1",
-                      "CommRevex_H1FY2",
-                      "CommRevex_H2FY2",
-                      "CommRevex_H1FY3",
-                      "CommRevex_H2FY3",
-                      "CommRevex_H1FY4",
-                      "CommRevex_H2FY4",
-                      "CommRevex_H1FY5",
-                      "CommRevex_H2FY5",
-                    ].map((f) => (
-                      <>
-                        {f === "CommRevex_Total" ? (
-                          <td
-                            key={f}
-                            className="border border-slate-200 text-right"
-                          >
-                            {(
-                              Number(row["CommRevex_H1FY1"]) +
-                              Number(row["CommRevex_H2FY1"]) +
-                              Number(row["CommRevex_H1FY2"]) +
-                              Number(row["CommRevex_H2FY2"]) +
-                              Number(row["CommRevex_H1FY3"]) +
-                              Number(row["CommRevex_H2FY3"]) +
-                              Number(row["CommRevex_H1FY4"]) +
-                              Number(row["CommRevex_H2FY4"]) +
-                              Number(row["CommRevex_H1FY5"]) +
-                              Number(row["CommRevex_H2FY5"])
-                            ).toFixed(2)}
-                          </td>
-                        ) : (
-                          <>
-                            {f === "CommRevex_TotalF1" ? (
-                              <td
-                                key={f}
-                                className="border border-slate-200 text-right"
-                              >
-                                {(
-                                  Number(row["CommRevex_H1FY1"]) +
-                                  Number(row["CommRevex_H2FY1"])
-                                ).toFixed(2)}
-                              </td>
-                            ) : (
-                              <td
-                                key={f}
-                                className="border border-slate-200 text-right"
-                              >
-                                {row[f]}
-                              </td>
-                            )}
-                          </>
-                        )}
-                      </>
-                    ))}
-
-                    {/* Cash Capex */}
-                    {[
-                      "CashCapex_Total",
-                      "CashCapex_TotalF1",
-                      "CashCapex_AprFY1",
-                      "CashCapex_MayFY1",
-                      "CashCapex_JunFY1",
-                      "CashCapex_JulFY1",
-                      "CashCapex_AugFY1",
-                      "CashCapex_SepFY1",
-                      "CashCapex_OctFY1",
-                      "CashCapex_NovFY1",
-                      "CashCapex_DecFY1",
-                      "CashCapex_JanFY1",
-                      "CashCapex_FebFY1",
-                      "CashCapex_MarFY1",
-                      "CashCapex_H1FY1",
-                      "CashCapex_H2FY1",
-                      "CashCapex_H1FY2",
-                      "CashCapex_H2FY2",
-                      "CashCapex_H1FY3",
-                      "CashCapex_H2FY3",
-                      "CashCapex_H1FY4",
-                      "CashCapex_H2FY4",
-                      "CashCapex_H1FY5",
-                      "CashCapex_H2FY5",
-                    ].map((f) => (
-                      <>
-                        {f === "CashCapex_Total" ? (
-                          <td
-                            key={f}
-                            className="border border-slate-200 text-right"
-                          >
-                            {(
-                              Number(row["CashCapex_H1FY1"]) +
-                              Number(row["CashCapex_H2FY1"]) +
-                              Number(row["CashCapex_H1FY2"]) +
-                              Number(row["CashCapex_H2FY2"]) +
-                              Number(row["CashCapex_H1FY3"]) +
-                              Number(row["CashCapex_H2FY3"]) +
-                              Number(row["CashCapex_H1FY4"]) +
-                              Number(row["CashCapex_H2FY4"]) +
-                              Number(row["CashCapex_H1FY5"]) +
-                              Number(row["CashCapex_H2FY5"])
-                            ).toFixed(2)}
-                          </td>
-                        ) : (
-                          <>
-                            {f === "CashCapex_TotalF1" ? (
-                              <td
-                                key={f}
-                                className="border border-slate-200 text-right"
-                              >
-                                {(
-                                  Number(row["CashCapex_H1FY1"]) +
-                                  Number(row["CashCapex_H2FY1"])
-                                ).toFixed(2)}
-                              </td>
-                            ) : (
-                              <td
-                                key={f}
-                                className="border border-slate-200 text-right"
-                              >
-                                {row[f]}
-                              </td>
-                            )}
-                          </>
-                        )}
-                      </>
-                    ))}
-
-                    {/* Cash Revex */}
-                    {[
-                      "CashRevex_Total",
-                      "CashRevex_TotalF1",
-                      "CashRevex_AprFY1",
-                      "CashRevex_MayFY1",
-                      "CashRevex_JunFY1",
-                      "CashRevex_JulFY1",
-                      "CashRevex_AugFY1",
-                      "CashRevex_SepFY1",
-                      "CashRevex_OctFY1",
-                      "CashRevex_NovFY1",
-                      "CashRevex_DecFY1",
-                      "CashRevex_JanFY1",
-                      "CashRevex_FebFY1",
-                      "CashRevex_MarFY1",
-                      "CashRevex_H1FY1",
-                      "CashRevex_H2FY1",
-                      "CashRevex_H1FY2",
-                      "CashRevex_H2FY2",
-                      "CashRevex_H1FY3",
-                      "CashRevex_H2FY3",
-                      "CashRevex_H1FY4",
-                      "CashRevex_H2FY4",
-                      "CashRevex_H1FY5",
-                      "CashRevex_H2FY5",
-                    ].map((f) => (
-                      <>
-                        {f === "CashRevex_Total" ? (
-                          <td
-                            key={f}
-                            className="border border-slate-200 text-right"
-                          >
-                            {(
-                              Number(row["CashRevex_H1FY1"]) +
-                              Number(row["CashRevex_H2FY1"]) +
-                              Number(row["CashRevex_H1FY2"]) +
-                              Number(row["CashRevex_H2FY2"]) +
-                              Number(row["CashRevex_H1FY3"]) +
-                              Number(row["CashRevex_H2FY3"]) +
-                              Number(row["CashRevex_H1FY4"]) +
-                              Number(row["CashRevex_H2FY4"]) +
-                              Number(row["CashRevex_H1FY5"]) +
-                              Number(row["CashRevex_H2FY5"])
-                            ).toFixed(2)}
-                          </td>
-                        ) : (
-                          <>
-                            {f === "CashRevex_TotalF1" ? (
-                              <td
-                                key={f}
-                                className="border border-slate-200 text-right"
-                              >
-                                {(
-                                  Number(row["CashRevex_H1FY1"]) +
-                                  Number(row["CashRevex_H2FY1"])
-                                ).toFixed(2)}
-                              </td>
-                            ) : (
-                              <td
-                                key={f}
-                                className="border border-slate-200 text-right"
-                              >
-                                {row[f]}
-                              </td>
-                            )}
-                          </>
-                        )}
-                      </>
-                    ))}
-
-                    {/* Carry Forward */}
-                    <td className="border border-slate-200">
-                      {row.CarryForwardWBS}
-                    </td>
-                    <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
-                      {row.CarryForwardDescription}
-                    </td>
-                    <td className="border border-slate-200">
-                      {row.CarryForwardFYYear}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-
-              {/* Totals footer */}
-              <tfoot>
-                <tr className="sticky bottom-0 z-20 bg-amber-100 font-bold text-xs">
-                  <td className="sticky left-0 z-40 bg-amber-100 font-semibold text-center">
-                    Total
-                  </td>
-                  {/* General — no totals */}
-                  <td className="border border-slate-300"></td>
-                  <td className="border border-slate-300"></td>
-                  {/* Commitment Capex totals */}
-                  <td className="border border-slate-300 text-right">
-                    {getGrandTotal("CommCapex")}
-                  </td>
-                  <td className="border border-slate-300 text-right">
-                    {getFY1Total("CommCapex")}
-                  </td>
-                  {[
-                    "CommCapex_AprFY1",
-                    "CommCapex_MayFY1",
-                    "CommCapex_JunFY1",
-                    "CommCapex_JulFY1",
-                    "CommCapex_AugFY1",
-                    "CommCapex_SepFY1",
-                    "CommCapex_OctFY1",
-                    "CommCapex_NovFY1",
-                    "CommCapex_DecFY1",
-                    "CommCapex_JanFY1",
-                    "CommCapex_FebFY1",
-                    "CommCapex_MarFY1",
-                    "CommCapex_H1FY1",
-                    "CommCapex_H2FY1",
-                    "CommCapex_H1FY2",
-                    "CommCapex_H2FY2",
-                    "CommCapex_H1FY3",
-                    "CommCapex_H2FY3",
-                    "CommCapex_H1FY4",
-                    "CommCapex_H2FY4",
-                    "CommCapex_H1FY5",
-                    "CommCapex_H2FY5",
-                  ].map((f) => (
-                    <td
-                      key={`t-${f}`}
-                      className="border border-slate-300 text-right"
-                    >
-                      {getTotal(f)}
-                    </td>
-                  ))}
-                  {/* Commitment Revex totals */}
-                  <td className="border border-slate-300 text-right">
-                    {getGrandTotal("CommRevex")}
-                  </td>
-
-                  <td className="border border-slate-300 text-right">
-                    {getFY1Total("CommRevex")}
-                  </td>
-
-                  {[
-                    "CommRevex_AprFY1",
-                    "CommRevex_MayFY1",
-                    "CommRevex_JunFY1",
-                    "CommRevex_JulFY1",
-                    "CommRevex_AugFY1",
-                    "CommRevex_SepFY1",
-                    "CommRevex_OctFY1",
-                    "CommRevex_NovFY1",
-                    "CommRevex_DecFY1",
-                    "CommRevex_JanFY1",
-                    "CommRevex_FebFY1",
-                    "CommRevex_MarFY1",
-                    "CommRevex_H1FY1",
-                    "CommRevex_H2FY1",
-                    "CommRevex_H1FY2",
-                    "CommRevex_H2FY2",
-                    "CommRevex_H1FY3",
-                    "CommRevex_H2FY3",
-                    "CommRevex_H1FY4",
-                    "CommRevex_H2FY4",
-                    "CommRevex_H1FY5",
-                    "CommRevex_H2FY5",
-                  ].map((f) => (
-                    <td
-                      key={`t-${f}`}
-                      className="border border-slate-300 text-right"
-                    >
-                      {getTotal(f)}
-                    </td>
-                  ))}
-                  {/* Cash Capex totals */}
-                  <td className="border border-slate-300 text-right">
-                    {getGrandTotal("CashCapex")}
-                  </td>
-
-                  <td className="border border-slate-300 text-right">
-                    {getFY1Total("CashCapex")}
-                  </td>
-                  {[
-                    "CashCapex_AprFY1",
-                    "CashCapex_MayFY1",
-                    "CashCapex_JunFY1",
-                    "CashCapex_JulFY1",
-                    "CashCapex_AugFY1",
-                    "CashCapex_SepFY1",
-                    "CashCapex_OctFY1",
-                    "CashCapex_NovFY1",
-                    "CashCapex_DecFY1",
-                    "CashCapex_JanFY1",
-                    "CashCapex_FebFY1",
-                    "CashCapex_MarFY1",
-                    "CashCapex_H1FY1",
-                    "CashCapex_H2FY1",
-                    "CashCapex_H1FY2",
-                    "CashCapex_H2FY2",
-                    "CashCapex_H1FY3",
-                    "CashCapex_H2FY3",
-                    "CashCapex_H1FY4",
-                    "CashCapex_H2FY4",
-                    "CashCapex_H1FY5",
-                    "CashCapex_H2FY5",
-                  ].map((f) => (
-                    <td
-                      key={`t-${f}`}
-                      className="border border-slate-300 text-right"
-                    >
-                      {getTotal(f)}
-                    </td>
-                  ))}
-                  {/* Cash Revex totals */}
-                  <td className="border border-slate-300 text-right">
-                    {getGrandTotal("CashRevex")}
-                  </td>
-
-                  <td className="border border-slate-300 text-right">
-                    {getFY1Total("CashRevex")}
-                  </td>
-                  {[
-                    "CashRevex_AprFY1",
-                    "CashRevex_MayFY1",
-                    "CashRevex_JunFY1",
-                    "CashRevex_JulFY1",
-                    "CashRevex_AugFY1",
-                    "CashRevex_SepFY1",
-                    "CashRevex_OctFY1",
-                    "CashRevex_NovFY1",
-                    "CashRevex_DecFY1",
-                    "CashRevex_JanFY1",
-                    "CashRevex_FebFY1",
-                    "CashRevex_MarFY1",
-                    "CashRevex_H1FY1",
-                    "CashRevex_H2FY1",
-                    "CashRevex_H1FY2",
-                    "CashRevex_H2FY2",
-                    "CashRevex_H1FY3",
-                    "CashRevex_H2FY3",
-                    "CashRevex_H1FY4",
-                    "CashRevex_H2FY4",
-                    "CashRevex_H1FY5",
-                    "CashRevex_H2FY5",
-                  ].map((f) => (
-                    <td
-                      key={`t-${f}`}
-                      className="border border-slate-300 text-right"
-                    >
-                      {getTotal(f)}
-                    </td>
-                  ))}
-                  {/* Carry Forward — no totals */}
-                  <td className="border border-slate-300"></td>
-                  <td className="border border-slate-300"></td>
-                  <td className="border border-slate-300"></td>
-                </tr>
-              </tfoot>
-            </table>
+            {/* {rows.length > 0 && activeTab === 2 && <CarryForwardTable />} */}
           </div>
         </div>
       )}
