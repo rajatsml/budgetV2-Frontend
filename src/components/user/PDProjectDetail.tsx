@@ -925,12 +925,12 @@ const PDProjectDetail = () => {
         <table className="table table-xs table-zebra min-w-max">
           <thead className="text-xs text-white">
             <tr className="bg-red-500   ">
-              <th className="text-center border">Actions</th>
+              {canEdit && <th className="text-center border">Actions</th>}
               <th className="text-center border" colSpan={2}>
                 General
               </th>
               <th className="text-center border" colSpan={5}>
-                Totals
+                Total
               </th>
               <th className="text-center border" colSpan={22}>
                 Commitment Capex
@@ -940,7 +940,7 @@ const PDProjectDetail = () => {
               </th>
             </tr>
             <tr className="bg-red-400">
-              <th></th>
+              {canEdit && <th></th>}
               <th className="align-middle border border-slate-300 ">
                 Description
               </th>
@@ -1012,20 +1012,22 @@ const PDProjectDetail = () => {
           <tbody>
             {rows.map((row) => (
               <tr key={row.PDDetailId} className="hover ">
-                <td className="border border-slate-300">
-                  <button
-                    className="btn btn-xs mr-2 btn-neutral"
-                    onClick={() => handleEdit(row.PDDetailId)}
-                  >
-                    Edit Commitment
-                  </button>
-                  <button
-                    className="btn btn-xs"
-                    onClick={() => handleDelete(row.PDDetailId)}
-                  >
-                    Delete
-                  </button>
-                </td>
+                {canEdit && (
+                  <td className="border border-slate-300">
+                    <button
+                      className="btn btn-xs mr-2 btn-neutral"
+                      onClick={() => handleEdit(row.PDDetailId)}
+                    >
+                      Edit Commitment
+                    </button>
+                    <button
+                      className="btn btn-xs"
+                      onClick={() => handleDelete(row.PDDetailId)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                )}
                 <td className="border border-slate-300">{row.Description}</td>
                 <td className="border border-slate-300">{row.Basis}</td>
                 <td className="border border-slate-300">
@@ -1196,12 +1198,12 @@ const PDProjectDetail = () => {
         <table className="table table-xs table-zebra min-w-max">
           <thead className="text-xs  text-white">
             <tr className="bg-red-500">
-              <th className="text-center border">Actions</th>
+              {canEdit && <th className="text-center border">Actions</th>}
               <th className="text-center border" colSpan={2}>
                 General
               </th>
               <th className="text-center border" colSpan={5}>
-                Totals
+                Total
               </th>
               <th className="text-center border" colSpan={22}>
                 CashFlow Capex
@@ -1211,7 +1213,7 @@ const PDProjectDetail = () => {
               </th>
             </tr>
             <tr className="bg-red-400">
-              <th></th>
+              {canEdit && <th></th>}
               <th className="align-middle border border-slate-300">
                 Description
               </th>
@@ -1281,174 +1283,191 @@ const PDProjectDetail = () => {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, idx) => (
-              <tr key={row.PDDetailId} className="hover">
-                <td className="border border-slate-300">
-                  <button
-                    className="btn btn-xs mr-2 btn-neutral"
-                    onClick={() => handleEdit(row.PDDetailId)}
-                  >
-                    Add/Update Commitment {idx + 1} Budget
-                  </button>
-                </td>
-                <td className="border border-slate-300">{row.Description}</td>
-                <td className="border border-slate-300">{row.Basis}</td>
-                <td className="border border-slate-300">
-                  {(
-                    Number(getCashFlowTotal(row, "CashCapex")) +
-                    Number(getCashFlowTotal(row, "CashRevex"))
-                  ).toFixed(2)}
-                </td>
+            {rows.map((row, idx) => {
+              const total =
+                Number(getCashFlowTotal(row, "CashCapex")) +
+                Number(getCashFlowTotal(row, "CashRevex"));
 
-                <td className="border border-slate-300">
-                  {getCashFlowTotal(row, "CashCapex")}
-                </td>
-                <td className="border border-slate-300">
-                  {getCashFlowTotal(row, "CashRevex")}
-                </td>
+              if (total <= 0 && !canEdit) return null;
 
-                <td className="border border-slate-300">
-                  {getCashFlowFY1Total(row, "CashCapex")}
-                </td>
-                <td className="border border-slate-300">
-                  {getCashFlowFY1Total(row, "CashRevex")}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_AprFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_MayFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_JunFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_JulFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_AugFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_SepFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_OctFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_NovFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_DecFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_JanFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_FebFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_MarFY1}
-                </td>
+              return (
+                <tr key={row.PDDetailId} className="hover">
+                  {canEdit && (
+                    <td className="border border-slate-300">
+                      <button
+                        className="btn btn-xs mr-2 btn-neutral"
+                        onClick={() => handleEdit(row.PDDetailId)}
+                      >
+                        Add/Update Commitment {idx + 1} Budget
+                      </button>
+                    </td>
+                  )}
 
-                <td className="border border-slate-300">
-                  {row.CashCapex_H1FY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H2FY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H1FY2}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H2FY2}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H1FY3}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H2FY3}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H1FY4}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H2FY4}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H1FY5}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashCapex_H2FY5}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_AprFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_MayFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_JunFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_JulFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_AugFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_SepFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_OctFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_NovFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_DecFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_JanFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_FebFY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_MarFY1}
-                </td>
+                  <td className="border border-slate-300">{row.Description}</td>
+                  <td className="border border-slate-300">{row.Basis}</td>
 
-                <td className="border border-slate-300">
-                  {row.CashRevex_H1FY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H2FY1}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H1FY2}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H2FY2}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H1FY3}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H2FY3}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H1FY4}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H2FY4}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H1FY5}
-                </td>
-                <td className="border border-slate-300">
-                  {row.CashRevex_H2FY5}
-                </td>
-              </tr>
-            ))}
+                  <td className="border border-slate-300">
+                    {total.toFixed(2)}
+                  </td>
+
+                  <td className="border border-slate-300">
+                    {getCashFlowTotal(row, "CashCapex")}
+                  </td>
+
+                  <td className="border border-slate-300">
+                    {getCashFlowTotal(row, "CashRevex")}
+                  </td>
+
+                  <td className="border border-slate-300">
+                    {getCashFlowFY1Total(row, "CashCapex")}
+                  </td>
+
+                  <td className="border border-slate-300">
+                    {getCashFlowFY1Total(row, "CashRevex")}
+                  </td>
+
+                  {/* Cash Capex FY1 Monthly */}
+                  <td className="border border-slate-300">
+                    {row.CashCapex_AprFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_MayFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_JunFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_JulFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_AugFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_SepFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_OctFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_NovFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_DecFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_JanFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_FebFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_MarFY1}
+                  </td>
+
+                  {/* Cash Capex Half-Yearly */}
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H1FY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H2FY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H1FY2}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H2FY2}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H1FY3}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H2FY3}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H1FY4}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H2FY4}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H1FY5}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashCapex_H2FY5}
+                  </td>
+
+                  {/* Cash Revex FY1 Monthly */}
+                  <td className="border border-slate-300">
+                    {row.CashRevex_AprFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_MayFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_JunFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_JulFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_AugFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_SepFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_OctFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_NovFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_DecFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_JanFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_FebFY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_MarFY1}
+                  </td>
+
+                  {/* Cash Revex Half-Yearly */}
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H1FY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H2FY1}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H1FY2}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H2FY2}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H1FY3}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H2FY3}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H1FY4}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H2FY4}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H1FY5}
+                  </td>
+                  <td className="border border-slate-300">
+                    {row.CashRevex_H2FY5}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -1514,7 +1533,7 @@ const PDProjectDetail = () => {
 
       {/* ── Input Tabs ─────────────────────────────────── */}
       <div className="border-slate-200 rounded">
-        {canEdit && (
+        {
           <div className="tabs tabs-box bg-gray-50 p-4 gap-x-2 tabs-xs border border-slate-200">
             {/* ══ TAB 1: COMMITMENTS ══════════════════════ */}
             <input
@@ -1525,53 +1544,55 @@ const PDProjectDetail = () => {
               onClick={() => changeTab(0)}
               aria-label="Commitments"
             />
-            <div className="tab-content border-base-300 bg-base-100 p-4">
-              <div className="overflow-x-auto border border-base-300 rounded">
-                <table className="table table-xs table-zebra min-w-max">
-                  {financialTableHeaderComm}
-                  <tbody>
-                    {/* Capex row */}
-                    <tr>
-                      <td rowSpan={2}>
-                        <textarea
-                          className="textarea textarea-bordered w-full min-w-48"
-                          placeholder="Description"
-                          value={formData.description}
-                          onChange={(e) =>
-                            handleChange("description", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td rowSpan={2}>
-                        <textarea
-                          className="textarea textarea-bordered w-full min-w-48"
-                          placeholder="Basis"
-                          value={formData.basis}
-                          onChange={(e) =>
-                            handleChange("basis", e.target.value)
-                          }
-                        />
-                      </td>
-                      {renderFinancialRow(
-                        "commitmentCapex",
-                        "Capex",
-                        formData.commitmentCapex,
-                        commCapexTotals,
-                      )}
-                    </tr>
-                    {/* Revex row */}
-                    <tr>
-                      {renderFinancialRow(
-                        "commitmentRevex",
-                        "Revex",
-                        formData.commitmentRevex,
-                        commRevexTotals,
-                      )}
-                    </tr>
-                  </tbody>
-                </table>
+            {canEdit && (
+              <div className="tab-content border-base-300 bg-base-100 p-4">
+                <div className="overflow-x-auto border border-base-300 rounded">
+                  <table className="table table-xs table-zebra min-w-max">
+                    {financialTableHeaderComm}
+                    <tbody>
+                      {/* Capex row */}
+                      <tr>
+                        <td rowSpan={2}>
+                          <textarea
+                            className="textarea textarea-bordered w-full min-w-48"
+                            placeholder="Description"
+                            value={formData.description}
+                            onChange={(e) =>
+                              handleChange("description", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td rowSpan={2}>
+                          <textarea
+                            className="textarea textarea-bordered w-full min-w-48"
+                            placeholder="Basis"
+                            value={formData.basis}
+                            onChange={(e) =>
+                              handleChange("basis", e.target.value)
+                            }
+                          />
+                        </td>
+                        {renderFinancialRow(
+                          "commitmentCapex",
+                          "Capex",
+                          formData.commitmentCapex,
+                          commCapexTotals,
+                        )}
+                      </tr>
+                      {/* Revex row */}
+                      <tr>
+                        {renderFinancialRow(
+                          "commitmentRevex",
+                          "Revex",
+                          formData.commitmentRevex,
+                          commRevexTotals,
+                        )}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* ══ TAB 2: CASH FLOW ════════════════════════ */}
             <input
@@ -1582,53 +1603,56 @@ const PDProjectDetail = () => {
               onClick={() => changeTab(1)}
               aria-label="Cash Flow"
             />
-            <div className="tab-content border-base-300 bg-base-100 p-4">
-              <div className="overflow-x-auto border border-base-300 rounded">
-                <table className="table table-xs table-zebra min-w-max">
-                  {financialTableHeaderCash}
-                  <tbody>
-                    {/* Capex row */}
-                    <tr>
-                      <td rowSpan={2}>
-                        <textarea
-                          className="textarea textarea-bordered w-full min-w-48"
-                          placeholder="Description"
-                          value={formData.description}
-                          onChange={(e) =>
-                            handleChange("description", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td rowSpan={2}>
-                        <textarea
-                          className="textarea textarea-bordered w-full min-w-48"
-                          placeholder="Basis"
-                          value={formData.basis}
-                          onChange={(e) =>
-                            handleChange("basis", e.target.value)
-                          }
-                        />
-                      </td>
-                      {renderFinancialRow(
-                        "cashCapex",
-                        "Capex",
-                        formData.cashCapex,
-                        cfCapexTotals,
-                      )}
-                    </tr>
-                    {/* Revex row */}
-                    <tr>
-                      {renderFinancialRow(
-                        "cashRevex",
-                        "Revex",
-                        formData.cashRevex,
-                        cfRevexTotals,
-                      )}
-                    </tr>
-                  </tbody>
-                </table>
+
+            {canEdit && (
+              <div className="tab-content border-base-300 bg-base-100 p-4">
+                <div className="overflow-x-auto border border-base-300 rounded">
+                  <table className="table table-xs table-zebra min-w-max">
+                    {financialTableHeaderCash}
+                    <tbody>
+                      {/* Capex row */}
+                      <tr>
+                        <td rowSpan={2}>
+                          <textarea
+                            className="textarea textarea-bordered w-full min-w-48"
+                            placeholder="Description"
+                            value={formData.description}
+                            onChange={(e) =>
+                              handleChange("description", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td rowSpan={2}>
+                          <textarea
+                            className="textarea textarea-bordered w-full min-w-48"
+                            placeholder="Basis"
+                            value={formData.basis}
+                            onChange={(e) =>
+                              handleChange("basis", e.target.value)
+                            }
+                          />
+                        </td>
+                        {renderFinancialRow(
+                          "cashCapex",
+                          "Capex",
+                          formData.cashCapex,
+                          cfCapexTotals,
+                        )}
+                      </tr>
+                      {/* Revex row */}
+                      <tr>
+                        {renderFinancialRow(
+                          "cashRevex",
+                          "Revex",
+                          formData.cashRevex,
+                          cfRevexTotals,
+                        )}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* ══ TAB 3: CARRY FORWARD ════════════════════ */}
             <input
@@ -1639,71 +1663,74 @@ const PDProjectDetail = () => {
               onClick={() => changeTab(2)}
               aria-label="Carry Forward"
             />
-            <div className="tab-content border-base-300 bg-base-100 p-4">
-              <div className="overflow-x-auto border border-base-300 rounded max-w-4xl">
-                <table className="table table-xs table-zebra min-w-150">
-                  <thead className="bg-red-500 text-white">
-                    <tr>
-                      <th className="text-center">WBS</th>
-                      <th>Description</th>
-                      <th className="text-center">FY Year</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="min-w-45">
-                        <input
-                          type="text"
-                          placeholder="Enter WBS"
-                          className="input input-bordered input-xs w-full"
-                          value={formData.carryForwardWBS}
-                          onChange={(e) =>
-                            handleChange("carryForwardWBS", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td className="min-w-75">
-                        <input
-                          type="text"
-                          placeholder="Enter Description"
-                          className="input input-bordered input-xs w-full"
-                          value={formData.carryForwardDescription}
-                          onChange={(e) =>
-                            handleChange(
-                              "carryForwardDescription",
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="min-w-37.5">
-                        <select
-                          className="select select-bordered select-xs w-full"
-                          value={formData.carryForwardFYYear}
-                          onChange={(e) =>
-                            handleChange("carryForwardFYYear", e.target.value)
-                          }
-                        >
-                          <option value="">Select</option>
-                          <option value="2025-26">2025-26</option>
-                          <option value="2026-27">2026-27</option>
-                          <option value="2027-28">2027-28</option>
-                          <option value="2028-29">2028-29</option>
-                          <option value="2029-30">2029-30</option>
-                          <option value="2030-31">2030-31</option>
-                        </select>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+
+            {canEdit && (
+              <div className="tab-content border-base-300 bg-base-100 p-4">
+                <div className="overflow-x-auto border border-base-300 rounded max-w-4xl">
+                  <table className="table table-xs table-zebra min-w-150">
+                    <thead className="bg-red-500 text-white">
+                      <tr>
+                        <th className="text-center">WBS</th>
+                        <th>Description</th>
+                        <th className="text-center">FY Year</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="min-w-45">
+                          <input
+                            type="text"
+                            placeholder="Enter WBS"
+                            className="input input-bordered input-xs w-full"
+                            value={formData.carryForwardWBS}
+                            onChange={(e) =>
+                              handleChange("carryForwardWBS", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td className="min-w-75">
+                          <input
+                            type="text"
+                            placeholder="Enter Description"
+                            className="input input-bordered input-xs w-full"
+                            value={formData.carryForwardDescription}
+                            onChange={(e) =>
+                              handleChange(
+                                "carryForwardDescription",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </td>
+                        <td className="min-w-37.5">
+                          <select
+                            className="select select-bordered select-xs w-full"
+                            value={formData.carryForwardFYYear}
+                            onChange={(e) =>
+                              handleChange("carryForwardFYYear", e.target.value)
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="2025-26">2025-26</option>
+                            <option value="2026-27">2026-27</option>
+                            <option value="2027-28">2027-28</option>
+                            <option value="2028-29">2028-29</option>
+                            <option value="2029-30">2029-30</option>
+                            <option value="2030-31">2030-31</option>
+                          </select>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
 
             <p className="text-sm text-error self-center font-semibold">
               Please fill the entries in Crores only
             </p>
           </div>
-        )}
+        }
 
         {/* ── Action Buttons ──────────────────────────── */}
         {canEdit && (
