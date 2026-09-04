@@ -1018,7 +1018,7 @@ const PDProjectDetail = () => {
                       className="btn btn-xs mr-2 btn-neutral"
                       onClick={() => handleEdit(row.PDDetailId)}
                     >
-                      Edit Commitment
+                      Edit
                     </button>
                     <button
                       className="btn btn-xs"

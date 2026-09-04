@@ -337,7 +337,7 @@ const MyProjects = () => {
                         )
                       }
                     >
-                      View Details
+                      Budget Inputs
                     </button>
                   </td>
                 </tr>
