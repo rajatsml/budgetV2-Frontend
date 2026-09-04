@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { Fragment, useState, useEffect } from "react";
 import PDHeader from "../pd/PDHeader";
 // import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -63,6 +63,11 @@ type PDFormData = {
   carryForwardFYYear: string;
 };
 
+type CashFlowDraft = {
+  cashCapex: FinancialValues;
+  cashRevex: FinancialValues;
+};
+
 // ─────────────────────────────────────────────────────────
 // Initial state helpers
 // ─────────────────────────────────────────────────────────
@@ -108,6 +113,45 @@ const initialFormState: PDFormData = {
   carryForwardFYYear: "",
 };
 
+const financialFields: (keyof FinancialValues)[] = [
+  "aprFY1",
+  "mayFY1",
+  "junFY1",
+  "julFY1",
+  "augFY1",
+  "sepFY1",
+  "octFY1",
+  "novFY1",
+  "decFY1",
+  "janFY1",
+  "febFY1",
+  "marFY1",
+  "h1FY1",
+  "h2FY1",
+  "h1FY2",
+  "h2FY2",
+  "h1FY3",
+  "h2FY3",
+  "h1FY4",
+  "h2FY4",
+  "h1FY5",
+  "h2FY5",
+];
+
+const getFinancialValuesFromRow = (
+  row: Record<string, unknown>,
+  prefix: "CommCapex" | "CommRevex" | "CashCapex" | "CashRevex",
+): FinancialValues => {
+  const values = {} as FinancialValues;
+
+  financialFields.forEach((field) => {
+    const apiField = `${prefix}_${field.charAt(0).toUpperCase()}${field.slice(1)}`;
+    values[field] = String(row[apiField] ?? "");
+  });
+
+  return values;
+};
+
 // ─────────────────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────────────────
@@ -124,6 +168,13 @@ const PDProjectDetail = () => {
   const [formData, setFormData] = useState<PDFormData>(initialFormState);
 
   const [rows, setRows] = useState<any[]>([]);
+
+  const [selectedCashFlowRows, setSelectedCashFlowRows] = useState<
+    Record<number, boolean>
+  >({});
+  const [cashFlowDrafts, setCashFlowDrafts] = useState<
+    Record<number, CashFlowDraft>
+  >({});
 
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
 
@@ -229,17 +280,31 @@ const PDProjectDetail = () => {
     ).toFixed(2);
   };
 
+  const hasCashFlowValues = (row: any) =>
+    Number(getCashFlowTotal(row, "CashCapex")) +
+      Number(getCashFlowTotal(row, "CashRevex")) >
+    0;
+
   // Live computed totals for the summary panel
   const commCapexTotals = calculateRowTotals(formData.commitmentCapex);
   const commRevexTotals = calculateRowTotals(formData.commitmentRevex);
   const cfCapexTotals = calculateRowTotals(formData.cashCapex);
   const cfRevexTotals = calculateRowTotals(formData.cashRevex);
+  const hasSavedCashFlow = rows.some(hasCashFlowValues);
+  const editableCashFlowRows = rows.filter(
+    (row) => !hasCashFlowValues(row) || selectedCashFlowRows[row.PDDetailId],
+  );
 
   // ─────────────────────────────────────────────────────────
   // Payload builder
   // ─────────────────────────────────────────────────────────
 
-  const buildPayload = (draftStatus: string) => {
+  const buildPayload = (
+    draftStatus: string,
+    values: PDFormData = formData,
+    recordId: number | null = pdDetailId,
+  ) => {
+    const formData = values;
     const commCapexCalc = calculateRowTotals(formData.commitmentCapex);
     const commRevexCalc = calculateRowTotals(formData.commitmentRevex);
     const cashCapexCalc = calculateRowTotals(formData.cashCapex);
@@ -247,7 +312,7 @@ const PDProjectDetail = () => {
 
     return {
       ProjectId: data?.projectID,
-      RecordId: pdDetailId?.toString() || "0",
+      RecordId: recordId?.toString() || "0",
       DeptId: data?.deptID?.toString(),
 
       Description: formData.description,
@@ -436,6 +501,55 @@ const PDProjectDetail = () => {
     }));
   };
 
+  const getCashFlowDraft = (row: any): CashFlowDraft =>
+    cashFlowDrafts[row.PDDetailId] || {
+      cashCapex: getFinancialValuesFromRow(row, "CashCapex"),
+      cashRevex: getFinancialValuesFromRow(row, "CashRevex"),
+    };
+
+  const handleCashFlowChange = (
+    rowId: number,
+    section: "cashCapex" | "cashRevex",
+    field: keyof FinancialValues,
+    value: string,
+  ) => {
+    setCashFlowDrafts((previous) => {
+      const row = rows.find((item) => item.PDDetailId === rowId);
+      if (!row) return previous;
+
+      const currentDraft = previous[rowId] || {
+        cashCapex: getFinancialValuesFromRow(row, "CashCapex"),
+        cashRevex: getFinancialValuesFromRow(row, "CashRevex"),
+      };
+
+      return {
+        ...previous,
+        [rowId]: {
+          ...currentDraft,
+          [section]: {
+            ...currentDraft[section],
+            [field]: value,
+          },
+        },
+      };
+    });
+  };
+
+  const getCashFlowPayloadForm = (
+    row: any,
+    draft: CashFlowDraft,
+  ): PDFormData => ({
+    description: row.Description || "",
+    basis: row.Basis || "",
+    commitmentCapex: getFinancialValuesFromRow(row, "CommCapex"),
+    commitmentRevex: getFinancialValuesFromRow(row, "CommRevex"),
+    cashCapex: draft.cashCapex,
+    cashRevex: draft.cashRevex,
+    carryForwardWBS: row.CarryForwardWBS || "",
+    carryForwardDescription: row.CarryForwardDescription || "",
+    carryForwardFYYear: row.CarryForwardFYYear || "",
+  });
+
   const handleChange = (key: keyof PDFormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -532,7 +646,59 @@ const PDProjectDetail = () => {
   // CRUD handlers
   // ─────────────────────────────────────────────────────────
 
+  const handleCashFlowSave = async () => {
+    const selectedRows = rows.filter(
+      (row) => selectedCashFlowRows[row.PDDetailId],
+    );
+
+    if (selectedRows.length === 0) {
+      alert("Select at least one commitment before saving cash flow.");
+      return;
+    }
+
+    const hasEmptyCashFlow = selectedRows.some((row) => {
+      const draft = getCashFlowDraft(row);
+      return (
+        Object.values(draft.cashCapex).every((value) => !value.trim()) &&
+        Object.values(draft.cashRevex).every((value) => !value.trim())
+      );
+    });
+
+    if (hasEmptyCashFlow) {
+      alert(
+        "Enter at least one cash flow value for every selected commitment.",
+      );
+      return;
+    }
+
+    try {
+      await Promise.all(
+        selectedRows.map((row) =>
+          UpdatePDMaster(
+            buildPayload(
+              "COMPLETE",
+              getCashFlowPayloadForm(row, getCashFlowDraft(row)),
+              row.PDDetailId,
+            ),
+            row.PDDetailId,
+          ),
+        ),
+      );
+
+      await fetchPDDetails();
+      setSelectedCashFlowRows({});
+      setCashFlowDrafts({});
+    } catch (error) {
+      console.error("Error saving cash flow rows:", error);
+    }
+  };
+
   const handleSave = async () => {
+    if (activeTab === 1) {
+      await handleCashFlowSave();
+      return;
+    }
+
     try {
       if (isRowEmpty()) {
         alert("Please enter at least one value before saving.");
@@ -735,6 +901,7 @@ const PDProjectDetail = () => {
       fy1Total: string;
       valueTotal: string;
     },
+    onValueChange?: (field: keyof FinancialValues, value: string) => void,
   ) => {
     const months: (keyof FinancialValues)[] = [
       "aprFY1",
@@ -792,7 +959,9 @@ const PDProjectDetail = () => {
               type="text"
               value={data[m]}
               onChange={(e) =>
-                handleFinancialChange(section, m, e.target.value)
+                onValueChange
+                  ? onValueChange(m, e.target.value)
+                  : handleFinancialChange(section, m, e.target.value)
               }
               className="input input-bordered input-xs w-16"
             />
@@ -824,7 +993,9 @@ const PDProjectDetail = () => {
               type="text"
               value={data[h]}
               onChange={(e) =>
-                handleFinancialChange(section, h, e.target.value)
+                onValueChange
+                  ? onValueChange(h, e.target.value)
+                  : handleFinancialChange(section, h, e.target.value)
               }
               className="input input-bordered input-xs w-16"
             />
@@ -879,6 +1050,7 @@ const PDProjectDetail = () => {
   const financialTableHeaderCash = (
     <thead className="text-xs bg-red-500 text-white">
       <tr>
+        <th className="align-middle text-center">Select</th>
         <th className="align-middle">Description</th>
         <th className="align-middle">Basis</th>
         <th className="align-middle">Type</th>
@@ -914,6 +1086,41 @@ const PDProjectDetail = () => {
       </tr>
     </thead>
   );
+
+  const savedFinancialHeaders = [
+    { label: "Apr FY1", color: "bg-sky-100 text-sky-950" },
+    { label: "May FY1", color: "bg-sky-100 text-sky-950" },
+    { label: "Jun FY1", color: "bg-sky-100 text-sky-950" },
+    { label: "Jul FY1", color: "bg-sky-100 text-sky-950" },
+    { label: "Aug FY1", color: "bg-sky-100 text-sky-950" },
+    { label: "Sep FY1", color: "bg-sky-100 text-sky-950" },
+    { label: "Oct FY1", color: "bg-emerald-100 text-emerald-950" },
+    { label: "Nov FY1", color: "bg-emerald-100 text-emerald-950" },
+    { label: "Dec FY1", color: "bg-emerald-100 text-emerald-950" },
+    { label: "Jan FY1", color: "bg-emerald-100 text-emerald-950" },
+    { label: "Feb FY1", color: "bg-emerald-100 text-emerald-950" },
+    { label: "Mar FY1", color: "bg-emerald-100 text-emerald-950" },
+    { label: "H1 FY1", color: "bg-sky-300 text-sky-950 font-bold" },
+    { label: "H2 FY1", color: "bg-emerald-300 text-emerald-950 font-bold" },
+    { label: "H1 FY2", color: "bg-indigo-200 text-indigo-950" },
+    { label: "H2 FY2", color: "bg-indigo-200 text-indigo-950" },
+    { label: "H1 FY3", color: "bg-violet-200 text-violet-950" },
+    { label: "H2 FY3", color: "bg-violet-200 text-violet-950" },
+    { label: "H1 FY4", color: "bg-fuchsia-200 text-fuchsia-950" },
+    { label: "H2 FY4", color: "bg-fuchsia-200 text-fuchsia-950" },
+    { label: "H1 FY5", color: "bg-orange-200 text-orange-950" },
+    { label: "H2 FY5", color: "bg-orange-200 text-orange-950" },
+  ];
+
+  const renderSavedFinancialHeaders = () =>
+    savedFinancialHeaders.map(({ label, color }, index) => (
+      <th
+        key={`${label}-${index}`}
+        className={`border border-slate-300 ${color}`}
+      >
+        {label}
+      </th>
+    ));
 
   // ─────────────────────────────────────────────────────────
   // Render
@@ -962,51 +1169,9 @@ const PDProjectDetail = () => {
                 Total Commitment <br /> Revex F1 in CR.
               </th>
 
-              <th className="border border-slate-300">Apr FY1</th>
-              <th className="border border-slate-300">May FY1</th>
-              <th className="border border-slate-300">Jun FY1</th>
-              <th className="border border-slate-300">Jul FY1</th>
-              <th className="border border-slate-300">Aug FY1</th>
-              <th className="border border-slate-300">Sep FY1</th>
-              <th className="border border-slate-300">Oct FY1</th>
-              <th className="border border-slate-300">Nov FY1</th>
-              <th className="border border-slate-300">Dec FY1</th>
-              <th className="border border-slate-300">Jan FY1</th>
-              <th className="border border-slate-300">Feb FY1</th>
-              <th className="border border-slate-300">Mar FY1</th>
-              <th className="border border-slate-300">H1 FY1</th>
-              <th className="border border-slate-300">H2 FY1</th>
-              <th className="border border-slate-300">H1 FY2</th>
-              <th className="border border-slate-300">H2 FY2</th>
-              <th className="border border-slate-300">H1 FY3</th>
-              <th className="border border-slate-300">H2 FY3</th>
-              <th className="border border-slate-300">H1 FY4</th>
-              <th className="border border-slate-300">H2 FY4</th>
-              <th className="border border-slate-300">H1 FY5</th>
-              <th className="border border-slate-300">H2 FY5</th>
+              {renderSavedFinancialHeaders()}
 
-              <th className="border border-slate-300">Apr FY1</th>
-              <th className="border border-slate-300">May FY1</th>
-              <th className="border border-slate-300">Jun FY1</th>
-              <th className="border border-slate-300">Jul FY1</th>
-              <th className="border border-slate-300">Aug FY1</th>
-              <th className="border border-slate-300">Sep FY1</th>
-              <th className="border border-slate-300">Oct FY1</th>
-              <th className="border border-slate-300">Nov FY1</th>
-              <th className="border border-slate-300">Dec FY1</th>
-              <th className="border border-slate-300">Jan FY1</th>
-              <th className="border border-slate-300">Feb FY1</th>
-              <th className="border border-slate-300">Mar FY1</th>
-              <th className="border border-slate-300">H1 FY1</th>
-              <th className="border border-slate-300">H2 FY1</th>
-              <th className="border border-slate-300">H1 FY2</th>
-              <th className="border border-slate-300">H2 FY2</th>
-              <th className="border border-slate-300">H1 FY3</th>
-              <th className="border border-slate-300">H2 FY3</th>
-              <th className="border border-slate-300">H1 FY4</th>
-              <th className="border border-slate-300">H2 FY4</th>
-              <th className="border border-slate-300">H1 FY5</th>
-              <th className="border border-slate-300">H2 FY5</th>
+              {renderSavedFinancialHeaders()}
             </tr>
           </thead>
           <tbody>
@@ -1028,8 +1193,12 @@ const PDProjectDetail = () => {
                     </button>
                   </td>
                 )}
-                <td className="border border-slate-300">{row.Description}</td>
-                <td className="border border-slate-300">{row.Basis}</td>
+                <td className="max-w-80 whitespace-normal wrap-break-word align-top border border-slate-300">
+                  {row.Description}
+                </td>
+                <td className="max-w-80 whitespace-normal wrap-break-word align-top border border-slate-300">
+                  {row.Basis}
+                </td>
                 <td className="border border-slate-300">
                   {(
                     Number(getCommTotal(row, "CommCapex")) +
@@ -1197,18 +1366,20 @@ const PDProjectDetail = () => {
       <div className="overflow-x-auto border border-base-300 rounded">
         <table className="table table-xs table-zebra min-w-max">
           <thead className="text-xs  text-white">
-            <tr className="bg-red-500">
-              {canEdit && <th className="text-center border">Actions</th>}
-              <th className="text-center border" colSpan={2}>
+            <tr>
+              {canEdit && (
+                <th className="text-center border bg-red-500">Actions</th>
+              )}
+              <th className="text-center border bg-red-500" colSpan={2}>
                 General
               </th>
-              <th className="text-center border" colSpan={5}>
-                Total
+              <th className="text-center border bg-red-500" colSpan={5}>
+                Cash Flow Totals
               </th>
-              <th className="text-center border" colSpan={22}>
+              <th className="text-center border bg-red-500" colSpan={22}>
                 CashFlow Capex
               </th>
-              <th className="text-center border" colSpan={22}>
+              <th className="text-center border bg-red-500" colSpan={22}>
                 CashFlow Revex
               </th>
             </tr>
@@ -1235,60 +1406,18 @@ const PDProjectDetail = () => {
                 Total CashFlow <br /> Revex F1 in CR.
               </th>
 
-              <th className="border border-slate-300">Apr FY1</th>
-              <th className="border border-slate-300">May FY1</th>
-              <th className="border border-slate-300">Jun FY1</th>
-              <th className="border border-slate-300">Jul FY1</th>
-              <th className="border border-slate-300">Aug FY1</th>
-              <th className="border border-slate-300">Sep FY1</th>
-              <th className="border border-slate-300">Oct FY1</th>
-              <th className="border border-slate-300">Nov FY1</th>
-              <th className="border border-slate-300">Dec FY1</th>
-              <th className="border border-slate-300">Jan FY1</th>
-              <th className="border border-slate-300">Feb FY1</th>
-              <th className="border border-slate-300">Mar FY1</th>
-              <th className="border border-slate-300">H1 FY1</th>
-              <th className="border border-slate-300">H2 FY1</th>
-              <th className="border border-slate-300">H1 FY2</th>
-              <th className="border border-slate-300">H2 FY2</th>
-              <th className="border border-slate-300">H1 FY3</th>
-              <th className="border border-slate-300">H2 FY3</th>
-              <th className="border border-slate-300">H1 FY4</th>
-              <th className="border border-slate-300">H2 FY4</th>
-              <th className="border border-slate-300">H1 FY5</th>
-              <th className="border border-slate-300">H2 FY5</th>
+              {renderSavedFinancialHeaders()}
 
-              <th className="border border-slate-300">Apr FY1</th>
-              <th className="border border-slate-300">May FY1</th>
-              <th className="border border-slate-300">Jun FY1</th>
-              <th className="border border-slate-300">Jul FY1</th>
-              <th className="border border-slate-300">Aug FY1</th>
-              <th className="border border-slate-300">Sep FY1</th>
-              <th className="border border-slate-300">Oct FY1</th>
-              <th className="border border-slate-300">Nov FY1</th>
-              <th className="border border-slate-300">Dec FY1</th>
-              <th className="border border-slate-300">Jan FY1</th>
-              <th className="border border-slate-300">Feb FY1</th>
-              <th className="border border-slate-300">Mar FY1</th>
-              <th className="border border-slate-300">H1 FY1</th>
-              <th className="border border-slate-300">H2 FY1</th>
-              <th className="border border-slate-300">H1 FY2</th>
-              <th className="border border-slate-300">H2 FY2</th>
-              <th className="border border-slate-300">H1 FY3</th>
-              <th className="border border-slate-300">H2 FY3</th>
-              <th className="border border-slate-300">H1 FY4</th>
-              <th className="border border-slate-300">H2 FY4</th>
-              <th className="border border-slate-300">H1 FY5</th>
-              <th className="border border-slate-300">H2 FY5</th>
+              {renderSavedFinancialHeaders()}
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, idx) => {
+            {rows.map((row) => {
               const total =
                 Number(getCashFlowTotal(row, "CashCapex")) +
                 Number(getCashFlowTotal(row, "CashRevex"));
 
-              if (total <= 0 && !canEdit) return null;
+              if (total <= 0) return null;
 
               return (
                 <tr key={row.PDDetailId} className="hover">
@@ -1296,15 +1425,28 @@ const PDProjectDetail = () => {
                     <td className="border border-slate-300">
                       <button
                         className="btn btn-xs mr-2 btn-neutral"
-                        onClick={() => handleEdit(row.PDDetailId)}
+                        onClick={() => {
+                          setCashFlowDrafts((previous) => ({
+                            ...previous,
+                            [row.PDDetailId]: getCashFlowDraft(row),
+                          }));
+                          setSelectedCashFlowRows((previous) => ({
+                            ...previous,
+                            [row.PDDetailId]: true,
+                          }));
+                        }}
                       >
-                        Add/Update Commitment {idx + 1} Budget
+                        Edit
                       </button>
                     </td>
                   )}
 
-                  <td className="border border-slate-300">{row.Description}</td>
-                  <td className="border border-slate-300">{row.Basis}</td>
+                  <td className="max-w-80 whitespace-normal wrap-break-word align-top border border-slate-300">
+                    {row.Description}
+                  </td>
+                  <td className="max-w-80 whitespace-normal wrap-break-word align-top border border-slate-300">
+                    {row.Basis}
+                  </td>
 
                   <td className="border border-slate-300">
                     {total.toFixed(2)}
@@ -1554,7 +1696,7 @@ const PDProjectDetail = () => {
                       <tr>
                         <td rowSpan={2}>
                           <textarea
-                            className="textarea textarea-bordered w-full min-w-48"
+                            className="textarea textarea-bordered w-full min-w-48 max-w-80"
                             placeholder="Description"
                             value={formData.description}
                             onChange={(e) =>
@@ -1564,7 +1706,7 @@ const PDProjectDetail = () => {
                         </td>
                         <td rowSpan={2}>
                           <textarea
-                            className="textarea textarea-bordered w-full min-w-48"
+                            className="textarea textarea-bordered w-full min-w-48 max-w-80"
                             placeholder="Basis"
                             value={formData.basis}
                             onChange={(e) =>
@@ -1610,44 +1752,102 @@ const PDProjectDetail = () => {
                   <table className="table table-xs table-zebra min-w-max">
                     {financialTableHeaderCash}
                     <tbody>
-                      {/* Capex row */}
-                      <tr>
-                        <td rowSpan={2}>
-                          <textarea
-                            className="textarea textarea-bordered w-full min-w-48"
-                            placeholder="Description"
-                            value={formData.description}
-                            onChange={(e) =>
-                              handleChange("description", e.target.value)
-                            }
-                          />
-                        </td>
-                        <td rowSpan={2}>
-                          <textarea
-                            className="textarea textarea-bordered w-full min-w-48"
-                            placeholder="Basis"
-                            value={formData.basis}
-                            onChange={(e) =>
-                              handleChange("basis", e.target.value)
-                            }
-                          />
-                        </td>
-                        {renderFinancialRow(
-                          "cashCapex",
-                          "Capex",
-                          formData.cashCapex,
-                          cfCapexTotals,
-                        )}
-                      </tr>
-                      {/* Revex row */}
-                      <tr>
-                        {renderFinancialRow(
-                          "cashRevex",
-                          "Revex",
-                          formData.cashRevex,
-                          cfRevexTotals,
-                        )}
-                      </tr>
+                      {rows.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={28}
+                            className="py-6 text-center text-gray-500"
+                          >
+                            Save a commitment before adding its cash flow.
+                          </td>
+                        </tr>
+                      ) : editableCashFlowRows.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={28}
+                            className="py-6 text-center text-gray-500"
+                          >
+                            All cash flow entries are saved. Use Edit Cash Flow
+                            below to make changes.
+                          </td>
+                        </tr>
+                      ) : (
+                        editableCashFlowRows.map((row) => {
+                          const draft = getCashFlowDraft(row);
+                          const capexTotals = calculateRowTotals(
+                            draft.cashCapex,
+                          );
+                          const revexTotals = calculateRowTotals(
+                            draft.cashRevex,
+                          );
+                          const selected = Boolean(
+                            selectedCashFlowRows[row.PDDetailId],
+                          );
+
+                          return (
+                            <Fragment key={row.PDDetailId}>
+                              <tr key={`${row.PDDetailId}-capex`}>
+                                <td
+                                  rowSpan={2}
+                                  className="text-center align-middle"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-sm"
+                                    checked={selected}
+                                    onChange={(event) =>
+                                      setSelectedCashFlowRows((previous) => ({
+                                        ...previous,
+                                        [row.PDDetailId]: event.target.checked,
+                                      }))
+                                    }
+                                  />
+                                </td>
+                                <td
+                                  rowSpan={2}
+                                  className="min-w-48 max-w-80 whitespace-normal wrap-break-word align-middle"
+                                >
+                                  {row.Description || "-"}
+                                </td>
+                                <td
+                                  rowSpan={2}
+                                  className="min-w-48 max-w-80 whitespace-normal wrap-break-word align-middle"
+                                >
+                                  {row.Basis || "-"}
+                                </td>
+                                {renderFinancialRow(
+                                  "cashCapex",
+                                  "Capex",
+                                  draft.cashCapex,
+                                  capexTotals,
+                                  (field, value) =>
+                                    handleCashFlowChange(
+                                      row.PDDetailId,
+                                      "cashCapex",
+                                      field,
+                                      value,
+                                    ),
+                                )}
+                              </tr>
+                              <tr key={`${row.PDDetailId}-revex`}>
+                                {renderFinancialRow(
+                                  "cashRevex",
+                                  "Revex",
+                                  draft.cashRevex,
+                                  revexTotals,
+                                  (field, value) =>
+                                    handleCashFlowChange(
+                                      row.PDDetailId,
+                                      "cashRevex",
+                                      field,
+                                      value,
+                                    ),
+                                )}
+                              </tr>
+                            </Fragment>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1753,12 +1953,18 @@ const PDProjectDetail = () => {
               <ChevronRight className="w-4 h-4 ml-1" />
             </button> */}
 
-            {!isRowEmpty() && (
+            {(activeTab === 1
+              ? editableCashFlowRows.length > 0
+              : !isRowEmpty()) && (
               <button
                 className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
                 onClick={handleSave}
               >
-                {isEditing ? "Update Row" : "Save"}
+                {activeTab === 1
+                  ? "Save Cash Flow"
+                  : isEditing
+                    ? "Update Row"
+                    : "Save"}
               </button>
             )}
 
@@ -1774,7 +1980,7 @@ const PDProjectDetail = () => {
       </div>
 
       {/* ── Saved Rows Table ───────────────────────────── */}
-      {rows.length > 0 && (
+      {(activeTab === 1 ? hasSavedCashFlow : rows.length > 0) && (
         <div className="mt-6 border border-slate-300 font-medium text-xs bg-white overflow-hidden">
           <div className="max-h-175 overflow-auto">
             {rows.length > 0 && activeTab === 0 && <CommitmentTable />}
