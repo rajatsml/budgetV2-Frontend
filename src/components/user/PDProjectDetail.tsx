@@ -11,6 +11,7 @@ import {
   GetPDApprovalHistory,
   ManageProjectWBS,
   GetWBSDropdown,
+  GetDropdownData,
 } from "../../service/projectmaster";
 import useUserStore from "../../store/userStore";
 
@@ -184,6 +185,8 @@ const PDProjectDetail = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   const [formData, setFormData] = useState<PDFormData>(initialFormState);
+
+  const [allFiYears, setAllFiYears] = useState<any[]>([]);
 
   const [rows, setRows] = useState<any[]>([]);
   const [carryForwardRows, setCarryForwardRows] = useState<any[]>([]);
@@ -500,12 +503,22 @@ const PDProjectDetail = () => {
       console.error("Failed to fetch WBS options", error);
     }
   };
+  const fetchFinancialYears = async () => {
+    try {
+      const response = await GetDropdownData("4");
+      console.log("Financial Years Response:", response);
+      setAllFiYears(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error("Failed to fetch financial years", error);
+    }
+  };
 
   useEffect(() => {
     fetchPDDetails();
     fetchApprovalHistory();
     fetchCarryForwardRows();
     fetchWBSOptions();
+    fetchFinancialYears();
   }, []);
 
   // ─────────────────────────────────────────────────────────
@@ -2134,11 +2147,12 @@ const PDProjectDetail = () => {
                             }
                           >
                             <option value="">Select financial year</option>
-                            <option value="2026-27">2026-27</option>
-                            <option value="2027-28">2027-28</option>
-                            <option value="2028-29">2028-29</option>
-                            <option value="2029-30">2029-30</option>
-                            <option value="2030-31">2030-31</option>
+
+                            {allFiYears.map((fy) => (
+                              <option key={fy.value} value={fy.value}>
+                                {fy.text}
+                              </option>
+                            ))}
                           </select>
                         </td>
                         <td className="min-w-45">
