@@ -76,6 +76,7 @@ const MyProjects = () => {
     approver1: string,
     approver2: string,
     approver3: string,
+    projectCategoryName: string,
   ) => {
     let status = "";
     let pendingWithUser = "";
@@ -145,6 +146,7 @@ const MyProjects = () => {
             approver3,
             status,
             pendingWithUser,
+            projectCategoryName,
           },
         });
       }
@@ -334,6 +336,7 @@ const MyProjects = () => {
                           project?.approver1,
                           project?.approver2,
                           project?.approver3,
+                          project?.projectCategoryName,
                         )
                       }
                     >

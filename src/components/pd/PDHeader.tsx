@@ -15,6 +15,7 @@ const PDHeader: React.FC<PDHeaderProps> = ({
   deptName,
   category,
   fyYear,
+
   // pendingWith,
   // status,
 }) => {
@@ -50,9 +51,9 @@ const PDHeader: React.FC<PDHeaderProps> = ({
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Type
+            Project Type
           </label>
-          <input value={category} readOnly className={inputStyle} />
+          <input value={"PD"} readOnly className={inputStyle} />
         </div>
 
         <div>
@@ -62,28 +63,28 @@ const PDHeader: React.FC<PDHeaderProps> = ({
           <input value={fyYear} readOnly className={inputStyle} />
         </div>
       </div>
-
+      {/* 
       <div className="mb-4">
         <label className="mb-2 block text-sm font-medium text-slate-700">
           Project Name
         </label>
         <input value={projectName} readOnly className={inputStyle} />
-      </div>
-
-      {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Status
-          </label>
-          <input value={status} readOnly className={inputStyle} />
-        </div>
-        <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Pending With
-          </label>
-          <input value={pendingWith} readOnly className={inputStyle} />
-        </div>
       </div> */}
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            Project Name
+          </label>
+          <input value={projectName} readOnly className={inputStyle} />
+        </div>
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            Category
+          </label>
+          <input value={category} readOnly className={inputStyle} />
+        </div>
+      </div>
     </div>
   );
 };

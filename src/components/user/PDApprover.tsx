@@ -5,6 +5,7 @@ import {
   GetPDMaster,
   UpdatePDStatus,
   GetPDApprovalHistory,
+  ManageProjectWBS,
 } from "../../service/projectmaster";
 import useUserStore from "../../store/userStore";
 
@@ -17,6 +18,7 @@ const PDApprover = () => {
   const { user } = useUserStore();
 
   const [rows, setRows] = useState<any[]>([]);
+  const [carryForwardRows, setCarryForwardRows] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
     "Summary" | "Commitments" | "Cashflow" | "Carry Forward"
   >("Summary");
@@ -50,9 +52,25 @@ const PDApprover = () => {
     }
   };
 
+  const fetchCarryForwardRows = async () => {
+    try {
+      const response = await ManageProjectWBS({
+        type: 1,
+        projectId: data?.projectID,
+        deptId: data?.deptID?.toString(),
+      });
+      setCarryForwardRows(
+        Array.isArray(response) ? response : response?.items || [],
+      );
+    } catch (error) {
+      console.error("Failed to fetch carry forward rows", error);
+    }
+  };
+
   useEffect(() => {
     fetchPDDetails();
     fetchApprovalHistory();
+    fetchCarryForwardRows();
   }, []);
 
   // ─────────────────────────────────────────────────────────
@@ -107,6 +125,29 @@ const PDApprover = () => {
       getTotal("CashRevex_H2FY4") +
       getTotal("CashRevex_H1FY5") +
       getTotal("CashRevex_H2FY5"),
+  };
+
+  const summaryTotals = {
+    commitmentTotal: summary.commCapex + summary.commRevex,
+    cashFlowTotal: summary.cashCapex + summary.cashRevex,
+    commitmentFY1:
+      getTotal("CommCapex_H1FY1") +
+      getTotal("CommCapex_H2FY1") +
+      getTotal("CommRevex_H1FY1") +
+      getTotal("CommRevex_H2FY1"),
+    cashFlowFY1:
+      getTotal("CashCapex_H1FY1") +
+      getTotal("CashCapex_H2FY1") +
+      getTotal("CashRevex_H1FY1") +
+      getTotal("CashRevex_H2FY1"),
+    carryForwardCommitment: carryForwardRows.reduce(
+      (sum, row) => sum + Number(row.commitmentAmt ?? row.CommitmentAmt ?? 0),
+      0,
+    ),
+    carryForwardCashFlow: carryForwardRows.reduce(
+      (sum, row) => sum + Number(row.cashFlowAmt ?? row.CashFlowAmt ?? 0),
+      0,
+    ),
   };
 
   // ─────────────────────────────────────────────────────────
@@ -334,17 +375,17 @@ const PDApprover = () => {
           projectName={data?.projectName}
           deptName={data?.deptName}
           deptID={data?.deptID}
-          category={data?.category}
-          fyYear={data?.FyYear}
+          category={data?.projectCategoryName}
           pendingWith={data?.pendingWithUser}
           status={data?.status}
+          fyYear={data?.FyYear}
         />
 
         {/* Summary panel — aligned with new model */}
         <div className="border border-slate-200 rounded p-4 bg-gray-200 shadow-sm w-1/2">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
           <div className="overflow-x-auto rounded border border-base-300 bg-white">
-            <table className="table w-full table-sm">
+            <table className="table w-full table-xs text-[11px]">
               <thead>
                 <tr className="bg-base-200 text-xs">
                   <th className="border-r border-base-300 font-semibold text-center">
@@ -358,6 +399,24 @@ const PDApprover = () => {
                   </th>
                   <th className="border-r border-base-300 font-semibold text-center">
                     Cash Flow Revex Total
+                  </th>
+                  <th className="border-r border-base-300 font-semibold text-center">
+                    Commitment Total
+                  </th>
+                  <th className="border-r border-base-300 font-semibold text-center">
+                    Cash Flow Total
+                  </th>
+                  <th className="border-r border-base-300 font-semibold text-center">
+                    Commitment FY1 Total
+                  </th>
+                  <th className="font-semibold text-center">
+                    Cash Flow FY1 Total
+                  </th>
+                  <th className="font-semibold text-center">
+                    Carry Forward Commitment
+                  </th>
+                  <th className="font-semibold text-center">
+                    Carry Forward Cashflow
                   </th>
                 </tr>
               </thead>
@@ -375,6 +434,24 @@ const PDApprover = () => {
                   <td className="border-r border-base-300 py-3">
                     {summary.cashRevex.toFixed(2)} Cr
                   </td>
+                  <td className="border-r border-base-300 py-3">
+                    {summaryTotals.commitmentTotal.toFixed(2)} Cr
+                  </td>
+                  <td className="border-r border-base-300 py-3">
+                    {summaryTotals.cashFlowTotal.toFixed(2)} Cr
+                  </td>
+                  <td className="border-r border-base-300 py-3">
+                    {summaryTotals.commitmentFY1.toFixed(2)} Cr
+                  </td>
+                  <td className="py-3">
+                    {summaryTotals.cashFlowFY1.toFixed(2)} Cr
+                  </td>
+                  <td className="py-3">
+                    {summaryTotals.carryForwardCommitment.toFixed(2)} Cr
+                  </td>
+                  <td className="py-3">
+                    {summaryTotals.carryForwardCashFlow.toFixed(2)} Cr
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -383,7 +460,7 @@ const PDApprover = () => {
       </div>
 
       {/* ── Saved Records Tabs ────────────────────────── */}
-      {rows.length > 0 && (
+      {(rows.length > 0 || carryForwardRows.length > 0) && (
         <div className="mt-6">
           <div
             role="tablist"
@@ -411,7 +488,7 @@ const PDApprover = () => {
           {activeTab === "Summary" && (
             <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
               <div className="max-h-175 overflow-auto">
-                <table className="table table-zebra table-xs w-full text-xs">
+                <table className="table table-zebra table-xs w-full text-[11px]">
                   <thead className="sticky top-0 z-30 bg-red-500 text-white font-light">
                     <tr>
                       <th className="border border-red-400 text-center">
@@ -451,7 +528,7 @@ const PDApprover = () => {
                       const values = getRowSummary(row);
 
                       return (
-                        <tr key={row.PDDetailId} className="text-xs">
+                        <tr key={row.PDDetailId} className="text-[11px]">
                           <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
                             {row.Description}
                           </td>
@@ -494,27 +571,27 @@ const PDApprover = () => {
           {activeTab === "Commitments" && (
             <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
               <div className="max-h-175 overflow-auto">
-                <table className="table table-zebra table-xs w-full text-xs">
+                <table className="table table-zebra table-xs w-full text-[11px]">
                   <thead className="sticky top-0 z-30">
-                    <tr className="bg-red-500 text-white text-xs">
+                    <tr className="bg-red-500 text-white text-[11px]">
                       <th colSpan={2} className="text-center border">
                         General
                       </th>
                       <th colSpan={2} className="text-center border">
                         Total
                       </th>
-                      <th colSpan={22} className="text-center border">
+                      <th colSpan={24} className="text-center border">
                         Commitment Capex
                       </th>
                       <th colSpan={24} className="text-center border">
                         Commitment Revex
                       </th>
                     </tr>
-                    <tr className="bg-slate-100 text-slate-800 text-xs">
-                      <th className="border border-slate-300 font-medium">
+                    <tr className="bg-slate-100 text-slate-800 text-[11px]">
+                      <th className="border border-slate-300 font-medium w-[320px] min-w-[320px]">
                         Description
                       </th>
-                      <th className="border border-slate-300 font-medium">
+                      <th className="border border-slate-300 font-medium w-65 min-w-65">
                         Basis
                       </th>
                       <th className="border border-slate-300 font-medium">
@@ -549,11 +626,11 @@ const PDApprover = () => {
                   </thead>
                   <tbody>
                     {rows.map((row) => (
-                      <tr key={row.PDDetailId} className="text-xs">
-                        <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
+                      <tr key={row.PDDetailId} className="text-[11px]">
+                        <td className="border border-slate-200 w-[320px] min-w-[320px] whitespace-normal leading-4">
                           {row.Description}
                         </td>
-                        <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
+                        <td className="border border-slate-200 w-55 min-w-55 whitespace-normal leading-4">
                           {row.Basis}
                         </td>
                         <td className="border border-slate-200 text-right">
@@ -587,6 +664,50 @@ const PDApprover = () => {
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot className="bg-slate-200 font-semibold text-[11px]">
+                    <tr>
+                      <td
+                        colSpan={2}
+                        className="border border-slate-300 text-right"
+                      >
+                        Total
+                      </td>
+                      <td className="border border-slate-300 text-right">
+                        {summary.commCapex.toFixed(2)}
+                      </td>
+                      <td className="border border-slate-300 text-right">
+                        {(
+                          getTotal("CommCapex_H1FY1") +
+                          getTotal("CommCapex_H2FY1")
+                        ).toFixed(2)}
+                      </td>
+                      {commCapexFields.map((field) => (
+                        <td
+                          key={field}
+                          className="border border-slate-300 text-right"
+                        >
+                          {getTotal(field).toFixed(2)}
+                        </td>
+                      ))}
+                      <td className="border border-slate-300 text-right">
+                        {summary.commRevex.toFixed(2)}
+                      </td>
+                      <td className="border border-slate-300 text-right">
+                        {(
+                          getTotal("CommRevex_H1FY1") +
+                          getTotal("CommRevex_H2FY1")
+                        ).toFixed(2)}
+                      </td>
+                      {commRevexFields.map((field) => (
+                        <td
+                          key={field}
+                          className="border border-slate-300 text-right"
+                        >
+                          {getTotal(field).toFixed(2)}
+                        </td>
+                      ))}
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </div>
@@ -595,9 +716,9 @@ const PDApprover = () => {
           {activeTab === "Cashflow" && (
             <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
               <div className="max-h-175 overflow-auto">
-                <table className="table table-zebra table-xs w-full text-xs">
+                <table className="table table-zebra table-xs w-full text-[11px]">
                   <thead className="sticky top-0 z-30">
-                    <tr className="bg-red-500 text-white text-xs">
+                    <tr className="bg-red-500 text-white text-[11px]">
                       <th colSpan={2} className="text-center border">
                         General
                       </th>
@@ -611,11 +732,11 @@ const PDApprover = () => {
                         Cash Flow Revex
                       </th>
                     </tr>
-                    <tr className="bg-slate-100 text-slate-800 text-xs">
-                      <th className="border border-slate-300 font-medium">
+                    <tr className="bg-slate-100 text-slate-800 text-[11px]">
+                      <th className="border border-slate-300 font-medium w-[320px] min-w-[320px]">
                         Description
                       </th>
-                      <th className="border border-slate-300 font-medium">
+                      <th className="border border-slate-300 font-medium w-65 min-w-65">
                         Basis
                       </th>
                       <th className="border border-slate-300 font-medium">
@@ -651,11 +772,11 @@ const PDApprover = () => {
                   </thead>
                   <tbody>
                     {rows.map((row) => (
-                      <tr key={row.PDDetailId} className="text-xs">
-                        <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
+                      <tr key={row.PDDetailId} className="text-[11px]">
+                        <td className="border border-slate-200 w-[320px] min-w-[320px] whitespace-normal leading-4">
                           {row.Description}
                         </td>
-                        <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
+                        <td className="border border-slate-200 w-55 min-w-55 whitespace-normal leading-4">
                           {row.Basis}
                         </td>
                         <td className="border border-slate-200 text-right">
@@ -689,6 +810,50 @@ const PDApprover = () => {
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot className="bg-slate-200 font-semibold text-[11px]">
+                    <tr>
+                      <td
+                        colSpan={2}
+                        className="border border-slate-300 text-right"
+                      >
+                        Total
+                      </td>
+                      <td className="border border-slate-300 text-right">
+                        {summary.cashCapex.toFixed(2)}
+                      </td>
+                      <td className="border border-slate-300 text-right">
+                        {(
+                          getTotal("CashCapex_H1FY1") +
+                          getTotal("CashCapex_H2FY1")
+                        ).toFixed(2)}
+                      </td>
+                      {cashCapexFields.map((field) => (
+                        <td
+                          key={field}
+                          className="border border-slate-300 text-right"
+                        >
+                          {getTotal(field).toFixed(2)}
+                        </td>
+                      ))}
+                      <td className="border border-slate-300 text-right">
+                        {summary.cashRevex.toFixed(2)}
+                      </td>
+                      <td className="border border-slate-300 text-right">
+                        {(
+                          getTotal("CashRevex_H1FY1") +
+                          getTotal("CashRevex_H2FY1")
+                        ).toFixed(2)}
+                      </td>
+                      {cashRevexFields.map((field) => (
+                        <td
+                          key={field}
+                          className="border border-slate-300 text-right"
+                        >
+                          {getTotal(field).toFixed(2)}
+                        </td>
+                      ))}
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </div>
@@ -697,57 +862,47 @@ const PDApprover = () => {
           {activeTab === "Carry Forward" && (
             <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
               <div className="max-h-175 overflow-auto">
-                <table className="table table-zebra table-xs w-full text-xs">
+                <table className="table table-zebra table-xs w-full text-[11px]">
                   <thead className="sticky top-0 z-30 bg-red-500 text-white">
                     <tr>
                       <th className="border border-red-400 text-center">
-                        Description
+                        WBS Element
                       </th>
                       <th className="border border-red-400 text-center">
-                        Basis
-                      </th>
-                      <th className="border border-red-400 text-center">WBS</th>
-                      <th className="border border-red-400 text-center">
-                        Carry Forward Description
+                        WBS Description
                       </th>
                       <th className="border border-red-400 text-center">
-                        FY Year
+                        Financial Year
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Commitment Amount (Cr.)
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Cashflow Amount (Cr.)
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.filter(
-                      (row) =>
-                        row.CarryForwardWBS ||
-                        row.CarryForwardDescription ||
-                        row.CarryForwardFYYear,
-                    ).length > 0 ? (
-                      rows
-                        .filter(
-                          (row) =>
-                            row.CarryForwardWBS ||
-                            row.CarryForwardDescription ||
-                            row.CarryForwardFYYear,
-                        )
-                        .map((row) => (
-                          <tr key={row.PDDetailId} className="text-xs">
-                            <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
-                              {row.Description || "-"}
-                            </td>
-                            <td className="border border-slate-200 max-w-55 whitespace-normal leading-4">
-                              {row.Basis || "-"}
-                            </td>
-                            <td className="border border-slate-200">
-                              {row.CarryForwardWBS || "-"}
-                            </td>
-                            <td className="border border-slate-200 max-w-60 whitespace-normal leading-4">
-                              {row.CarryForwardDescription || "-"}
-                            </td>
-                            <td className="border border-slate-200">
-                              {row.CarryForwardFYYear || "-"}
-                            </td>
-                          </tr>
-                        ))
+                    {carryForwardRows.length > 0 ? (
+                      carryForwardRows.map((row) => (
+                        <tr key={row.id ?? row.Id} className="text-[11px]">
+                          <td className="border border-slate-200">
+                            {row.wbsId ?? row.WBSId ?? "-"}
+                          </td>
+                          <td className="border border-slate-200 max-w-80 whitespace-normal leading-4">
+                            {row.wbsDescription ?? row.WBSDescription ?? "-"}
+                          </td>
+                          <td className="border border-slate-200">
+                            {row.fyYear ?? row.FyYear ?? "-"}
+                          </td>
+                          <td className="border border-slate-200 text-right">
+                            {row.commitmentAmt ?? row.CommitmentAmt ?? "0"}
+                          </td>
+                          <td className="border border-slate-200 text-right">
+                            {row.cashFlowAmt ?? row.CashFlowAmt ?? "0"}
+                          </td>
+                        </tr>
+                      ))
                     ) : (
                       <tr>
                         <td
@@ -759,6 +914,40 @@ const PDApprover = () => {
                       </tr>
                     )}
                   </tbody>
+                  {carryForwardRows.length > 0 && (
+                    <tfoot className="bg-slate-200 font-semibold text-[11px]">
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="border border-slate-300 text-right"
+                        >
+                          Total
+                        </td>
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce(
+                              (sum, row) =>
+                                sum +
+                                Number(
+                                  row.commitmentAmt ?? row.CommitmentAmt ?? 0,
+                                ),
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce(
+                              (sum, row) =>
+                                sum +
+                                Number(row.cashFlowAmt ?? row.CashFlowAmt ?? 0),
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
               </div>
             </div>

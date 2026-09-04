@@ -199,6 +199,38 @@ const GetPDApprovalHistory = async (projectId: string, deptId: string) => {
   return response.data;
 };
 
+const ManageProjectWBS = async (payload: Record<string, unknown>) => {
+  try {
+    const response = await api.post(
+      `${import.meta.env.VITE_API_URL}/api/ProjectWBS/ManageProjectWBS`,
+      payload,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error managing project WBS:", error);
+    throw error;
+  }
+};
+
+const GetWBSDropdown = async (deptId: string | number) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/Dropdowns/6`,
+      {
+        params: {
+          search: deptId,
+          page: 1,
+          pageSize: 100,
+        },
+      },
+    );
+    return response.data?.items || response.data || [];
+  } catch (error) {
+    console.error("Error fetching WBS dropdown:", error);
+    return [];
+  }
+};
+
 const InitializeNonPDMaster = async (payload: Record<string, unknown>) => {
   try {
     const response = await api.post(
@@ -370,6 +402,8 @@ export {
   DeletePDMaster,
   UpdatePDStatus,
   GetPDApprovalHistory,
+  ManageProjectWBS,
+  GetWBSDropdown,
 
   // Non-PD Master
   InitializeNonPDMaster,

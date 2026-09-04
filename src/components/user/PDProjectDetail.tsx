@@ -9,6 +9,8 @@ import {
   DeletePDMaster,
   UpdatePDStatus,
   GetPDApprovalHistory,
+  ManageProjectWBS,
+  GetWBSDropdown,
 } from "../../service/projectmaster";
 import useUserStore from "../../store/userStore";
 
@@ -68,6 +70,14 @@ type CashFlowDraft = {
   cashRevex: FinancialValues;
 };
 
+type CarryForwardFormData = {
+  wbsId: string;
+  wbsDescription: string;
+  fyYear: string;
+  commitmentAmt: string;
+  cashFlowAmt: string;
+};
+
 // ─────────────────────────────────────────────────────────
 // Initial state helpers
 // ─────────────────────────────────────────────────────────
@@ -111,6 +121,14 @@ const initialFormState: PDFormData = {
   carryForwardWBS: "",
   carryForwardDescription: "",
   carryForwardFYYear: "",
+};
+
+const initialCarryForwardForm: CarryForwardFormData = {
+  wbsId: "",
+  wbsDescription: "",
+  fyYear: "",
+  commitmentAmt: "",
+  cashFlowAmt: "",
 };
 
 const financialFields: (keyof FinancialValues)[] = [
@@ -168,6 +186,13 @@ const PDProjectDetail = () => {
   const [formData, setFormData] = useState<PDFormData>(initialFormState);
 
   const [rows, setRows] = useState<any[]>([]);
+  const [carryForwardRows, setCarryForwardRows] = useState<any[]>([]);
+  const [wbsOptions, setWbsOptions] = useState<any[]>([]);
+  const [carryForwardForm, setCarryForwardForm] =
+    useState<CarryForwardFormData>(initialCarryForwardForm);
+  const [editingCarryForwardId, setEditingCarryForwardId] = useState<
+    number | null
+  >(null);
 
   const [selectedCashFlowRows, setSelectedCashFlowRows] = useState<
     Record<number, boolean>
@@ -452,9 +477,35 @@ const PDProjectDetail = () => {
     }
   };
 
+  const fetchCarryForwardRows = async () => {
+    try {
+      const response = await ManageProjectWBS({
+        type: 1,
+        projectId: data?.projectID,
+        deptId: data?.deptID?.toString(),
+      });
+      setCarryForwardRows(
+        Array.isArray(response) ? response : response?.items || [],
+      );
+    } catch (error) {
+      console.error("Failed to fetch carry forward rows", error);
+    }
+  };
+
+  const fetchWBSOptions = async () => {
+    try {
+      const response = await GetWBSDropdown(user?.roles[0]?.departmentId!);
+      setWbsOptions(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error("Failed to fetch WBS options", error);
+    }
+  };
+
   useEffect(() => {
     fetchPDDetails();
     fetchApprovalHistory();
+    fetchCarryForwardRows();
+    fetchWBSOptions();
   }, []);
 
   // ─────────────────────────────────────────────────────────
@@ -471,12 +522,7 @@ const PDProjectDetail = () => {
       allFinancialEmpty(formData.commitmentCapex) &&
       allFinancialEmpty(formData.commitmentRevex) &&
       allFinancialEmpty(formData.cashCapex) &&
-      allFinancialEmpty(formData.cashRevex) &&
-      (!formData.carryForwardWBS || formData.carryForwardWBS.trim() === "") &&
-      (!formData.carryForwardDescription ||
-        formData.carryForwardDescription.trim() === "") &&
-      (!formData.carryForwardFYYear ||
-        formData.carryForwardFYYear.trim() === "")
+      allFinancialEmpty(formData.cashRevex)
     );
   };
 
@@ -560,6 +606,47 @@ const PDProjectDetail = () => {
   const resetForm = () => {
     setFormData(initialFormState);
     setEditingRowId(null);
+  };
+
+  const getWBSOptionId = (option: Record<string, unknown>) =>
+    String(
+      option.wbsId ??
+        option.WBSId ??
+        option.wbsElement ??
+        option.code ??
+        option.value ??
+        option.id ??
+        "",
+    );
+
+  const getWBSOptionDescription = (option: Record<string, unknown>) =>
+    String(
+      option.wbsDescription ??
+        option.WBSDescription ??
+        option.description ??
+        option.name ??
+        option.label ??
+        option.text ??
+        "",
+    );
+
+  const handleCarryForwardWBSChange = (wbsId: string) => {
+    const selectedOption = wbsOptions.find(
+      (option) => getWBSOptionId(option) === wbsId,
+    );
+
+    setCarryForwardForm((previous) => ({
+      ...previous,
+      wbsId,
+      wbsDescription: selectedOption
+        ? getWBSOptionDescription(selectedOption)
+        : "",
+    }));
+  };
+
+  const resetCarryForwardForm = () => {
+    setCarryForwardForm(initialCarryForwardForm);
+    setEditingCarryForwardId(null);
   };
 
   // ─────────────────────────────────────────────────────────
@@ -646,6 +733,63 @@ const PDProjectDetail = () => {
   // CRUD handlers
   // ─────────────────────────────────────────────────────────
 
+  const handleCarryForwardSave = async () => {
+    const { wbsId, wbsDescription, fyYear, commitmentAmt, cashFlowAmt } =
+      carryForwardForm;
+
+    if (!wbsId || !fyYear || !commitmentAmt || !cashFlowAmt) {
+      alert("Please select a WBS and financial year, then enter both amounts.");
+      return;
+    }
+
+    try {
+      await ManageProjectWBS({
+        type: editingCarryForwardId ? 3 : 2,
+        ...(editingCarryForwardId ? { id: editingCarryForwardId } : {}),
+        projectId: data?.projectID,
+        deptId: data?.deptID?.toString(),
+        wbsId,
+        wbsDescription,
+        commitmentAmt,
+        cashFlowAmt,
+        fyYear,
+      });
+      await fetchCarryForwardRows();
+      resetCarryForwardForm();
+    } catch (error) {
+      console.error("Failed to save carry forward row", error);
+    }
+  };
+
+  const handleCarryForwardEdit = (row: any) => {
+    setCarryForwardForm({
+      wbsId: String(row.wbsId ?? row.WBSId ?? ""),
+      wbsDescription: String(row.wbsDescription ?? row.WBSDescription ?? ""),
+      fyYear: String(row.fyYear ?? row.FyYear ?? ""),
+      commitmentAmt: String(row.commitmentAmt ?? row.CommitmentAmt ?? ""),
+      cashFlowAmt: String(row.cashFlowAmt ?? row.CashFlowAmt ?? ""),
+    });
+    setEditingCarryForwardId(Number(row.id ?? row.Id));
+  };
+
+  const handleCarryForwardDelete = async (row: any) => {
+    const id = Number(row.id ?? row.Id);
+    if (
+      !id ||
+      !window.confirm("Are you sure you want to delete this carry forward row?")
+    ) {
+      return;
+    }
+
+    try {
+      await ManageProjectWBS({ type: 4, id });
+      await fetchCarryForwardRows();
+      if (editingCarryForwardId === id) resetCarryForwardForm();
+    } catch (error) {
+      console.error("Failed to delete carry forward row", error);
+    }
+  };
+
   const handleCashFlowSave = async () => {
     const selectedRows = rows.filter(
       (row) => selectedCashFlowRows[row.PDDetailId],
@@ -696,6 +840,11 @@ const PDProjectDetail = () => {
   const handleSave = async () => {
     if (activeTab === 1) {
       await handleCashFlowSave();
+      return;
+    }
+
+    if (activeTab === 2) {
+      await handleCarryForwardSave();
       return;
     }
 
@@ -867,8 +1016,10 @@ const PDProjectDetail = () => {
 
   const handleSubmitForApproval = async () => {
     try {
-      if (rows.length === 0) {
-        alert("Please save at least one entry before submitting for approval.");
+      if (rows.length === 0 && carryForwardRows.length === 0) {
+        alert(
+          "Please save at least one budget or carry forward entry before submitting for approval.",
+        );
         return;
       }
 
@@ -1616,6 +1767,66 @@ const PDProjectDetail = () => {
     );
   };
 
+  const CarryForwardTable = () => {
+    return (
+      <div className="overflow-x-auto border border-base-300 rounded">
+        <table className="table table-xs table-zebra min-w-225">
+          <thead className="text-xs text-white">
+            <tr className="bg-red-500">
+              {canEdit && <th className="border border-red-400">Actions</th>}
+              <th className="border border-red-400">WBS Element</th>
+              <th className="border border-red-400">WBS Description</th>
+              <th className="border border-red-400">Financial Year</th>
+              <th className="border border-red-400 text-right">
+                Commitment Amount (Cr.)
+              </th>
+              <th className="border border-red-400 text-right">
+                Cashflow Amount (Cr.)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {carryForwardRows.map((row) => (
+              <tr key={row.id ?? row.Id}>
+                {canEdit && (
+                  <td className="border border-slate-300 whitespace-nowrap">
+                    <button
+                      className="btn btn-xs btn-neutral mr-2"
+                      onClick={() => handleCarryForwardEdit(row)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-xs btn-error text-white"
+                      onClick={() => handleCarryForwardDelete(row)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                )}
+                <td className="border border-slate-300">
+                  {row.wbsId ?? row.WBSId ?? "-"}
+                </td>
+                <td className="max-w-80 whitespace-normal wrap-break-word border border-slate-300">
+                  {row.wbsDescription ?? row.WBSDescription ?? "-"}
+                </td>
+                <td className="border border-slate-300">
+                  {row.fyYear ?? row.FyYear ?? "-"}
+                </td>
+                <td className="border border-slate-300 text-right">
+                  {row.commitmentAmt ?? row.CommitmentAmt ?? "0"}
+                </td>
+                <td className="border border-slate-300 text-right">
+                  {row.cashFlowAmt ?? row.CashFlowAmt ?? "0"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 space-y-4">
       {/* ── Project Info / Summary ──────────────────────── */}
@@ -1676,7 +1887,7 @@ const PDProjectDetail = () => {
       {/* ── Input Tabs ─────────────────────────────────── */}
       <div className="border-slate-200 rounded">
         {
-          <div className="tabs tabs-box bg-gray-50 p-4 gap-x-2 tabs-xs border border-slate-200">
+          <div className="tabs tabs-box bg-gray-50 p-4 gap-x-2 border border-slate-200">
             {/* ══ TAB 1: COMMITMENTS ══════════════════════ */}
             <input
               type="radio"
@@ -1866,58 +2077,99 @@ const PDProjectDetail = () => {
 
             {canEdit && (
               <div className="tab-content border-base-300 bg-base-100 p-4">
-                <div className="overflow-x-auto border border-base-300 rounded max-w-4xl">
-                  <table className="table table-xs table-zebra min-w-150">
+                <div className="overflow-x-auto border border-base-300 rounded">
+                  <table className="table table-xs table-zebra min-w-250">
                     <thead className="bg-red-500 text-white">
                       <tr>
-                        <th className="text-center">WBS</th>
-                        <th>Description</th>
-                        <th className="text-center">FY Year</th>
+                        <th>WBS Element</th>
+                        <th>WBS Description</th>
+                        <th>Financial Year</th>
+                        <th>Commitment Amount (Cr.)</th>
+                        <th>Cashflow Amount (Cr.)</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="min-w-45">
-                          <input
-                            type="text"
-                            placeholder="Enter WBS"
-                            className="input input-bordered input-xs w-full"
-                            value={formData.carryForwardWBS}
-                            onChange={(e) =>
-                              handleChange("carryForwardWBS", e.target.value)
-                            }
-                          />
-                        </td>
-                        <td className="min-w-75">
-                          <input
-                            type="text"
-                            placeholder="Enter Description"
-                            className="input input-bordered input-xs w-full"
-                            value={formData.carryForwardDescription}
-                            onChange={(e) =>
-                              handleChange(
-                                "carryForwardDescription",
-                                e.target.value,
-                              )
-                            }
-                          />
-                        </td>
-                        <td className="min-w-37.5">
+                        <td className="min-w-55">
                           <select
                             className="select select-bordered select-xs w-full"
-                            value={formData.carryForwardFYYear}
-                            onChange={(e) =>
-                              handleChange("carryForwardFYYear", e.target.value)
+                            value={carryForwardForm.wbsId}
+                            onChange={(event) =>
+                              handleCarryForwardWBSChange(event.target.value)
                             }
                           >
-                            <option value="">Select</option>
-                            <option value="2025-26">2025-26</option>
+                            <option value="">Select WBS element</option>
+                            {wbsOptions.map((option) => {
+                              const wbsId = getWBSOptionId(option);
+                              const description =
+                                getWBSOptionDescription(option);
+
+                              return (
+                                <option key={wbsId} value={wbsId}>
+                                  {description
+                                    ? `${wbsId} - ${description}`
+                                    : wbsId}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </td>
+                        <td className="min-w-80">
+                          <textarea
+                            className="textarea textarea-bordered textarea-xs h-8 min-h-8 w-full resize-none"
+                            value={carryForwardForm.wbsDescription}
+                            readOnly
+                            placeholder="Selected automatically from WBS"
+                          />
+                        </td>
+                        <td className="min-w-40">
+                          <select
+                            className="select select-bordered select-xs w-full"
+                            value={carryForwardForm.fyYear}
+                            onChange={(event) =>
+                              setCarryForwardForm((previous) => ({
+                                ...previous,
+                                fyYear: event.target.value,
+                              }))
+                            }
+                          >
+                            <option value="">Select financial year</option>
                             <option value="2026-27">2026-27</option>
                             <option value="2027-28">2027-28</option>
                             <option value="2028-29">2028-29</option>
                             <option value="2029-30">2029-30</option>
                             <option value="2030-31">2030-31</option>
                           </select>
+                        </td>
+                        <td className="min-w-45">
+                          <input
+                            type="number"
+                            min="0"
+                            step="any"
+                            className="input input-bordered input-xs w-full"
+                            value={carryForwardForm.commitmentAmt}
+                            onChange={(event) =>
+                              setCarryForwardForm((previous) => ({
+                                ...previous,
+                                commitmentAmt: event.target.value,
+                              }))
+                            }
+                          />
+                        </td>
+                        <td className="min-w-45">
+                          <input
+                            type="number"
+                            min="0"
+                            step="any"
+                            className="input input-bordered input-xs w-full"
+                            value={carryForwardForm.cashFlowAmt}
+                            onChange={(event) =>
+                              setCarryForwardForm((previous) => ({
+                                ...previous,
+                                cashFlowAmt: event.target.value,
+                              }))
+                            }
+                          />
                         </td>
                       </tr>
                     </tbody>
@@ -1955,23 +2207,29 @@ const PDProjectDetail = () => {
 
             {(activeTab === 1
               ? editableCashFlowRows.length > 0
-              : !isRowEmpty()) && (
+              : activeTab === 2
+                ? true
+                : !isRowEmpty()) && (
               <button
                 className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
                 onClick={handleSave}
               >
                 {activeTab === 1
                   ? "Save Cash Flow"
-                  : isEditing
-                    ? "Update Row"
-                    : "Save"}
+                  : activeTab === 2
+                    ? editingCarryForwardId
+                      ? "Update Carry Forward"
+                      : "Save Carry Forward"
+                    : isEditing
+                      ? "Update Row"
+                      : "Save"}
               </button>
             )}
 
             <button
               className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:border-gray-400"
               onClick={handleSubmitForApproval}
-              disabled={rows.length === 0}
+              disabled={rows.length === 0 && carryForwardRows.length === 0}
             >
               Submit For Approval
             </button>
@@ -1980,14 +2238,20 @@ const PDProjectDetail = () => {
       </div>
 
       {/* ── Saved Rows Table ───────────────────────────── */}
-      {(activeTab === 1 ? hasSavedCashFlow : rows.length > 0) && (
+      {(activeTab === 1
+        ? hasSavedCashFlow
+        : activeTab === 2
+          ? carryForwardRows.length > 0
+          : rows.length > 0) && (
         <div className="mt-6 border border-slate-300 font-medium text-xs bg-white overflow-hidden">
           <div className="max-h-175 overflow-auto">
             {rows.length > 0 && activeTab === 0 && <CommitmentTable />}
 
             {rows.length > 0 && activeTab === 1 && <CashFlowTable />}
 
-            {/* {rows.length > 0 && activeTab === 2 && <CarryForwardTable />} */}
+            {carryForwardRows.length > 0 && activeTab === 2 && (
+              <CarryForwardTable />
+            )}
           </div>
         </div>
       )}
