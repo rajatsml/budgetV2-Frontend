@@ -383,6 +383,18 @@ const GetUserProjects = async (userid: string) => {
     return [];
   }
 };
+const GetBudgetManagerProjects = async (userid: string) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/Projects/GetBudgetManagerProjects?userId=${userid}`,
+    );
+
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching budget manager projects:", error);
+    return [];
+  }
+};
 
 export {
   FetchAllProjectsOfUser,
@@ -393,6 +405,7 @@ export {
   DeleteProject,
   GetDropdownData,
   GetUserProjects,
+  GetBudgetManagerProjects,
 
   // PD Master
   InitializePDMaster,

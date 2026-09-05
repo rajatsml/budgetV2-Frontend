@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../store/userStore";
 import {
-  GetProjects,
   InitializeNonPDMaster,
   InitializePDMaster,
+  GetBudgetManagerProjects,
 } from "../../service/projectmaster";
 
-const MyProjects = () => {
+const WBSProjects = () => {
   const navigate = useNavigate();
 
   const user = useUserStore((s: any) => s.user);
@@ -30,7 +30,7 @@ const MyProjects = () => {
     try {
       setLoading(true);
 
-      const data = await GetProjects();
+      const data = await GetBudgetManagerProjects(user?.userId);
 
       setProjects(data || []);
     } catch (error) {
@@ -112,89 +112,25 @@ const MyProjects = () => {
       console.error("Initialization error:", err);
     }
 
-    if (projectType === "2") {
-      if (user?.userId === makerId) {
-        navigate("/pd-project", {
-          state: {
-            projectType,
-            projectName,
-            projectID,
-            deptName,
-            deptID,
-            category,
-            FyYear,
-            makerId,
-            approver1,
-            approver2,
-            approver3,
-            status,
-            pendingWithUser,
-            projectCategoryName,
-            isOngoing: isOngoing,
-          },
-        });
-      } else {
-        navigate("/pd-project-approver", {
-          state: {
-            projectType,
-            projectName,
-            projectID,
-            deptName,
-            deptID,
-            category,
-            FyYear,
-            makerId,
-            approver1,
-            approver2,
-            approver3,
-            status,
-            pendingWithUser,
-            projectCategoryName,
-            isOngoing,
-          },
-        });
-      }
-    } else if (projectType === "3") {
-      if (user?.userId === makerId) {
-        navigate("/nonpd-project", {
-          state: {
-            projectType,
-            projectName,
-            projectID,
-            deptName,
-            deptID,
-            category,
-            FyYear,
-            makerId,
-            approver1,
-            approver2,
-            approver3,
-            status,
-            pendingWithUser,
-          },
-        });
-      } else {
-        navigate("/nonpd-project-approver", {
-          state: {
-            projectType,
-            projectName,
-            projectID,
-            deptName,
-            deptID,
-            category,
-            FyYear,
-            makerId,
-            approver1,
-            approver2,
-            approver3,
-            status,
-            pendingWithUser,
-          },
-        });
-      }
-    } else {
-      navigate("/");
-    }
+    navigate("/wbs-actual-spent", {
+      state: {
+        projectType,
+        projectName,
+        projectID,
+        deptName,
+        deptID,
+        category,
+        FyYear,
+        makerId,
+        approver1,
+        approver2,
+        approver3,
+        status,
+        pendingWithUser,
+        projectCategoryName,
+        isOngoing: isOngoing,
+      },
+    });
   };
   return (
     <div className="p-6 min-h-screen">
@@ -288,41 +224,14 @@ const MyProjects = () => {
                       </div>
                     </div>
                   </td>
-                  {/* <td className="text-xs">
-                    {project.deptProjectStatus
-                      ? project.deptProjectStatus
-                      : "OPENED"}
-                  </td> */}
-                  {/* <td className="text-xs">
-                    {project.deptProjectStatus === null ? (
-                      <>{project.makerId}</>
-                    ) : project.pendingWithUser &&
-                      project.pendingWithUserName ? (
-                      <>
-                        {project.pendingWithUserName} -{" "}
-                        {project.pendingWithUser}
-                      </>
-                    ) : (
-                      <>-</>
-                    )}
-                  </td> */}
 
                   <td className="text-xs">
-                    {project.deptProjectStatus === "APPROVED" ||
-                    project.deptProjectStatus === "APPROVED BY BUDGET MANAGER"
+                    {project.deptProjectStatus === "APPROVED"
                       ? "APPROVED"
                       : `${project.deptProjectStatus || "OPENED"} - ${
                           project.pendingWithUserName || project.makerId || ""
                         }`}
                   </td>
-
-                  {/* <td>
-                    <div className={`badge  ${project.status === "Posted"}`}>
-                      {project.status}
-                    </div>
-                  </td> */}
-
-                  {/* <td>{project.createdBy}</td> */}
 
                   <td>
                     <button
@@ -346,7 +255,7 @@ const MyProjects = () => {
                         )
                       }
                     >
-                      Budget Inputs
+                      Actual Spent
                     </button>
                   </td>
                 </tr>
@@ -359,4 +268,4 @@ const MyProjects = () => {
   );
 };
 
-export default MyProjects;
+export default WBSProjects;

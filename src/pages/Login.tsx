@@ -84,6 +84,7 @@ const Login = () => {
         deptCode: data.deptCode,
         deptNameShort: data.deptNameShort,
         gradeCode: data.gradeCode,
+        isBudgetManager: data.isBudgetManager,
 
         roles,
 

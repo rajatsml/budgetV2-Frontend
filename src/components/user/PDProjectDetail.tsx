@@ -1796,8 +1796,12 @@ const PDProjectDetail = () => {
               <th className="border border-red-400 text-right">
                 Cashflow Amount (Cr.)
               </th>
+              <th className="border border-red-400 text-right">
+                Actual Spent (Cr.)
+              </th>
             </tr>
           </thead>
+
           <tbody>
             {carryForwardRows.map((row) => (
               <tr key={row.id ?? row.Id}>
@@ -1832,6 +1836,11 @@ const PDProjectDetail = () => {
                 <td className="border border-slate-300 text-right">
                   {row.cashFlowAmt ?? row.CashFlowAmt ?? "0"}
                 </td>
+                <td className="border border-slate-300 text-right">
+                  {isNaN(Number(row.actualSpent ?? row.ActualSpent))
+                    ? "0.0"
+                    : Number(row.actualSpent ?? row.ActualSpent).toFixed(1)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -1849,7 +1858,7 @@ const PDProjectDetail = () => {
           projectName={data?.projectName}
           deptName={data?.deptName}
           deptID={data?.deptID}
-          category={data?.category}
+          category={data?.projectCategoryName}
           fyYear={data?.FyYear}
           pendingWith={data?.pendingWithUser}
           status={data?.status}
@@ -2079,118 +2088,127 @@ const PDProjectDetail = () => {
             )}
 
             {/* ══ TAB 3: CARRY FORWARD ════════════════════ */}
-            <input
-              type="radio"
-              name="pd_tabs"
-              className={`tab ${activeTab === 2 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
-              checked={activeTab === 2}
-              onClick={() => changeTab(2)}
-              aria-label="Carry Forward"
-            />
+            <>
+              {data?.isOngoing && (
+                <>
+                  <input
+                    type="radio"
+                    name="pd_tabs"
+                    className={`tab ${activeTab === 2 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
+                    checked={activeTab === 2}
+                    onClick={() => changeTab(2)}
+                    aria-label="Carry Forward"
+                  />
+                  {canEdit && (
+                    <div className="tab-content border-base-300 bg-base-100 p-4">
+                      <div className="overflow-x-auto border border-base-300 rounded">
+                        <table className="table table-xs table-zebra min-w-250">
+                          <thead className="bg-red-500 text-white">
+                            <tr>
+                              <th>WBS Element</th>
+                              <th>WBS Description</th>
+                              <th>Financial Year</th>
+                              <th>Commitment Amount (Cr.)</th>
+                              <th>Cashflow Amount (Cr.)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td className="min-w-55">
+                                <select
+                                  className="select select-bordered select-xs w-full"
+                                  value={carryForwardForm.wbsId}
+                                  onChange={(event) =>
+                                    handleCarryForwardWBSChange(
+                                      event.target.value,
+                                    )
+                                  }
+                                >
+                                  <option value="">Select WBS element</option>
+                                  {wbsOptions.map((option) => {
+                                    const wbsId = getWBSOptionId(option);
+                                    const description =
+                                      getWBSOptionDescription(option);
 
-            {canEdit && (
-              <div className="tab-content border-base-300 bg-base-100 p-4">
-                <div className="overflow-x-auto border border-base-300 rounded">
-                  <table className="table table-xs table-zebra min-w-250">
-                    <thead className="bg-red-500 text-white">
-                      <tr>
-                        <th>WBS Element</th>
-                        <th>WBS Description</th>
-                        <th>Financial Year</th>
-                        <th>Commitment Amount (Cr.)</th>
-                        <th>Cashflow Amount (Cr.)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="min-w-55">
-                          <select
-                            className="select select-bordered select-xs w-full"
-                            value={carryForwardForm.wbsId}
-                            onChange={(event) =>
-                              handleCarryForwardWBSChange(event.target.value)
-                            }
-                          >
-                            <option value="">Select WBS element</option>
-                            {wbsOptions.map((option) => {
-                              const wbsId = getWBSOptionId(option);
-                              const description =
-                                getWBSOptionDescription(option);
+                                    return (
+                                      <option key={wbsId} value={wbsId}>
+                                        {description
+                                          ? `${wbsId} - ${description}`
+                                          : wbsId}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                              </td>
+                              <td className="min-w-80">
+                                <textarea
+                                  className="textarea textarea-bordered textarea-xs h-8 min-h-8 w-full resize-none"
+                                  value={carryForwardForm.wbsDescription}
+                                  readOnly
+                                  placeholder="Selected automatically from WBS"
+                                />
+                              </td>
+                              <td className="min-w-40">
+                                <select
+                                  className="select select-bordered select-xs w-full"
+                                  value={carryForwardForm.fyYear}
+                                  onChange={(event) =>
+                                    setCarryForwardForm((previous) => ({
+                                      ...previous,
+                                      fyYear: event.target.value,
+                                    }))
+                                  }
+                                >
+                                  <option value="">
+                                    Select financial year
+                                  </option>
 
-                              return (
-                                <option key={wbsId} value={wbsId}>
-                                  {description
-                                    ? `${wbsId} - ${description}`
-                                    : wbsId}
-                                </option>
-                              );
-                            })}
-                          </select>
-                        </td>
-                        <td className="min-w-80">
-                          <textarea
-                            className="textarea textarea-bordered textarea-xs h-8 min-h-8 w-full resize-none"
-                            value={carryForwardForm.wbsDescription}
-                            readOnly
-                            placeholder="Selected automatically from WBS"
-                          />
-                        </td>
-                        <td className="min-w-40">
-                          <select
-                            className="select select-bordered select-xs w-full"
-                            value={carryForwardForm.fyYear}
-                            onChange={(event) =>
-                              setCarryForwardForm((previous) => ({
-                                ...previous,
-                                fyYear: event.target.value,
-                              }))
-                            }
-                          >
-                            <option value="">Select financial year</option>
-
-                            {allFiYears.map((fy) => (
-                              <option key={fy.value} value={fy.value}>
-                                {fy.text}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="min-w-45">
-                          <input
-                            type="number"
-                            min="0"
-                            step="any"
-                            className="input input-bordered input-xs w-full"
-                            value={carryForwardForm.commitmentAmt}
-                            onChange={(event) =>
-                              setCarryForwardForm((previous) => ({
-                                ...previous,
-                                commitmentAmt: event.target.value,
-                              }))
-                            }
-                          />
-                        </td>
-                        <td className="min-w-45">
-                          <input
-                            type="number"
-                            min="0"
-                            step="any"
-                            className="input input-bordered input-xs w-full"
-                            value={carryForwardForm.cashFlowAmt}
-                            onChange={(event) =>
-                              setCarryForwardForm((previous) => ({
-                                ...previous,
-                                cashFlowAmt: event.target.value,
-                              }))
-                            }
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+                                  {allFiYears.map((fy) => (
+                                    <option key={fy.value} value={fy.value}>
+                                      {fy.text}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="min-w-45">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="any"
+                                  className="input input-bordered input-xs w-full"
+                                  value={carryForwardForm.commitmentAmt}
+                                  onChange={(event) =>
+                                    setCarryForwardForm((previous) => ({
+                                      ...previous,
+                                      commitmentAmt: event.target.value,
+                                    }))
+                                  }
+                                />
+                              </td>
+                              <td className="min-w-45">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="any"
+                                  className="input input-bordered input-xs w-full"
+                                  value={carryForwardForm.cashFlowAmt}
+                                  onChange={(event) =>
+                                    setCarryForwardForm((previous) => ({
+                                      ...previous,
+                                      cashFlowAmt: event.target.value,
+                                    }))
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
 
             <p className="text-sm text-error self-center font-semibold">
               Please fill the entries in Crores only

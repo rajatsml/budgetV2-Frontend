@@ -9,7 +9,7 @@ import {
 } from "../../service/projectmaster";
 import useUserStore from "../../store/userStore";
 
-const PDApprover = () => {
+const WBSActualSpent = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [approvalHistory, setApprovalHistory] = useState<any[]>([]);
@@ -19,12 +19,12 @@ const PDApprover = () => {
 
   const [rows, setRows] = useState<any[]>([]);
   const [carryForwardRows, setCarryForwardRows] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<
-    "Summary" | "Commitments" | "Cashflow" | "Carry Forward"
-  >("Summary");
+  const [activeTab, setActiveTab] = useState<"Carry Forward" | "Summary">(
+    "Carry Forward",
+  );
 
   const isPendingWithCurrentUser =
-    data?.status === "PENDING WITH APPROVER" &&
+    data?.status === "PENDING WITH BUDGET MANAGER" &&
     data?.pendingWithUser?.toString() === user?.userId?.toString();
 
   // ─────────────────────────────────────────────────────────
@@ -52,6 +52,39 @@ const PDApprover = () => {
     }
   };
 
+  const handleActualSpentChange = (id: number, value: string) => {
+    setCarryForwardRows((prev) =>
+      prev.map((row) =>
+        (row.id ?? row.Id) === id ? { ...row, actualSpent: value } : row,
+      ),
+    );
+  };
+
+  const handleActualSpentSave = async (row: any) => {
+    try {
+      await ManageProjectWBS({
+        type: 3,
+        id: row.id ?? row.Id,
+        projectId: data?.projectID,
+        deptId: data?.deptID?.toString(),
+        wbsId: row.wbsId ?? row.WBSId,
+        wbsDescription: row.wbsDescription ?? row.WBSDescription,
+        commitmentAmt: row.commitmentAmt ?? row.CommitmentAmt,
+        cashFlowAmt: row.cashFlowAmt ?? row.CashFlowAmt,
+        fyYear: row.fyYear ?? row.FyYear,
+
+        // new field
+        actualSpent: row.actualSpent,
+      });
+
+      alert("Actual Spent updated successfully.");
+
+      await fetchCarryForwardRows();
+    } catch (error) {
+      console.error("Failed to update Actual Spent", error);
+    }
+  };
+
   const fetchCarryForwardRows = async () => {
     try {
       const response = await ManageProjectWBS({
@@ -59,8 +92,14 @@ const PDApprover = () => {
         projectId: data?.projectID,
         deptId: data?.deptID?.toString(),
       });
+
+      const items = Array.isArray(response) ? response : response?.items || [];
+
       setCarryForwardRows(
-        Array.isArray(response) ? response : response?.items || [],
+        items.map((item: any) => ({
+          ...item,
+          actualSpent: item.actualSpent ?? item.ActualSpent ?? "",
+        })),
       );
     } catch (error) {
       console.error("Failed to fetch carry forward rows", error);
@@ -161,11 +200,11 @@ const PDApprover = () => {
         projectId: data?.projectID,
         deptId: data?.deptID?.toString(),
         userId: user?.userId!,
-        actionPerformed: "APPROVED",
+        actionPerformed: "BUDGET_MANAGER_APPROVED",
         remarks: remarks,
       });
       alert(response.message);
-      navigate("/myprojects");
+      navigate("/pd-budget-manager-projects");
     } catch (error) {
       console.error("Approval failed", error);
     }
@@ -182,147 +221,11 @@ const PDApprover = () => {
         remarks: remarks,
       });
       alert(response.message);
-      navigate("/myprojects");
+      navigate("/pd-budget-manager-projects");
     } catch (error) {
       console.error("Review Back failed", error);
     }
   };
-
-  // ─────────────────────────────────────────────────────────
-  // Column definitions — reused for header + body + footer
-  // ─────────────────────────────────────────────────────────
-
-  // Added missing _H1FY1 and _H2FY1 fields to match the 24 sub-columns
-  const commCapexFields = [
-    "CommCapex_AprFY1",
-    "CommCapex_MayFY1",
-    "CommCapex_JunFY1",
-    "CommCapex_JulFY1",
-    "CommCapex_AugFY1",
-    "CommCapex_SepFY1",
-    "CommCapex_OctFY1",
-    "CommCapex_NovFY1",
-    "CommCapex_DecFY1",
-    "CommCapex_JanFY1",
-    "CommCapex_FebFY1",
-    "CommCapex_MarFY1",
-    "CommCapex_H1FY1", // Aligns with "H1 FY1"
-    "CommCapex_H2FY1", // Aligns with "H2 FY1"
-    "CommCapex_H1FY2",
-    "CommCapex_H2FY2",
-    "CommCapex_H1FY3",
-    "CommCapex_H2FY3",
-    "CommCapex_H1FY4",
-    "CommCapex_H2FY4",
-    "CommCapex_H1FY5",
-    "CommCapex_H2FY5",
-  ];
-
-  const commRevexFields = [
-    "CommRevex_AprFY1",
-    "CommRevex_MayFY1",
-    "CommRevex_JunFY1",
-    "CommRevex_JulFY1",
-    "CommRevex_AugFY1",
-    "CommRevex_SepFY1",
-    "CommRevex_OctFY1",
-    "CommRevex_NovFY1",
-    "CommRevex_DecFY1",
-    "CommRevex_JanFY1",
-    "CommRevex_FebFY1",
-    "CommRevex_MarFY1",
-    "CommRevex_H1FY1", // Aligns with "H1 FY1"
-    "CommRevex_H2FY1", // Aligns with "H2 FY1"
-    "CommRevex_H1FY2",
-    "CommRevex_H2FY2",
-    "CommRevex_H1FY3",
-    "CommRevex_H2FY3",
-    "CommRevex_H1FY4",
-    "CommRevex_H2FY4",
-    "CommRevex_H1FY5",
-    "CommRevex_H2FY5",
-  ];
-
-  const cashCapexFields = [
-    "CashCapex_AprFY1",
-    "CashCapex_MayFY1",
-    "CashCapex_JunFY1",
-    "CashCapex_JulFY1",
-    "CashCapex_AugFY1",
-    "CashCapex_SepFY1",
-    "CashCapex_OctFY1",
-    "CashCapex_NovFY1",
-    "CashCapex_DecFY1",
-    "CashCapex_JanFY1",
-    "CashCapex_FebFY1",
-    "CashCapex_MarFY1",
-    "CashCapex_H1FY1", // Aligns with "H1 FY1"
-    "CashCapex_H2FY1", // Aligns with "H2 FY1"
-    "CashCapex_H1FY2",
-    "CashCapex_H2FY2",
-    "CashCapex_H1FY3",
-    "CashCapex_H2FY3",
-    "CashCapex_H1FY4",
-    "CashCapex_H2FY4",
-    "CashCapex_H1FY5",
-    "CashCapex_H2FY5",
-  ];
-
-  const cashRevexFields = [
-    "CashRevex_AprFY1",
-    "CashRevex_MayFY1",
-    "CashRevex_JunFY1",
-    "CashRevex_JulFY1",
-    "CashRevex_AugFY1",
-    "CashRevex_SepFY1",
-    "CashRevex_OctFY1",
-    "CashRevex_NovFY1",
-    "CashRevex_DecFY1",
-    "CashRevex_JanFY1",
-    "CashRevex_FebFY1",
-    "CashRevex_MarFY1",
-    "CashRevex_H1FY1", // Aligns with "H1 FY1"
-    "CashRevex_H2FY1", // Aligns with "H2 FY1"
-    "CashRevex_H1FY2",
-    "CashRevex_H2FY2",
-    "CashRevex_H1FY3",
-    "CashRevex_H2FY3",
-    "CashRevex_H1FY4",
-    "CashRevex_H2FY4",
-    "CashRevex_H1FY5",
-    "CashRevex_H2FY5",
-  ];
-
-  const subCols = [
-    // "Total Value",
-    // "Total FY1",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-    "Jan",
-    "Feb",
-    "Mar",
-    "H1 FY1",
-    "H2 FY1",
-    "H1 FY2",
-    "H2 FY2",
-    "H1 FY3",
-    "H2 FY3",
-    "H1 FY4",
-    "H2 FY4",
-    "H1 FY5",
-    "H2 FY5",
-  ];
-
-  // ─────────────────────────────────────────────────────────
-  // Render
-  // ─────────────────────────────────────────────────────────
 
   const getGrandTotal = (row: any, prefix: string) => {
     return (
@@ -363,8 +266,7 @@ const PDApprover = () => {
       Number(row.CashCapex_H2FY1 || 0) + Number(row.CashRevex_H2FY1 || 0),
   });
 
-  const tabs: Array<"Summary" | "Commitments" | "Cashflow" | "Carry Forward"> =
-    ["Summary", "Commitments", "Cashflow", "Carry Forward"];
+  const tabs: Array<"Summary" | "Carry Forward"> = ["Summary", "Carry Forward"];
 
   return (
     <div className="p-4 space-y-4">
@@ -568,297 +470,6 @@ const PDApprover = () => {
             </div>
           )}
 
-          {activeTab === "Commitments" && (
-            <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
-              <div className="max-h-175 overflow-auto">
-                <table className="table table-zebra table-xs w-full text-[11px]">
-                  <thead className="sticky top-0 z-30">
-                    <tr className="bg-red-500 text-white text-[11px]">
-                      <th colSpan={2} className="text-center border">
-                        General
-                      </th>
-                      <th colSpan={2} className="text-center border">
-                        Total
-                      </th>
-                      <th colSpan={24} className="text-center border">
-                        Commitment Capex
-                      </th>
-                      <th colSpan={24} className="text-center border">
-                        Commitment Revex
-                      </th>
-                    </tr>
-                    <tr className="bg-slate-100 text-slate-800 text-[11px]">
-                      <th className="border border-slate-300 font-medium w-[320px] min-w-[320px]">
-                        Description
-                      </th>
-                      <th className="border border-slate-300 font-medium w-65 min-w-65">
-                        Basis
-                      </th>
-                      <th className="border border-slate-300 font-medium">
-                        Total Value
-                      </th>
-                      <th className="border border-slate-300 font-medium">
-                        Total FY1
-                      </th>
-                      {subCols.map((col) => (
-                        <th
-                          key={`comm-${col}`}
-                          className="border border-slate-300 font-medium whitespace-nowrap"
-                        >
-                          {col}
-                        </th>
-                      ))}
-                      <th className="border border-slate-300 font-medium">
-                        Total Commitment <br /> Revex
-                      </th>
-                      <th className="border border-slate-300 font-medium">
-                        Total Commitment <br /> Revex FY1
-                      </th>
-                      {subCols.map((col) => (
-                        <th
-                          key={`comm-r-${col}`}
-                          className="border border-slate-300 font-medium whitespace-nowrap"
-                        >
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row) => (
-                      <tr key={row.PDDetailId} className="text-[11px]">
-                        <td className="border border-slate-200 w-[320px] min-w-[320px] whitespace-normal leading-4">
-                          {row.Description}
-                        </td>
-                        <td className="border border-slate-200 w-55 min-w-55 whitespace-normal leading-4">
-                          {row.Basis}
-                        </td>
-                        <td className="border border-slate-200 text-right">
-                          {getGrandTotal(row, "CommCapex").toFixed(2)}
-                        </td>
-                        <td className="border border-slate-200 text-right">
-                          {getFY1Total(row, "CommCapex").toFixed(2)}
-                        </td>
-                        {commCapexFields.map((f) => (
-                          <td
-                            key={f}
-                            className="border border-slate-200 text-right"
-                          >
-                            {row[f] ?? 0}
-                          </td>
-                        ))}
-                        <td className="border border-slate-200 text-right">
-                          {getGrandTotal(row, "CommRevex").toFixed(2)}
-                        </td>
-                        <td className="border border-slate-200 text-right">
-                          {getFY1Total(row, "CommRevex").toFixed(2)}
-                        </td>
-                        {commRevexFields.map((f) => (
-                          <td
-                            key={f}
-                            className="border border-slate-200 text-right"
-                          >
-                            {row[f] ?? 0}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot className="bg-slate-200 font-semibold text-[11px]">
-                    <tr>
-                      <td
-                        colSpan={2}
-                        className="border border-slate-300 text-right"
-                      >
-                        Total
-                      </td>
-                      <td className="border border-slate-300 text-right">
-                        {summary.commCapex.toFixed(2)}
-                      </td>
-                      <td className="border border-slate-300 text-right">
-                        {(
-                          getTotal("CommCapex_H1FY1") +
-                          getTotal("CommCapex_H2FY1")
-                        ).toFixed(2)}
-                      </td>
-                      {commCapexFields.map((field) => (
-                        <td
-                          key={field}
-                          className="border border-slate-300 text-right"
-                        >
-                          {getTotal(field).toFixed(2)}
-                        </td>
-                      ))}
-                      <td className="border border-slate-300 text-right">
-                        {summary.commRevex.toFixed(2)}
-                      </td>
-                      <td className="border border-slate-300 text-right">
-                        {(
-                          getTotal("CommRevex_H1FY1") +
-                          getTotal("CommRevex_H2FY1")
-                        ).toFixed(2)}
-                      </td>
-                      {commRevexFields.map((field) => (
-                        <td
-                          key={field}
-                          className="border border-slate-300 text-right"
-                        >
-                          {getTotal(field).toFixed(2)}
-                        </td>
-                      ))}
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "Cashflow" && (
-            <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
-              <div className="max-h-175 overflow-auto">
-                <table className="table table-zebra table-xs w-full text-[11px]">
-                  <thead className="sticky top-0 z-30">
-                    <tr className="bg-red-500 text-white text-[11px]">
-                      <th colSpan={2} className="text-center border">
-                        General
-                      </th>
-                      <th colSpan={2} className="text-center border">
-                        Total
-                      </th>
-                      <th colSpan={24} className="text-center border">
-                        Cash Flow Capex
-                      </th>
-                      <th colSpan={24} className="text-center border">
-                        Cash Flow Revex
-                      </th>
-                    </tr>
-                    <tr className="bg-slate-100 text-slate-800 text-[11px]">
-                      <th className="border border-slate-300 font-medium w-[320px] min-w-[320px]">
-                        Description
-                      </th>
-                      <th className="border border-slate-300 font-medium w-65 min-w-65">
-                        Basis
-                      </th>
-                      <th className="border border-slate-300 font-medium">
-                        Total Value
-                      </th>
-                      <th className="border border-slate-300 font-medium">
-                        Total FY1
-                      </th>
-                      {subCols.map((col) => (
-                        <th
-                          key={`cash-${col}`}
-                          className="border border-slate-300 font-medium whitespace-nowrap"
-                        >
-                          {col}
-                        </th>
-                      ))}
-
-                      <th className="border border-slate-300 font-medium">
-                        Total CashFlow <br /> Revex
-                      </th>
-                      <th className="border border-slate-300 font-medium">
-                        Total CashFlow <br /> Revex FY1
-                      </th>
-                      {subCols.map((col) => (
-                        <th
-                          key={`cash-r-${col}`}
-                          className="border border-slate-300 font-medium whitespace-nowrap"
-                        >
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row) => (
-                      <tr key={row.PDDetailId} className="text-[11px]">
-                        <td className="border border-slate-200 w-[320px] min-w-[320px] whitespace-normal leading-4">
-                          {row.Description}
-                        </td>
-                        <td className="border border-slate-200 w-55 min-w-55 whitespace-normal leading-4">
-                          {row.Basis}
-                        </td>
-                        <td className="border border-slate-200 text-right">
-                          {getGrandTotal(row, "CashCapex").toFixed(2)}
-                        </td>
-                        <td className="border border-slate-200 text-right">
-                          {getFY1Total(row, "CashCapex").toFixed(2)}
-                        </td>
-                        {cashCapexFields.map((f) => (
-                          <td
-                            key={f}
-                            className="border border-slate-200 text-right"
-                          >
-                            {row[f] ?? 0}
-                          </td>
-                        ))}
-                        <td className="border border-slate-200 text-right">
-                          {getGrandTotal(row, "CashRevex").toFixed(2)}
-                        </td>
-                        <td className="border border-slate-200 text-right">
-                          {getFY1Total(row, "CashRevex").toFixed(2)}
-                        </td>
-                        {cashRevexFields.map((f) => (
-                          <td
-                            key={f}
-                            className="border border-slate-200 text-right"
-                          >
-                            {row[f] ?? 0}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot className="bg-slate-200 font-semibold text-[11px]">
-                    <tr>
-                      <td
-                        colSpan={2}
-                        className="border border-slate-300 text-right"
-                      >
-                        Total
-                      </td>
-                      <td className="border border-slate-300 text-right">
-                        {summary.cashCapex.toFixed(2)}
-                      </td>
-                      <td className="border border-slate-300 text-right">
-                        {(
-                          getTotal("CashCapex_H1FY1") +
-                          getTotal("CashCapex_H2FY1")
-                        ).toFixed(2)}
-                      </td>
-                      {cashCapexFields.map((field) => (
-                        <td
-                          key={field}
-                          className="border border-slate-300 text-right"
-                        >
-                          {getTotal(field).toFixed(2)}
-                        </td>
-                      ))}
-                      <td className="border border-slate-300 text-right">
-                        {summary.cashRevex.toFixed(2)}
-                      </td>
-                      <td className="border border-slate-300 text-right">
-                        {(
-                          getTotal("CashRevex_H1FY1") +
-                          getTotal("CashRevex_H2FY1")
-                        ).toFixed(2)}
-                      </td>
-                      {cashRevexFields.map((field) => (
-                        <td
-                          key={field}
-                          className="border border-slate-300 text-right"
-                        >
-                          {getTotal(field).toFixed(2)}
-                        </td>
-                      ))}
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          )}
-
           {activeTab === "Carry Forward" && (
             <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
               <div className="max-h-175 overflow-auto">
@@ -904,8 +515,29 @@ const PDApprover = () => {
                           <td className="border border-slate-200 text-right">
                             {row.cashFlowAmt ?? row.CashFlowAmt ?? "0"}
                           </td>
-                          <td className="border border-slate-200 text-right">
-                            {row.actualSpent ?? row.ActualSpent ?? "0"}
+                          <td className="border border-slate-200">
+                            <div className="flex items-center gap-2 ">
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={row.actualSpent ?? ""}
+                                className="input input-xs w-full"
+                                onChange={(e) =>
+                                  handleActualSpentChange(
+                                    row.id ?? row.Id,
+                                    e.target.value,
+                                  )
+                                }
+                              />
+
+                              <button
+                                type="button"
+                                className="btn btn-xs bg-red-500 text-white hover:bg-red-600"
+                                onClick={() => handleActualSpentSave(row)}
+                              >
+                                Save
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -929,6 +561,7 @@ const PDApprover = () => {
                         >
                           Total
                         </td>
+
                         <td className="border border-slate-300 text-right">
                           {carryForwardRows
                             .reduce(
@@ -941,12 +574,24 @@ const PDApprover = () => {
                             )
                             .toFixed(2)}
                         </td>
+
                         <td className="border border-slate-300 text-right">
                           {carryForwardRows
                             .reduce(
                               (sum, row) =>
                                 sum +
                                 Number(row.cashFlowAmt ?? row.CashFlowAmt ?? 0),
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce(
+                              (sum, row) =>
+                                sum +
+                                Number(row.actualSpent ?? row.ActualSpent ?? 0),
                               0,
                             )
                             .toFixed(2)}
@@ -1032,4 +677,4 @@ const PDApprover = () => {
   );
 };
 
-export default PDApprover;
+export default WBSActualSpent;

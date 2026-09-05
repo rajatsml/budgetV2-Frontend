@@ -18,6 +18,7 @@ type AuthUser = {
   deptCode: string;
   deptNameShort: string;
   gradeCode: string;
+  isBudgetManager: boolean;
 
   roles: UserRole[];
 
@@ -92,6 +93,7 @@ const useUserStore = create<UserState>((set, get) => ({
       deptCode,
       deptNameShort,
       gradeCode,
+      isBudgetManager,
       roles = [],
     } = data;
 
@@ -115,7 +117,7 @@ const useUserStore = create<UserState>((set, get) => ({
       deptCode,
       deptNameShort,
       gradeCode,
-
+      isBudgetManager,
       roles,
 
       // derived frontend role

@@ -21,6 +21,8 @@ import ProjectDetails from "./components/dashboard/ProjectDetails";
 import AddProjectPD from "./components/project/AddProjectPD";
 import PDInputs from "./components/user/PDInputs";
 import PostedProjects from "./components/user/PostedProjects";
+import WBSProjects from "./components/user/WBSProjects";
+import WBSActualSpent from "./components/user/WBSActualSpent";
 
 function App() {
   return (
@@ -99,6 +101,26 @@ function App() {
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <PDApprover />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/pd-budget-manager-projects"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <WBSProjects />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/wbs-actual-spent"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <WBSActualSpent />
               <Footer />
             </RoleProtectedRoute>
           }
