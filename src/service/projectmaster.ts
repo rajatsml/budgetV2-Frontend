@@ -396,6 +396,73 @@ const GetBudgetManagerProjects = async (userid: string) => {
   }
 };
 
+const GetProjectsDropdown = async (FiYear: string) => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/Dropdowns/7`,
+      {
+        params: {
+          search: FiYear,
+          page: 1,
+          pageSize: 100,
+        },
+      },
+    );
+    return response.data?.items || response.data || [];
+  } catch (error) {
+    console.error("Error in fetching Project Names dropdown:", error);
+    return [];
+  }
+};
+
+const GetBudgetedByProject = async (projectId: string) => {
+  const response = await api.post(
+    `${import.meta.env.VITE_API_URL}/api/AFCC-budgeted/ManageAFCCBudgeted`,
+    {
+      type: 1,
+      projectId,
+    },
+  );
+
+  return response.data;
+};
+
+const InsertBudgeted = async (payload: any) => {
+  const response = await api.post(
+    `${import.meta.env.VITE_API_URL}/api/AFCC-budgeted/ManageAFCCBudgeted`,
+    {
+      type: 2,
+      ...payload,
+    },
+  );
+
+  return response.data;
+};
+
+const UpdateBudgeted = async (payload: any) => {
+  const response = await api.post(
+    `${import.meta.env.VITE_API_URL}/api/AFCC-budgeted/ManageAFCCBudgeted`,
+    {
+      type: 3,
+      ...payload,
+    },
+  );
+
+  return response.data;
+};
+
+const DeleteBudgeted = async (budgetedId: number) => {
+  const response = await api.post(
+    `${import.meta.env.VITE_API_URL}/api/AFCC-budgeted/ManageAFCCBudgeted`,
+    {
+      type: 4,
+      budgetedId,
+    },
+  );
+
+  return response.data;
+};
+
 export {
   FetchAllProjectsOfUser,
   CreateProject,
@@ -406,6 +473,7 @@ export {
   GetDropdownData,
   GetUserProjects,
   GetBudgetManagerProjects,
+  GetProjectsDropdown,
 
   // PD Master
   InitializePDMaster,
@@ -431,4 +499,10 @@ export {
   GetDashboardSummary,
   GetProjectHierarchy,
   GetBudgetDashboardDetails,
+
+  // AFCC SHEET
+  GetBudgetedByProject,
+  InsertBudgeted,
+  UpdateBudgeted,
+  DeleteBudgeted,
 };
