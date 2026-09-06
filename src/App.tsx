@@ -6,11 +6,7 @@ import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import AddProject from "./components/project/AddProject";
 import AllProjects from "./components/project/AllProjects";
-import NewPD from "./components/pd/NewPD";
-import NonNewPD from "./components/nonpd/NonNewPD";
-import PDProject from "./components/pd/PDProject";
-import NonPD2 from "./components/nonpd/NonPD2";
-import PDForm from "./components/pd/PDForm";
+
 import MyProjects from "./components/user/MyProjects";
 import PDProjectDetail from "./components/user/PDProjectDetail";
 import RoleProtectedRoute from "./RoleProtectedRoute";
@@ -23,6 +19,8 @@ import PDInputs from "./components/user/PDInputs";
 import PostedProjects from "./components/user/PostedProjects";
 import WBSProjects from "./components/user/WBSProjects";
 import WBSActualSpent from "./components/user/WBSActualSpent";
+import AFCCSheet from "./components/dashboard/AFCCSheet";
+import AFCCSummary from "./components/dashboard/AFCCSummary";
 
 function App() {
   return (
@@ -52,23 +50,22 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
-          path="/addproject/:projectId?"
+          path="/afcc"
           element={
             <RoleProtectedRoute allowedRoles={["Admin"]}>
               <NavBar />
-              <AddProject />
+              <AFCCSheet />
               <Footer />
             </RoleProtectedRoute>
           }
         />
         <Route
-          path="/project-detail"
+          path="/afcc-summary"
           element={
             <RoleProtectedRoute allowedRoles={["Admin"]}>
               <NavBar />
-              <ProjectDetails />
+              <AFCCSummary />
               <Footer />
             </RoleProtectedRoute>
           }
@@ -127,27 +124,6 @@ function App() {
         />
 
         <Route
-          path="/nonpd-project"
-          element={
-            <RoleProtectedRoute allowedRoles={["User"]}>
-              <NavBar />
-              <NonPDProjectDetail />
-              <Footer />
-            </RoleProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/nonpd-project-approver"
-          element={
-            <RoleProtectedRoute allowedRoles={["User"]}>
-              <NavBar />
-              <NonPDApprover />
-              <Footer />
-            </RoleProtectedRoute>
-          }
-        />
-        <Route
           path="/posted-projects"
           element={
             <RoleProtectedRoute allowedRoles={["User"]}>
@@ -174,16 +150,6 @@ function App() {
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <AddProjectPD />
-              <Footer />
-            </RoleProtectedRoute>
-          }
-        />
-        <Route
-          path="/pd-form"
-          element={
-            <RoleProtectedRoute allowedRoles={["Admin"]}>
-              <NavBar />
-              <PDInputs />
               <Footer />
             </RoleProtectedRoute>
           }

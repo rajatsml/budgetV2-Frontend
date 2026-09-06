@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import useUserStore from "../store/userStore";
 import {
   LayoutDashboard,
@@ -14,7 +15,10 @@ import {
 const NavBar = () => {
   const logout = useUserStore((s: any) => s.logout);
   const user = useUserStore((s: any) => s.user);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const department = useUserStore((s: any) => s.department);
+
+  const [showProjectsMenu, setShowProjectsMenu] = useState(false);
 
   const isAdmin = user?.role === "Admin";
   const isUser = user?.role === "User";
@@ -28,6 +32,20 @@ const NavBar = () => {
     logout();
     navigate("/login");
   };
+
+  useEffect(() => {
+    const closeMenu = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setShowProjectsMenu(false);
+      }
+    };
+
+    document.addEventListener("click", closeMenu);
+    return () => document.removeEventListener("click", closeMenu);
+  }, []);
 
   const navLinkClass = (path: string) =>
     `flex items-center gap-2 rounded px-4 py-2 text-sm font-medium transition-all duration-200 ${
@@ -55,13 +73,38 @@ const NavBar = () => {
                   <LayoutDashboard size={16} />
                   Dashboard
                 </Link>
-                <Link
-                  to="/allprojects"
-                  className={navLinkClass("/allprojects")}
-                >
-                  <FolderKanban size={16} />
-                  All Projects
-                </Link>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowProjectsMenu(!showProjectsMenu)}
+                    className=" hover:cursor-pointer flex items-center gap-2 rounded px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  >
+                    <FolderKanban size={16} />
+                    Project Views
+                    {showProjectsMenu ? (
+                      <ChevronDown size={14} />
+                    ) : (
+                      <ChevronRight size={14} />
+                    )}
+                  </button>
+
+                  {showProjectsMenu && (
+                    <div className="absolute left-0 top-full mt-2 w-40 rounded border border-slate-200 bg-white shadow-lg z-50 p-2">
+                      <Link
+                        to="/afcc"
+                        className="block px-4 py-2 text-sm hover:bg-slate-100"
+                      >
+                        AFCC Sheet
+                      </Link>
+
+                      <Link
+                        to="/afcc-summary"
+                        className="block px-4 py-2 text-sm hover:bg-slate-100"
+                      >
+                        AFCC Summary
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </>
             )}
 
