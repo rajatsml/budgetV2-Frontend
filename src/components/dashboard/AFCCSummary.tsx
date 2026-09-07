@@ -135,15 +135,15 @@ const AFCCSummary = () => {
                   <th className="border-2 border-black w-55">Cost in cr</th>
 
                   <th colSpan={3} className="border-2 border-black text-center">
-                    Spent till FY 26
+                    Spent till FY {financialYear.split("-")[0]}
                   </th>
 
                   <th colSpan={4} className="border-2 border-black text-center">
-                    Proposed for approval FY 27
+                    Proposed for approval FY 1
                   </th>
 
                   <th className="border-2 border-black text-center">
-                    FY 28 onwards
+                    FY 2 onwards
                   </th>
 
                   <th
@@ -252,7 +252,7 @@ const AFCCSummary = () => {
             </table>
 
             {/* BOTTOM TABLE */}
-            <div className="mt-14 w-fit">
+            {/* <div className="mt-14 w-fit">
               <table className="border-collapse text-sm min-w-135">
                 <tbody>
                   <tr>
@@ -317,7 +317,7 @@ const AFCCSummary = () => {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </div> */}
           </div>
         </div>
       ) : (

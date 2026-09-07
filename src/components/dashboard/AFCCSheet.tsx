@@ -356,11 +356,11 @@ const AFCCSheet = () => {
                     <thead>
                       <tr className="bg-red-600 text-white font-bold px-2 py-1">
                         <th className="border  border-black">4. Budgeted</th>
-                        <th className="border  border-black">FY29</th>
-                        <th className="border  border-black">FY30</th>
-                        <th className="border  border-black">FY31</th>
-                        <th className="border  border-black">FY32</th>
-                        <th className="border  border-black">FY33</th>
+                        <th className="border  border-black">FY 1</th>
+                        <th className="border  border-black">FY 2</th>
+                        <th className="border  border-black">FY 3</th>
+                        <th className="border  border-black">FY 4</th>
+                        <th className="border  border-black">FY 5</th>
                         <th className="border  border-black">Total</th>
                         <th className="border  border-black">Action</th>
                       </tr>
@@ -465,7 +465,7 @@ const AFCCSheet = () => {
 
                         <td className="border text-center">
                           <button
-                            className="btn btn-success btn-xs"
+                            className="btn btn-neutral btn-xs"
                             onClick={handleSaveBudgeted}
                           >
                             Save
@@ -618,14 +618,14 @@ const AFCCSheet = () => {
                               {isEditing ? (
                                 <div className="flex justify-center gap-1">
                                   <button
-                                    className="btn btn-success btn-xs"
+                                    className="btn btn-neutral btn-xs"
                                     onClick={() => handleUpdate(row.BudgetedId)}
                                   >
                                     Update
                                   </button>
 
                                   <button
-                                    className="btn btn-secondary btn-xs"
+                                    className="btn btn-xs"
                                     onClick={() => {
                                       setEditingId(null);
                                       setEditData({});
@@ -637,14 +637,14 @@ const AFCCSheet = () => {
                               ) : (
                                 <div className="flex justify-center gap-1">
                                   <button
-                                    className="btn btn-warning btn-xs"
+                                    className="btn btn-neutral btn-xs"
                                     onClick={() => handleEdit(row)}
                                   >
                                     Edit
                                   </button>
 
                                   <button
-                                    className="btn btn-error btn-xs"
+                                    className="btn btn-xs"
                                     onClick={() => handleDelete(row.BudgetedId)}
                                   >
                                     Delete
@@ -668,12 +668,14 @@ const AFCCSheet = () => {
                   <table className="table table-xs w-full">
                     <thead className="bg-red-600 text-white">
                       <tr>
-                        <th>S</th>
+                        <th>SNo</th>
                         <th>Details</th>
                         <th>Total</th>
-                        <th>FY27</th>
-                        <th>FY28</th>
-                        <th>FY29</th>
+                        <th>FY 1</th>
+                        <th>FY 2</th>
+                        <th>FY 3</th>
+                        <th>FY 4</th>
+                        <th>FY 5</th>
                       </tr>
                     </thead>
 
@@ -681,6 +683,8 @@ const AFCCSheet = () => {
                       <tr>
                         <td className="border">1</td>
                         <td className="border">PD</td>
+                        <td className="border"></td>
+                        <td className="border"></td>
                         <td className="border"></td>
                         <td className="border"></td>
                         <td className="border"></td>
@@ -694,11 +698,15 @@ const AFCCSheet = () => {
                         <td className="border"></td>
                         <td className="border"></td>
                         <td className="border"></td>
+                        <td className="border"></td>
+                        <td className="border"></td>
                       </tr>
 
                       <tr>
                         <td className="border">3</td>
                         <td className="border">CME Bus</td>
+                        <td className="border"></td>
+                        <td className="border"></td>
                         <td className="border"></td>
                         <td className="border"></td>
                         <td className="border"></td>
@@ -709,6 +717,8 @@ const AFCCSheet = () => {
                         <td colSpan={2} className="border font-bold">
                           Total
                         </td>
+                        <td className="border">0.00</td>
+                        <td className="border">0.00</td>
                         <td className="border">0.00</td>
                         <td className="border">0.00</td>
                         <td className="border">0.00</td>
@@ -730,9 +740,11 @@ const AFCCSheet = () => {
                         <th>S</th>
                         <th>Details</th>
                         <th>Total</th>
-                        <th>FY27</th>
-                        <th>FY28</th>
-                        <th>FY29</th>
+                        <th>FY 1</th>
+                        <th>FY 2</th>
+                        <th>FY 3</th>
+                        <th>FY 4</th>
+                        <th>FY 5</th>
                       </tr>
                     </thead>
 
@@ -744,12 +756,16 @@ const AFCCSheet = () => {
                         <td className="border"></td>
                         <td className="border"></td>
                         <td className="border"></td>
+                        <td className="border"></td>
+                        <td className="border"></td>
                       </tr>
 
                       <tr>
                         <td colSpan={2} className="border font-bold">
                           Total
                         </td>
+                        <td className="border">0.00</td>
+                        <td className="border">0.00</td>
                         <td className="border">0.00</td>
                         <td className="border">0.00</td>
                         <td className="border">0.00</td>
