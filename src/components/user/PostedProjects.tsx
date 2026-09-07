@@ -104,7 +104,9 @@ const PostedProjects = () => {
                 <th>Status</th>
                 <th>Financial Year</th>
                 <th>Duration</th>
-                <th>Action</th>
+                <th>Creation Date</th>
+                <th>Modification Date</th>
+                <th>View</th>
               </tr>
             </thead>
 
@@ -135,13 +137,15 @@ const PostedProjects = () => {
                       </div>
                     </div>
                   </td>
+                  <td>{formatDate(project.createdAt)}</td>
+                  <td>{formatDate(project.updatedAt)}</td>
 
                   <td>
                     <button
                       className="btn btn-sm bg-red-500 text-white hover:bg-red-600"
                       onClick={() => handleNavigation(project?.projectId)}
                     >
-                      View Details
+                      Project Details
                     </button>
                   </td>
                 </tr>

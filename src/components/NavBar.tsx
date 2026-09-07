@@ -116,15 +116,18 @@ const NavBar = () => {
                 </Link>
                 <Link to="/myprojects" className={navLinkClass("/myprojects")}>
                   <FolderKanban size={16} />
-                  My Projects
+                  Budget Inputs
                 </Link>
-                <Link
-                  to="/pd-budget-manager-projects"
-                  className={navLinkClass("/pd-budget-manager-projects")}
-                >
-                  <FolderKanban size={16} />
-                  Actual Spent Projects
-                </Link>
+                {user?.isBudgetManager && (
+                  <Link
+                    to="/pd-budget-manager-projects"
+                    className={navLinkClass("/pd-budget-manager-projects")}
+                  >
+                    <FolderKanban size={16} />
+                    Actual Spent Projects
+                  </Link>
+                )}
+
                 <Link
                   to="/posted-projects"
                   className={navLinkClass("/posted-projects")}
