@@ -4,22 +4,19 @@ import {
   GetDropdownData,
   GetProjectsDropdown,
   GetProjectById,
+  GetAFCCSummary,
+  type AFCCSummaryEntry,
 } from "../../service/projectmaster";
 const AFCCSummary = () => {
-  const departments = [
-    "PD / Validation",
-    "CDMM Bus",
-    "CDMM Chassis",
-    "CME Bus",
-    "CME Chassis",
-  ];
-
   const [financialYear, setFinancialYear] = useState("");
   const [project, setProject] = useState("");
 
   const [fiYears, setFiYears] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [projectDetails, setProjectDetails] = useState<any>(null);
+  const [summaryRows, setSummaryRows] = useState<AFCCSummaryEntry[]>([]);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   const fetchFiYears = async () => {
     try {
@@ -48,14 +45,51 @@ const AFCCSummary = () => {
   useEffect(() => {
     if (!project) {
       setProjectDetails(null);
+      setSummaryRows([]);
+      setSummaryError(null);
       return;
     }
 
-    GetProjectById(project).then(setProjectDetails).catch(console.error);
+    const fetchSummaryData = async () => {
+      setIsSummaryLoading(true);
+      setSummaryError(null);
+      try {
+        const [details, rows] = await Promise.all([
+          GetProjectById(project),
+          GetAFCCSummary(project),
+        ]);
+        setProjectDetails(details);
+        setSummaryRows(rows);
+      } catch (error) {
+        console.error("Error fetching AFCC summary data:", error);
+        setSummaryRows([]);
+        setSummaryError("Unable to load AFCC summary data.");
+      } finally {
+        setIsSummaryLoading(false);
+      }
+    };
+
+    fetchSummaryData();
   }, [project]);
 
+  const formatAmount = (value: number | undefined) =>
+    value === undefined || value === null || value === ""
+      ? "0.00"
+      : Number(value).toFixed(2);
+  const totalSummary = (
+    field: keyof Omit<AFCCSummaryEntry, "deptId" | "departmentName">,
+  ) => summaryRows.reduce((total, row) => total + Number(row[field] || 0), 0);
+  const getOverallOutlay = (row: AFCCSummaryEntry) =>
+    row.carryForward + row.fy1Total + row.fy2Onwards;
+
   return (
-    <section className="bg-base-200 min-h-screen p-4">
+    <section
+      className="bg-base-200 min-h-screen p-4"
+      aria-busy={isSummaryLoading}
+    >
+      <div className="sr-only" role="status">
+        {summaryError || (isSummaryLoading ? "Loading AFCC summary." : "")}
+      </div>
       {/* HEADER */}
       <div className="rounded p-4 flex items-center bg-white shadow gap-4 mb-4">
         <div className="flex items-center gap-2">
@@ -175,24 +209,36 @@ const AFCCSummary = () => {
                 </tr>
 
                 {/* Department Rows */}
-                {departments.map((dept, index) => (
-                  <tr key={index}>
+                {summaryRows.map((row) => (
+                  <tr key={`${row.deptId}-${row.departmentName}`}>
                     <td className="border border-gray-400 px-2 h-9 font-semibold">
-                      {dept}
+                      {row.departmentName}
                     </td>
 
                     <td className="border border-gray-400"></td>
                     <td className="border border-gray-400"></td>
                     <td className="border border-gray-400"></td>
 
-                    <td className="border border-gray-400"></td>
-                    <td className="border border-gray-400"></td>
-                    <td className="border border-gray-400"></td>
-                    <td className="border border-gray-400"></td>
+                    <td className="border border-gray-400">
+                      {formatAmount(row.carryForward)}
+                    </td>
+                    <td className="border border-gray-400">
+                      {formatAmount(row.fy1Capex)}
+                    </td>
+                    <td className="border border-gray-400">
+                      {formatAmount(row.fy1Revex)}
+                    </td>
+                    <td className="border border-gray-400">
+                      {formatAmount(row.fy1Total)}
+                    </td>
 
-                    <td className="border border-gray-400"></td>
+                    <td className="border border-gray-400">
+                      {formatAmount(row.fy2Onwards)}
+                    </td>
 
-                    <td className="border border-gray-400 bg-[#f7f0d2]"></td>
+                    <td className="border border-gray-400 bg-[#f7f0d2]">
+                      {formatAmount(getOverallOutlay(row))}
+                    </td>
                   </tr>
                 ))}
 
@@ -204,17 +250,24 @@ const AFCCSummary = () => {
                   <td className="border-2 border-black text-center">0.00</td>
                   <td className="border-2 border-black text-center">0.00</td>
 
-                  <td className="border-2 border-black text-center">0.00</td>
-                  <td className="border-2 border-black text-center">0.00</td>
-                  <td className="border-2 border-black text-center">0.00</td>
+                  <td className="border-2 border-black text-center">{formatAmount(totalSummary("carryForward"))}</td>
+                  <td className="border-2 border-black text-center">{formatAmount(totalSummary("fy1Capex"))}</td>
+                  <td className="border-2 border-black text-center">{formatAmount(totalSummary("fy1Revex"))}</td>
 
                   <td className="border-2 border-black text-center bg-[#f2b37d]">
-                    0.00
+                    {formatAmount(totalSummary("fy1Total"))}
                   </td>
 
-                  <td className="border-2 border-black text-center">0.00</td>
+                  <td className="border-2 border-black text-center">{formatAmount(totalSummary("fy2Onwards"))}</td>
 
-                  <td className="border-2 border-black text-center">0.00</td>
+                  <td className="border-2 border-black text-center">
+                    {formatAmount(
+                      summaryRows.reduce(
+                        (total, row) => total + getOverallOutlay(row),
+                        0,
+                      ),
+                    )}
+                  </td>
                 </tr>
 
                 {/* Contingency Provision */}

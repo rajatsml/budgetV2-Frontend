@@ -415,6 +415,141 @@ const GetProjectsDropdown = async (FiYear: string) => {
   }
 };
 
+export interface AFCCSheetSummary {
+  capital: number;
+  revenue: number;
+  carryForward: number;
+  totalOutlay: number;
+  askForCurrentYear: number;
+}
+
+export interface AFCCBreakupEntry {
+  deptId: string | number;
+  departmentName: string;
+  fy1: number;
+  fy2: number;
+  fy3: number;
+  fy4: number;
+  fy5: number;
+  total: number;
+}
+
+export interface AFCCSheetResponse {
+  afccSheet: AFCCSheetSummary;
+  capexBreakup: AFCCBreakupEntry[];
+  revenueBreakup: AFCCBreakupEntry[];
+}
+
+export interface AFCCSummaryEntry {
+  deptId: string | number;
+  departmentName: string;
+  carryForward: number;
+  fy1Capex: number;
+  fy1Revex: number;
+  fy1Total: number;
+  fy2Onwards: number;
+  overallOutlay: number;
+}
+
+const getResponseItems = <T,>(data: unknown): T[] => {
+  if (Array.isArray(data)) {
+    return data.flatMap((value) => getResponseItems<T>(value));
+  }
+  if (!data || typeof data !== "object") return [];
+
+  const response = data as Record<string, unknown>;
+  const keys = Object.keys(response).map((key) => key.toLowerCase());
+  const isRow = keys.some((key) =>
+    ["capital", "departmentname", "fy1capex", "fy1total"].includes(key),
+  );
+
+  return isRow
+    ? [data as T]
+    : Object.values(response).flatMap((value) => getResponseItems<T>(value));
+};
+
+const getField = (row: Record<string, unknown>, field: string) => {
+  const key = Object.keys(row).find(
+    (candidate) => candidate.toLowerCase() === field.toLowerCase(),
+  );
+  return key ? row[key] : undefined;
+};
+
+const toNumber = (value: unknown) => Number(value ?? 0);
+
+const mapAFCCBreakupEntry = (
+  row: Record<string, unknown>,
+): AFCCBreakupEntry => ({
+  deptId: (getField(row, "deptId") ?? "") as string | number,
+  departmentName: String(getField(row, "departmentName") ?? ""),
+  fy1: toNumber(getField(row, "fy1")),
+  fy2: toNumber(getField(row, "fy2")),
+  fy3: toNumber(getField(row, "fy3")),
+  fy4: toNumber(getField(row, "fy4")),
+  fy5: toNumber(getField(row, "fy5")),
+  total: toNumber(getField(row, "total")),
+});
+
+const mapAFCCSummaryEntry = (
+  row: Record<string, unknown>,
+): AFCCSummaryEntry => ({
+  deptId: (getField(row, "deptId") ?? "") as string | number,
+  departmentName: String(getField(row, "departmentName") ?? ""),
+  carryForward: toNumber(getField(row, "carryForward")),
+  fy1Capex: toNumber(getField(row, "fy1Capex")),
+  fy1Revex: toNumber(getField(row, "fy1Revex")),
+  fy1Total: toNumber(getField(row, "fy1Total")),
+  fy2Onwards: toNumber(getField(row, "fy2Onwards")),
+  overallOutlay: toNumber(getField(row, "overallOutlay")),
+});
+
+const GetAFCCSheetEntries = async (
+  projectId: string,
+): Promise<AFCCSheetResponse> => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/AFCC-budgeted/dashboard/${projectId}`,
+    );
+    const data = response.data as Record<string, unknown>;
+    const sheet = (data.afccSheet ?? {}) as Record<string, unknown>;
+    return {
+      afccSheet: {
+        capital: toNumber(getField(sheet, "capital")),
+        revenue: toNumber(getField(sheet, "revenue")),
+        carryForward: toNumber(getField(sheet, "carryForward")),
+        totalOutlay: toNumber(getField(sheet, "totalOutlay")),
+        askForCurrentYear: toNumber(getField(sheet, "askForCurrentYear")),
+      },
+      capexBreakup: getResponseItems<Record<string, unknown>>(
+        data.capexBreakup,
+      ).map(mapAFCCBreakupEntry),
+      revenueBreakup: getResponseItems<Record<string, unknown>>(
+        data.revenueBreakup,
+      ).map(mapAFCCBreakupEntry),
+    };
+  } catch (error) {
+    console.error("Error fetching AFCC sheet entries:", error);
+    throw error;
+  }
+};
+
+const GetAFCCSummary = async (
+  projectId: string,
+): Promise<AFCCSummaryEntry[]> => {
+  try {
+    const response = await api.get(
+      `${import.meta.env.VITE_API_URL}/api/AFCC-budgeted/AFCCSummary`,
+      { params: { projectId } },
+    );
+    return getResponseItems<Record<string, unknown>>(response.data).map(
+      mapAFCCSummaryEntry,
+    );
+  } catch (error) {
+    console.error("Error fetching AFCC summary:", error);
+    throw error;
+  }
+};
+
 const GetBudgetedByProject = async (projectId: string) => {
   const response = await api.post(
     `${import.meta.env.VITE_API_URL}/api/AFCC-budgeted/ManageAFCCBudgeted`,
@@ -501,6 +636,8 @@ export {
   GetBudgetDashboardDetails,
 
   // AFCC SHEET
+  GetAFCCSheetEntries,
+  GetAFCCSummary,
   GetBudgetedByProject,
   InsertBudgeted,
   UpdateBudgeted,

@@ -4,6 +4,9 @@ import {
   GetDropdownData,
   GetProjectsDropdown,
   GetProjectById,
+  GetAFCCSheetEntries,
+  type AFCCSheetResponse,
+  type AFCCBreakupEntry,
   GetBudgetedByProject,
   InsertBudgeted,
   UpdateBudgeted,
@@ -21,6 +24,9 @@ const AFCCSheet = () => {
   const [projectDetails, setProjectDetails] = useState<any>(null);
 
   const [budgetedRows, setBudgetedRows] = useState<any[]>([]);
+  const [afccData, setAfccData] = useState<AFCCSheetResponse | null>(null);
+  const [isAfccLoading, setIsAfccLoading] = useState(false);
+  const [afccError, setAfccError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const [editData, setEditData] = useState<any>({});
@@ -51,6 +57,20 @@ const AFCCSheet = () => {
       setBudgetedRows(data || []);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const fetchAfccEntries = async (projectId: string) => {
+    setIsAfccLoading(true);
+    setAfccError(null);
+    try {
+      setAfccData(await GetAFCCSheetEntries(projectId));
+    } catch (error) {
+      console.error("Error fetching AFCC entries:", error);
+      setAfccData(null);
+      setAfccError("Unable to load AFCC entries.");
+    } finally {
+      setIsAfccLoading(false);
     }
   };
 
@@ -162,6 +182,8 @@ const AFCCSheet = () => {
     const fetchProjectDetails = async () => {
       if (!project) {
         setProjectDetails(null);
+        setAfccData(null);
+        setAfccError(null);
         return;
       }
 
@@ -170,6 +192,7 @@ const AFCCSheet = () => {
 
         setProjectDetails(response);
         await fetchBudgetedData(project);
+        await fetchAfccEntries(project);
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -178,8 +201,23 @@ const AFCCSheet = () => {
     fetchProjectDetails();
   }, [project]);
 
+  const sheetSummary = afccData?.afccSheet;
+  const getAmount = (value: number | undefined) =>
+    value === undefined ? "0.00" : value.toFixed(2);
+  const calculatedSheetTotal =
+    (sheetSummary?.capital || 0) +
+    (sheetSummary?.revenue || 0) +
+    (sheetSummary?.carryForward || 0);
+  const breakupTotal = (
+    rows: AFCCBreakupEntry[],
+    field: keyof AFCCBreakupEntry,
+  ) => rows.reduce((total, row) => total + Number(row[field] || 0), 0);
+
   return (
-    <section className="bg-base-200 min-h-screen p-4">
+    <section className="bg-base-200 min-h-screen p-4" aria-busy={isAfccLoading}>
+      <div className="sr-only" role="status">
+        {afccError || (isAfccLoading ? "Loading AFCC entries." : "")}
+      </div>
       {/* HEADER */}
       <div className="rounded p-4 flex items-center bg-white shadow gap-4 mb-4">
         <div className="flex items-center gap-2">
@@ -245,9 +283,12 @@ const AFCCSheet = () => {
               <div className="col-span-5">
                 <div className="grid grid-cols-2">
                   <div className="p-2 border-r border-black">
-                    Project Outlay Cr.
+                    Project Outlay Cr. {getAmount(sheetSummary?.totalOutlay)}
                   </div>
-                  <div className="p-2">Ask for FY {financialYear} Cr.</div>
+                  <div className="p-2">
+                    Ask for FY {financialYear} Cr.{" "}
+                    {getAmount(sheetSummary?.askForCurrentYear)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -307,30 +348,36 @@ const AFCCSheet = () => {
                     <tbody>
                       <tr>
                         <td className="border">Capital SML</td>
-                        <td className="border"></td>
+                        <td className="border">
+                          {getAmount(sheetSummary?.capital)}
+                        </td>
                         <td className="border">Location</td>
                         <td className="border"></td>
                       </tr>
 
                       <tr>
                         <td className="border">Revenue SML</td>
-                        <td className="border"></td>
+                        <td className="border">
+                          {getAmount(sheetSummary?.revenue)}
+                        </td>
                         <td className="border">IRR / Pay Back</td>
                         <td className="border"></td>
                       </tr>
 
                       <tr>
                         <td className="border">Carry Forward</td>
-                        <td className="border"></td>
+                        <td className="border">
+                          {getAmount(sheetSummary?.carryForward)}
+                        </td>
                         <td className="border">SOP</td>
                         <td className="border"></td>
                       </tr>
 
                       <tr>
                         <td className="border">Spent till March</td>
-                        <td className="border"></td>
+                        <td className="border">0</td>
                         <td className="border">Material Cost</td>
-                        <td className="border"></td>
+                        <td className="border">0</td>
                       </tr>
 
                       <tr>
@@ -342,7 +389,9 @@ const AFCCSheet = () => {
 
                       <tr>
                         <td className="border font-semibold">Project Cost</td>
-                        <td className="border"></td>
+                        <td className="border">
+                          {getAmount(calculatedSheetTotal)}
+                        </td>
                         <td className="border"></td>
                         <td className="border"></td>
                       </tr>
@@ -680,49 +729,53 @@ const AFCCSheet = () => {
                     </thead>
 
                     <tbody>
-                      <tr>
-                        <td className="border">1</td>
-                        <td className="border">PD</td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                      </tr>
-
-                      <tr>
-                        <td className="border">2</td>
-                        <td className="border">CDM</td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                      </tr>
-
-                      <tr>
-                        <td className="border">3</td>
-                        <td className="border">CME Bus</td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                      </tr>
+                      {afccData?.capexBreakup.map((row, index) => (
+                        <tr key={`${row.deptId}-${row.departmentName}`}>
+                          <td className="border">{index + 1}</td>
+                          <td className="border">{row.departmentName}</td>
+                          <td className="border">{getAmount(row.total)}</td>
+                          <td className="border">{getAmount(row.fy1)}</td>
+                          <td className="border">{getAmount(row.fy2)}</td>
+                          <td className="border">{getAmount(row.fy3)}</td>
+                          <td className="border">{getAmount(row.fy4)}</td>
+                          <td className="border">{getAmount(row.fy5)}</td>
+                        </tr>
+                      ))}
 
                       <tr>
                         <td colSpan={2} className="border font-bold">
                           Total
                         </td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.capexBreakup || [], "total"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.capexBreakup || [], "fy1"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.capexBreakup || [], "fy2"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.capexBreakup || [], "fy3"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.capexBreakup || [], "fy4"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.capexBreakup || [], "fy5"),
+                          )}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -749,27 +802,56 @@ const AFCCSheet = () => {
                     </thead>
 
                     <tbody>
-                      <tr>
-                        <td className="border">1</td>
-                        <td className="border">PD</td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                        <td className="border"></td>
-                      </tr>
+                      {afccData?.revenueBreakup.map((row, index) => (
+                        <tr key={`${row.deptId}-${row.departmentName}`}>
+                          <td className="border">{index + 1}</td>
+                          <td className="border">{row.departmentName}</td>
+                          <td className="border">{getAmount(row.total)}</td>
+                          <td className="border">{getAmount(row.fy1)}</td>
+                          <td className="border">{getAmount(row.fy2)}</td>
+                          <td className="border">{getAmount(row.fy3)}</td>
+                          <td className="border">{getAmount(row.fy4)}</td>
+                          <td className="border">{getAmount(row.fy5)}</td>
+                        </tr>
+                      ))}
 
                       <tr>
                         <td colSpan={2} className="border font-bold">
                           Total
                         </td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
-                        <td className="border">0.00</td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(
+                              afccData?.revenueBreakup || [],
+                              "total",
+                            ),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.revenueBreakup || [], "fy1"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.revenueBreakup || [], "fy2"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.revenueBreakup || [], "fy3"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.revenueBreakup || [], "fy4"),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(afccData?.revenueBreakup || [], "fy5"),
+                          )}
+                        </td>
                       </tr>
                     </tbody>
                   </table>

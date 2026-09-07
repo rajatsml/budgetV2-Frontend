@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Building2,
   FolderOpen,
@@ -38,6 +38,7 @@ const AddProjectPD = () => {
   const [projectStatus, setProjectStatus] = useState<string>("");
   const [projectCreatedBy, setProjectCreatedBy] = useState<string>("");
   const { projectId } = useParams();
+  const navigate = useNavigate();
   const isEditMode = Boolean(projectId);
 
   const currentUserId = String(user?.user?.userId ?? "");
@@ -177,10 +178,12 @@ const AddProjectPD = () => {
       if (isEditMode) {
         response = await UpdateProject(projectId!, payload);
         alert("Project updated successfully");
+        navigate(`/posted-projects`);
       } else {
         response = await CreateProject(payload);
         alert("Project created successfully");
         resetFormFields();
+        navigate(`/posted-projects`);
       }
       console.log(response);
     } catch (error) {
