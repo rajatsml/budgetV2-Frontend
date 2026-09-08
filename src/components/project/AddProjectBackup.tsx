@@ -111,13 +111,10 @@ const AddProjectBackup = () => {
         departments: buildDepartmentsPayload(),
       };
 
-      console.log("PROJECT PAYLOAD", payload);
-
-      const response = isExistingProject
+      isExistingProject
         ? await UpdateProject(projectId!, payload)
         : await CreateProject(payload);
 
-      console.log("PROJECT SAVED", response);
       alert(
         isExistingProject
           ? "Project updated successfully"
@@ -270,7 +267,6 @@ const AddProjectBackup = () => {
       const data = await FetchDropDownData(
         `${import.meta.env.VITE_API_URL}/api/Dropdowns/2?search=${search}&page=1&pageSize=50`,
       );
-      console.log("GETEMPLOYEES DATA", data);
 
       setEmployees(data || []);
     } catch (error) {

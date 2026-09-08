@@ -73,9 +73,7 @@ const AFCCSummary = () => {
   }, [project]);
 
   const formatAmount = (value: number | undefined) =>
-    value === undefined || value === null || value === ""
-      ? "0.00"
-      : Number(value).toFixed(2);
+    value === undefined ? "0.00" : Number(value).toFixed(2);
   const totalSummary = (
     field: keyof Omit<AFCCSummaryEntry, "deptId" | "departmentName">,
   ) => summaryRows.reduce((total, row) => total + Number(row[field] || 0), 0);
@@ -250,15 +248,23 @@ const AFCCSummary = () => {
                   <td className="border-2 border-black text-center">0.00</td>
                   <td className="border-2 border-black text-center">0.00</td>
 
-                  <td className="border-2 border-black text-center">{formatAmount(totalSummary("carryForward"))}</td>
-                  <td className="border-2 border-black text-center">{formatAmount(totalSummary("fy1Capex"))}</td>
-                  <td className="border-2 border-black text-center">{formatAmount(totalSummary("fy1Revex"))}</td>
+                  <td className="border-2 border-black text-center">
+                    {formatAmount(totalSummary("carryForward"))}
+                  </td>
+                  <td className="border-2 border-black text-center">
+                    {formatAmount(totalSummary("fy1Capex"))}
+                  </td>
+                  <td className="border-2 border-black text-center">
+                    {formatAmount(totalSummary("fy1Revex"))}
+                  </td>
 
                   <td className="border-2 border-black text-center bg-[#f2b37d]">
                     {formatAmount(totalSummary("fy1Total"))}
                   </td>
 
-                  <td className="border-2 border-black text-center">{formatAmount(totalSummary("fy2Onwards"))}</td>
+                  <td className="border-2 border-black text-center">
+                    {formatAmount(totalSummary("fy2Onwards"))}
+                  </td>
 
                   <td className="border-2 border-black text-center">
                     {formatAmount(

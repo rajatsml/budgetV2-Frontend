@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { Calendar, FolderOpen, Clock3, FileCheck, Files } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Calendar, FolderOpen, FileCheck, Files } from "lucide-react";
+// import { useNavigate } from "react-router-dom";
 import { GetProjects, GetDashboardSummary } from "../../service/projectmaster";
 
 const AdminDashboard = () => {
-  const handleNavigation = (project: any) => {
-    navigate("/project-detail", {
-      state: {
-        project,
-      },
-    });
-  };
+  // const handleNavigation = (project: any) => {
+  //   navigate("/project-detail", {
+  //     state: {
+  //       project,
+  //     },
+  //   });
+  // };
 
   /**
    * Returns financial year in format:
@@ -29,7 +29,7 @@ const AdminDashboard = () => {
     return `${startYear}-${endYear}`;
   };
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [financialYear, setFinancialYear] = useState(getCurrentFinancialYear());
 
   const [financialYears, setFinancialYears] = useState<any[]>([]);
@@ -158,7 +158,7 @@ const AdminDashboard = () => {
 
       {/* Statistics */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-4">
         {/* Total Submitted Projects */}
 
         <div className="bg-white rounded shadow p-4">
@@ -203,7 +203,7 @@ const AdminDashboard = () => {
 
         {/* Pending With Dept */}
 
-        <div className="bg-white rounded shadow p-4">
+        {/* <div className="bg-white rounded shadow p-4">
           <div className="flex items-center gap-3">
             <div className="bg-yellow-100 p-2 rounded-lg">
               <Clock3 className="w-4 h-4 text-gray-800" />
@@ -221,7 +221,7 @@ const AdminDashboard = () => {
               <div className="text-sm font-medium">FY {financialYear}</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* PD Projects */}
 
@@ -278,7 +278,7 @@ const AdminDashboard = () => {
                   <th>Financial Year</th>
                   <th>Timeline</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  {/* <th>Action</th> */}
                 </tr>
               </thead>
 
@@ -328,14 +328,14 @@ const AdminDashboard = () => {
 
                       <td>{project.status}</td>
 
-                      <td>
+                      {/* <td>
                         <button
                           onClick={() => handleNavigation(project)}
                           className="btn btn-neutral btn-xs"
                         >
                           Know More
                         </button>
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 )}

@@ -23,8 +23,6 @@ const NavBar = () => {
   const isAdmin = user?.role === "Admin";
   const isUser = user?.role === "User";
 
-  console.log(user);
-
   const navigate = useNavigate();
   const location = useLocation();
 

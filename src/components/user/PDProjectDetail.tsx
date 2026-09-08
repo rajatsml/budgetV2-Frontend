@@ -210,14 +210,16 @@ const PDProjectDetail = () => {
 
   const data = location.state;
 
-  console.log(data);
-  console.log(data?.status);
-
   const canEdit = data?.status === "OPENED";
 
   const { user } = useUserStore();
 
   // const tabs = ["Commitments", "Cash Flow", "Carry Forward"];
+
+  //  FOR INPUT VALIDATION
+  const isValidNumber = (value: string) => {
+    return /^\d*\.?\d*$/.test(value);
+  };
 
   // ─────────────────────────────────────────────────────────
   // Calculation helpers
@@ -460,7 +462,6 @@ const PDProjectDetail = () => {
 
   const fetchPDDetails = async () => {
     try {
-      console.log(data?.projectID, data?.deptID);
       const response = await GetPDMaster(data?.projectID, data?.deptID);
       setRows(response);
     } catch (error) {
@@ -506,7 +507,6 @@ const PDProjectDetail = () => {
   const fetchFinancialYears = async () => {
     try {
       const response = await GetDropdownData("4");
-      console.log("Financial Years Response:", response);
       setAllFiYears(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Failed to fetch financial years", error);
@@ -539,8 +539,8 @@ const PDProjectDetail = () => {
     );
   };
 
-  const getTotal = (field: string) =>
-    rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
+  // const getTotal = (field: string) =>
+  //   rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
 
   // ─────────────────────────────────────────────────────────
   // Form handlers
@@ -551,6 +551,11 @@ const PDProjectDetail = () => {
     field: keyof FinancialValues,
     value: string,
   ) => {
+    if (!isValidNumber(value)) {
+      alert("Please enter a valid amount");
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [section]: {
@@ -572,6 +577,11 @@ const PDProjectDetail = () => {
     field: keyof FinancialValues,
     value: string,
   ) => {
+    if (!isValidNumber(value)) {
+      alert("Please enter a valid amount");
+      return;
+    }
+
     setCashFlowDrafts((previous) => {
       const row = rows.find((item) => item.PDDetailId === rowId);
       if (!row) return previous;
@@ -688,31 +698,31 @@ const PDProjectDetail = () => {
   //   }
   // };
 
-  const getGrandTotal = (prefix: string) =>
-    rows.reduce(
-      (sum, row) =>
-        sum +
-        Number(row[`${prefix}_H1FY1`] || 0) +
-        Number(row[`${prefix}_H2FY1`] || 0) +
-        Number(row[`${prefix}_H1FY2`] || 0) +
-        Number(row[`${prefix}_H2FY2`] || 0) +
-        Number(row[`${prefix}_H1FY3`] || 0) +
-        Number(row[`${prefix}_H2FY3`] || 0) +
-        Number(row[`${prefix}_H1FY4`] || 0) +
-        Number(row[`${prefix}_H2FY4`] || 0) +
-        Number(row[`${prefix}_H1FY5`] || 0) +
-        Number(row[`${prefix}_H2FY5`] || 0),
-      0,
-    );
+  // const getGrandTotal = (prefix: string) =>
+  //   rows.reduce(
+  //     (sum, row) =>
+  //       sum +
+  //       Number(row[`${prefix}_H1FY1`] || 0) +
+  //       Number(row[`${prefix}_H2FY1`] || 0) +
+  //       Number(row[`${prefix}_H1FY2`] || 0) +
+  //       Number(row[`${prefix}_H2FY2`] || 0) +
+  //       Number(row[`${prefix}_H1FY3`] || 0) +
+  //       Number(row[`${prefix}_H2FY3`] || 0) +
+  //       Number(row[`${prefix}_H1FY4`] || 0) +
+  //       Number(row[`${prefix}_H2FY4`] || 0) +
+  //       Number(row[`${prefix}_H1FY5`] || 0) +
+  //       Number(row[`${prefix}_H2FY5`] || 0),
+  //     0,
+  //   );
 
-  const getFY1Total = (prefix: string) =>
-    rows.reduce(
-      (sum, row) =>
-        sum +
-        Number(row[`${prefix}_H1FY1`] || 0) +
-        Number(row[`${prefix}_H2FY1`] || 0),
-      0,
-    );
+  // const getFY1Total = (prefix: string) =>
+  //   rows.reduce(
+  //     (sum, row) =>
+  //       sum +
+  //       Number(row[`${prefix}_H1FY1`] || 0) +
+  //       Number(row[`${prefix}_H2FY1`] || 0),
+  //     0,
+  //   );
 
   const changeTab = (tabIndex: number) => {
     setActiveTab(tabIndex);
@@ -721,8 +731,6 @@ const PDProjectDetail = () => {
   // const nextTab = async () => {
   //   const success = await savePDData();
   //   if (!success) return;
-
-  //   console.log("This is success - NEXT", success);
 
   //   if (activeTab < tabs.length - 1) {
   //     setActiveTab((prev) => prev + 1);
@@ -733,8 +741,6 @@ const PDProjectDetail = () => {
   // const prevTab = async () => {
   //   const success = await savePDData();
   //   if (!success) return;
-
-  //   console.log("This is success - PREV", success);
 
   //   if (activeTab > 0) {
   //     setActiveTab((prev) => prev - 1);
@@ -870,7 +876,6 @@ const PDProjectDetail = () => {
 
       if (editingRowId) {
         await UpdatePDMaster(payload, Number(editingRowId));
-        console.log("Row Updated");
       } else {
         if (!pdDetailId) {
           const response = await SavePDMaster(payload);
@@ -879,7 +884,6 @@ const PDProjectDetail = () => {
           const response = await UpdatePDMaster(payload, pdDetailId);
           setPDDetailId(response?.pdDetailId);
         }
-        console.log("Row Saved");
       }
 
       await fetchPDDetails();
@@ -2172,32 +2176,48 @@ const PDProjectDetail = () => {
                               </td>
                               <td className="min-w-45">
                                 <input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   min="0"
                                   step="any"
                                   className="input input-bordered input-xs w-full"
                                   value={carryForwardForm.commitmentAmt}
-                                  onChange={(event) =>
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+
+                                    if (!isValidNumber(value)) {
+                                      alert("Enter a valid amount");
+                                      return;
+                                    }
+
                                     setCarryForwardForm((previous) => ({
                                       ...previous,
-                                      commitmentAmt: event.target.value,
-                                    }))
-                                  }
+                                      commitmentAmt: value,
+                                    }));
+                                  }}
                                 />
                               </td>
                               <td className="min-w-45">
                                 <input
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   min="0"
                                   step="any"
                                   className="input input-bordered input-xs w-full"
                                   value={carryForwardForm.cashFlowAmt}
-                                  onChange={(event) =>
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+
+                                    if (!isValidNumber(value)) {
+                                      alert("Enter a valid amount");
+                                      return;
+                                    }
+
                                     setCarryForwardForm((previous) => ({
                                       ...previous,
-                                      cashFlowAmt: event.target.value,
-                                    }))
-                                  }
+                                      cashFlowAmt: value,
+                                    }));
+                                  }}
                                 />
                               </td>
                             </tr>

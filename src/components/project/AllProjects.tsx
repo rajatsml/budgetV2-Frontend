@@ -71,8 +71,6 @@ const AllProjects: React.FC<ProjectListProps> = ({ onEdit, onView }) => {
 
       const data = await GetProjects();
 
-      console.log("Projects API Response:", data);
-
       setProjects(data || []);
     } catch (error) {
       console.error("Error fetching projects:", error);

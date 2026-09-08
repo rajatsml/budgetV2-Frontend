@@ -591,7 +591,8 @@ const WBSActualSpent = () => {
                             .reduce(
                               (sum, row) =>
                                 sum +
-                                Number(row.actualSpent ?? row.ActualSpent ?? 0),
+                                (Number(row.actualSpent ?? row.ActualSpent) ||
+                                  0),
                               0,
                             )
                             .toFixed(2)}

@@ -193,9 +193,6 @@ const NonPDProjectDetail = () => {
 
   const data = location.state;
 
-  console.log(data);
-  console.log(data?.status);
-
   const canEdit = data?.status === "OPENED";
 
   const { user } = useUserStore();
@@ -289,8 +286,6 @@ const NonPDProjectDetail = () => {
 
   const fetchNonPDDetails = async () => {
     try {
-      console.log(data?.projectID, data?.deptID);
-
       const response = await GetNonPDMaster(data?.projectID, data?.deptID);
 
       setRows(response);
@@ -347,8 +342,6 @@ const NonPDProjectDetail = () => {
     const success = await saveNonPDData();
     if (!success) return;
 
-    console.log("This is success - NEXT", success);
-
     if (activeTab < tabs.length - 1) {
       setActiveTab((prev) => prev + 1);
     }
@@ -359,8 +352,6 @@ const NonPDProjectDetail = () => {
   const prevTab = async () => {
     const success = await saveNonPDData();
     if (!success) return;
-
-    console.log("This is success - NEXT", success);
 
     if (activeTab > 0) {
       setActiveTab((prev) => prev - 1);
@@ -392,8 +383,6 @@ const NonPDProjectDetail = () => {
 
       if (editingRowId) {
         await UpdateNonPDMaster(payload, Number(editingRowId));
-
-        console.log("Row Updated");
       } else {
         if (!nonpdDetailId) {
           const response = await SaveNonPDMaster(payload);
@@ -402,8 +391,6 @@ const NonPDProjectDetail = () => {
           const response = await UpdateNonPDMaster(payload, nonpdDetailId);
           setNonPDDetailId(response?.nonPDDetailId);
         }
-
-        console.log("Row Saved");
       }
 
       await fetchNonPDDetails();

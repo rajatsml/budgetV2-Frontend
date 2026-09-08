@@ -904,8 +904,12 @@ const PDApprover = () => {
                           <td className="border border-slate-200 text-right">
                             {row.cashFlowAmt ?? row.CashFlowAmt ?? "0"}
                           </td>
-                          <td className="border border-slate-200 text-right">
-                            {row.actualSpent ?? row.ActualSpent ?? "0"}
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(Number(row.actualSpent ?? row.ActualSpent))
+                              ? "0.0"
+                              : Number(
+                                  row.actualSpent ?? row.ActualSpent,
+                                ).toFixed(1)}
                           </td>
                         </tr>
                       ))
@@ -947,6 +951,17 @@ const PDApprover = () => {
                               (sum, row) =>
                                 sum +
                                 Number(row.cashFlowAmt ?? row.CashFlowAmt ?? 0),
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce(
+                              (sum, row) =>
+                                sum +
+                                (Number(row.actualSpent ?? row.ActualSpent) ||
+                                  0),
                               0,
                             )
                             .toFixed(2)}

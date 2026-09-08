@@ -19,8 +19,6 @@ const NonPDApprover = () => {
   const data = location.state;
   const { user } = useUserStore();
 
-  console.log("Location DATA", data);
-
   const isPendingWithCurrentUser =
     data?.status === "PENDING WITH APPROVER" &&
     data?.pendingWithUser?.toString() === user?.userId?.toString();

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { PlusSquare, Pencil, Trash2, ChevronRight } from "lucide-react";
-import MasterInfoNonPD from "./MasterInfoNonPD";
+// import { PlusSquare, Pencil, Trash2, ChevronRight } from "lucide-react";
+// import MasterInfoNonPD from "./MasterInfoNonPD";
 import NonPDHeader from "./NonPDHeader";
 
 type NonPDRow = {
@@ -362,13 +362,13 @@ const tabs = [
 ];
 
 const NonPD2 = () => {
-  const textInput = "input input-bordered input-sm w-56 min-w-80 mx-auto";
+  // const textInput = "input input-bordered input-sm w-56 min-w-80 mx-auto";
 
-  const numberInput =
-    "input input-bordered input-sm w-24 min-w-24 text-center mx-auto";
+  // const numberInput =
+  "input input-bordered input-sm w-24 min-w-24 text-center mx-auto";
   const rowCellClass = " align-middle";
-  const actionCellClass = "flex items-center justify-center py-2";
-  const actionButtonClass = "btn btn-sm min-w-[96px]";
+  // const actionCellClass = "flex items-center justify-center py-2";
+  // const actionButtonClass = "btn btn-sm min-w-[96px]";
   const [rows, setRows] = useState<NonPDRowWithId[]>([]);
   const [currentEntry, setCurrentEntry] = useState<NonPDRow>(initialRowState);
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
@@ -407,28 +407,28 @@ const NonPD2 = () => {
     setEditingRowId(null);
   };
 
-  const createRowId = () =>
-    `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  // const createRowId = () =>
+  //   `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  const handleSaveRow = () => {
-    if (editingRowId) {
-      setRows((previous) =>
-        previous.map((row) =>
-          row.id === editingRowId ? { ...row, ...currentEntry } : row,
-        ),
-      );
-    } else {
-      setRows((previous) => [
-        ...previous,
-        {
-          id: createRowId(),
-          ...currentEntry,
-        },
-      ]);
-    }
+  // const handleSaveRow = () => {
+  //   if (editingRowId) {
+  //     setRows((previous) =>
+  //       previous.map((row) =>
+  //         row.id === editingRowId ? { ...row, ...currentEntry } : row,
+  //       ),
+  //     );
+  //   } else {
+  //     setRows((previous) => [
+  //       ...previous,
+  //       {
+  //         id: createRowId(),
+  //         ...currentEntry,
+  //       },
+  //     ]);
+  //   }
 
-    resetEntry();
-  };
+  //   resetEntry();
+  // };
 
   const handleEditRow = (id: string) => {
     const rowToEdit = rows.find((row) => row.id === id);
@@ -450,7 +450,7 @@ const NonPD2 = () => {
     }
   };
 
-  const handleCancelEdit = () => resetEntry();
+  // const handleCancelEdit = () => resetEntry();
 
   const inputStyle =
     "w-full h-8  px-3 text-xs border border-slate-200 rounded-lg outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
@@ -721,7 +721,7 @@ const NonPD2 = () => {
             // disabled={activeTab === tabs.length - 1 || !isCurrentTabValid()}
           >
             Next
-            <ChevronRight />
+            {/* <ChevronRight /> */}
           </button>
 
           {/* {!isRowEmpty() && (
