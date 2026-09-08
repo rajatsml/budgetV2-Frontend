@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { Calendar, FolderOpen, FileCheck, Files } from "lucide-react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { GetProjects, GetDashboardSummary } from "../../service/projectmaster";
 
 const AdminDashboard = () => {
-  // const handleNavigation = (project: any) => {
-  //   navigate("/project-detail", {
-  //     state: {
-  //       project,
-  //     },
-  //   });
-  // };
+  const navigate = useNavigate();
+
+  const handleNavigation = (project: any) => {
+    navigate("/project-detail", {
+      state: {
+        project,
+      },
+    });
+  };
 
   /**
    * Returns financial year in format:
@@ -278,7 +280,7 @@ const AdminDashboard = () => {
                   <th>Financial Year</th>
                   <th>Timeline</th>
                   <th>Status</th>
-                  {/* <th>Action</th> */}
+                  <th>Action</th>
                 </tr>
               </thead>
 
@@ -328,14 +330,14 @@ const AdminDashboard = () => {
 
                       <td>{project.status}</td>
 
-                      {/* <td>
+                      <td>
                         <button
                           onClick={() => handleNavigation(project)}
                           className="btn btn-neutral btn-xs"
                         >
-                          Know More
+                          Project Status
                         </button>
-                      </td> */}
+                      </td>
                     </tr>
                   ))
                 )}

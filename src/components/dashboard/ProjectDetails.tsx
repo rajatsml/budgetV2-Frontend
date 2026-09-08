@@ -3,13 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Building2,
-  Layers,
-  TableProperties,
+  // Layers,
+  // TableProperties,
   AlertCircle,
 } from "lucide-react";
 import {
   GetProjectHierarchy,
-  GetBudgetDashboardDetails,
+  // GetBudgetDashboardDetails,
 } from "../../service/projectmaster";
 
 const ProjectDetails = () => {
@@ -21,17 +21,17 @@ const ProjectDetails = () => {
   const [loading, setLoading] = useState(false);
   const [departmentData, setDepartmentData] = useState<any[]>([]);
 
-  const hiddenKeys = [
-    "nonPDDetailId",
-    "projectId",
-    "recordId",
-    "isDeleted",
-    "draftStatus",
-    "id",
-    "deletedAt",
-    "deletedBy",
-    "pdDetailId",
-  ];
+  // const hiddenKeys = [
+  //   "nonPDDetailId",
+  //   "projectId",
+  //   "recordId",
+  //   "isDeleted",
+  //   "draftStatus",
+  //   "id",
+  //   "deletedAt",
+  //   "deletedBy",
+  //   "pdDetailId",
+  // ];
 
   useEffect(() => {
     if (!project?.projectId) return;
@@ -41,21 +41,10 @@ const ProjectDetails = () => {
   const loadProjectData = async () => {
     try {
       setLoading(true);
-      const hierarchyResponse = await GetProjectHierarchy(project.projectId);
 
-      const detailPromises = hierarchyResponse.map(async (dept: any) => {
-        const details = await GetBudgetDashboardDetails(
-          project.projectId,
-          dept.deptId,
-        );
-        return {
-          hierarchy: dept,
-          details: details || [],
-        };
-      });
+      const response = await GetProjectHierarchy(project.projectId);
 
-      const result = await Promise.all(detailPromises);
-      setDepartmentData(result);
+      setDepartmentData(response || []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -179,161 +168,51 @@ const ProjectDetails = () => {
       )}
 
       {/* Department Blocks */}
-      {!loading &&
-        departmentData.map((deptBlock: any, index: number) => {
-          const hierarchyInfo = deptBlock.hierarchy;
+      {!loading && (
+        <div className="bg-white rounded shadow overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-slate-200">
+            <h2 className="font-bold text-base text-gray-800">
+              Department Status Tracker
+            </h2>
+          </div>
 
-          return (
-            <div
-              key={index}
-              className="bg-white rounded shadow overflow-hidden border border-gray-100"
-            >
-              {/* Department Section Header */}
-              <div className="px-4 py-3 bg-gray-50 border-b border-slate-300 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-gray-600" />
-                  <h2 className="font-bold text-base text-gray-800">
-                    {hierarchyInfo.deptName}
-                  </h2>
-                </div>
-                <span className="text-xs bg-neutral text-white px-2 py-0.5 rounded font-medium">
-                  {deptBlock.details.length} Records Available
-                </span>
-              </div>
+          <div className="overflow-x-auto">
+            <table className="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Pending With</th>
+                </tr>
+              </thead>
 
-              <div className="p-4 space-y-6">
-                {/* Approval Hierarchy Structural Grid */}
-                <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                    Approval Hierarchy
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <div className="p-3 bg-base-200 rounded border border-gray-100">
-                      <div className="text-[10px] uppercase font-semibold text-gray-500">
-                        Maker
-                      </div>
-                      <div className="text-sm font-medium text-gray-800 mt-0.5">
-                        {hierarchyInfo.makerId || "-"}
-                      </div>
-                    </div>
-                    <div className="p-3 bg-base-200 rounded border border-gray-100">
-                      <div className="text-[10px] uppercase font-semibold text-gray-500">
-                        Approver 1
-                      </div>
-                      <div className="text-sm font-medium text-gray-800 mt-0.5">
-                        {hierarchyInfo.approver1 || "-"}
-                      </div>
-                    </div>
-                    <div className="p-3 bg-base-200 rounded border border-gray-100">
-                      <div className="text-[10px] uppercase font-semibold text-gray-500">
-                        Approver 2
-                      </div>
-                      <div className="text-sm font-medium text-gray-800 mt-0.5">
-                        {hierarchyInfo.approver2 || "-"}
-                      </div>
-                    </div>
-                    <div className="p-3 bg-base-200 rounded border border-gray-100">
-                      <div className="text-[10px] uppercase font-semibold text-gray-500">
-                        Approver 3
-                      </div>
-                      <div className="text-sm font-medium text-gray-800 mt-0.5">
-                        {hierarchyInfo.approver3 || "-"}
-                      </div>
-                    </div>
-                    <div className="p-3 bg-base-200 rounded border border-gray-100">
-                      <div className="text-[10px] uppercase font-semibold text-gray-500">
-                        Project Status
-                      </div>
-                      <div className="text-sm font-medium text-gray-800 mt-0.5">
-                        {hierarchyInfo.projectStatus || "-"}
-                      </div>
-                    </div>
-                    <div className="p-3 bg-base-200 rounded border border-gray-100">
-                      <div className="text-[10px] uppercase font-semibold text-gray-500">
-                        Pending With
-                      </div>
-                      <div className="text-sm font-medium text-gray-800 mt-0.5">
-                        {hierarchyInfo.pendingWith || "-"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <tbody>
+                {departmentData.map((dept: any, index: number) => (
+                  <tr key={index}>
+                    <td className="font-medium">{dept.deptName}</td>
 
-                {/* Dynamic Budget Data Matrix */}
-                <div>
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <TableProperties className="w-4 h-4 text-gray-500" />
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                      Budget Details
-                    </h3>
-                  </div>
+                    <td>
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusBadgeClass(
+                          dept.projectStatus,
+                        )}`}
+                      >
+                        {dept.projectStatus}
+                      </span>
+                    </td>
 
-                  {deptBlock.details.length === 0 ? (
-                    <div className="p-4 text-center border border-dashed rounded-lg text-sm text-gray-500 bg-gray-50">
-                      No active ledger mappings found for this functional group.
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
-                      <table className="table table-zebra table-sm w-full">
-                        <thead>
-                          <tr className="bg-gray-50 border-b border-gray-200 text-gray-700">
-                            <th className="font-semibold text-xs py-2">#</th>
-                            {Object.keys(deptBlock.details[0])
-                              // Filter out hidden columns from the headers
-                              .filter((key) => !hiddenKeys.includes(key))
-                              .map((key) => (
-                                <th
-                                  key={key}
-                                  className="font-semibold text-xs py-2"
-                                >
-                                  {key
-                                    .replace(/([A-Z])/g, " $1")
-                                    .replace(/^./, (str) => str.toUpperCase())}
-                                </th>
-                              ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {deptBlock.details.map(
-                            (record: any, rowIndex: number) => {
-                              // Filter the keys to exclude the hidden ones
-                              const visibleKeys = Object.keys(
-                                deptBlock.details[0],
-                              ).filter((key) => !hiddenKeys.includes(key));
-
-                              return (
-                                <tr
-                                  key={rowIndex}
-                                  className="hover:bg-gray-50/50 transition-colors"
-                                >
-                                  <td className="font-medium text-gray-500 text-xs">
-                                    {rowIndex + 1}
-                                  </td>
-                                  {visibleKeys.map((key) => (
-                                    <td
-                                      key={key}
-                                      className="whitespace-nowrap text-xs text-gray-700 py-2"
-                                    >
-                                      {record[key] === null ||
-                                      record[key] === undefined ||
-                                      record[key] === ""
-                                        ? "-"
-                                        : String(record[key])}
-                                    </td>
-                                  ))}
-                                </tr>
-                              );
-                            },
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+                    <td>
+                      {dept.pendingWith?.trim() && dept.pendingWith !== "-"
+                        ? dept.pendingWith
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

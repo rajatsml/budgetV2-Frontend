@@ -13,7 +13,7 @@ import RoleProtectedRoute from "./RoleProtectedRoute";
 import PDApprover from "./components/user/PDApprover";
 // import NonPDProjectDetail from "./components/user/NonPDProjectDetail";
 // import NonPDApprover from "./components/user/NonPDApprover";
-// import ProjectDetails from "./components/dashboard/ProjectDetails";
+import ProjectDetails from "./components/dashboard/ProjectDetails";
 import AddProjectPD from "./components/project/AddProjectPD";
 // import PDInputs from "./components/user/PDInputs";
 import PostedProjects from "./components/user/PostedProjects";
@@ -66,6 +66,16 @@ function App() {
             <RoleProtectedRoute allowedRoles={["Admin"]}>
               <NavBar />
               <AFCCSummary />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/project-detail"
+          element={
+            <RoleProtectedRoute allowedRoles={["Admin"]}>
+              <NavBar />
+              <ProjectDetails />
               <Footer />
             </RoleProtectedRoute>
           }
