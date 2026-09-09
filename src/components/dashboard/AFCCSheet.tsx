@@ -6,7 +6,6 @@ import {
   GetProjectById,
   GetAFCCSheetEntries,
   type AFCCSheetResponse,
-  type AFCCBreakupEntry,
   GetBudgetedByProject,
   InsertBudgeted,
   UpdateBudgeted,
@@ -208,10 +207,8 @@ const AFCCSheet = () => {
     (sheetSummary?.capital || 0) +
     (sheetSummary?.revenue || 0) +
     (sheetSummary?.carryForward || 0);
-  const breakupTotal = (
-    rows: AFCCBreakupEntry[],
-    field: keyof AFCCBreakupEntry,
-  ) => rows.reduce((total, row) => total + Number(row[field] || 0), 0);
+  const breakupTotal = (rows: any[], field: keyof any) =>
+    rows.reduce((total, row) => total + Number(row[field] || 0), 0);
 
   return (
     <section className="bg-base-200 min-h-screen p-4" aria-busy={isAfccLoading}>
@@ -310,10 +307,10 @@ const AFCCSheet = () => {
               {/* LEFT SECTION */}
               <div className="col-span-7 border-r border-black">
                 {/* Objective */}
-                <div className="border border-black">
-                  <div className="font-bold p-2">1. Objective :</div>
+                <div className="border border-black h-fit">
+                  <div className="font-bold p-2">1. Project Objective :</div>
 
-                  <div className="h-44 p-2">
+                  <div className=" p-2">
                     <textarea
                       className="textarea textarea-bordered w-full h-full bg-white"
                       value={projectDetails?.projectObjective || ""}
@@ -321,15 +318,30 @@ const AFCCSheet = () => {
                     />
                   </div>
                 </div>
+                {/* Objective */}
+                <div className="border border-black mt-4 h-fit">
+                  <div className="font-bold p-2">2. Project Scope :</div>
 
-                {/* Scope */}
-                <div className="border border-black mt-4">
-                  <div className="font-bold p-2">2. Brief / Scope :</div>
-
-                  <div className="h-72 p-2">
+                  <div className=" p-2">
                     <textarea
                       className="textarea textarea-bordered w-full h-full bg-white"
                       value={projectDetails?.projectScope || ""}
+                      readOnly
+                    />
+                  </div>
+                </div>
+
+                {/* Scope */}
+                <div className="border border-black mt-4 min-h-fit">
+                  <div className="font-bold p-2">
+                    3. Key Assumptions / Change Scope / Activities Currently
+                    Undertaken / Model :
+                  </div>
+
+                  <div className=" p-2">
+                    <textarea
+                      className="textarea textarea-bordered w-full h-full bg-white"
+                      value={projectDetails?.keyAssumptions || ""}
                       readOnly
                     />
                   </div>
@@ -341,13 +353,13 @@ const AFCCSheet = () => {
                 {/* PROJECT COST */}
                 <div>
                   <div className="bg-red-600 text-white font-bold px-2 py-1 border border-black">
-                    3. Project Cost
+                    4. Project Cost
                   </div>
 
                   <table className="table table-xs w-full">
                     <tbody>
                       <tr>
-                        <td className="border">Capital SML</td>
+                        <td className="border">Capex </td>
                         <td className="border">
                           {getAmount(sheetSummary?.capital)}
                         </td>
@@ -356,7 +368,7 @@ const AFCCSheet = () => {
                       </tr>
 
                       <tr>
-                        <td className="border">Revenue SML</td>
+                        <td className="border">Revex </td>
                         <td className="border">
                           {getAmount(sheetSummary?.revenue)}
                         </td>
@@ -404,7 +416,7 @@ const AFCCSheet = () => {
                   <table className="table table-xs w-full">
                     <thead>
                       <tr className="bg-red-600 text-white font-bold px-2 py-1">
-                        <th className="border  border-black">4. Budgeted</th>
+                        <th className="border  border-black">5. Budgeted</th>
                         <th className="border  border-black">FY 1</th>
                         <th className="border  border-black">FY 2</th>
                         <th className="border  border-black">FY 3</th>
@@ -709,19 +721,21 @@ const AFCCSheet = () => {
                 </div>
 
                 {/* CAPEX BREAKUP */}
-                <div className="mt-4">
-                  <div className="font-bold border px-2 py-1 bg-white">
-                    5. Capex Breakup
+                <div className="mt-4  overflow-x-scroll  ">
+                  <div className="font-bold border px-2 py-1 bg-white w-full">
+                    6. Capex Breakup
                   </div>
 
-                  <table className="table table-xs w-full">
+                  <table className="table table-xs w-full ">
                     <thead className="bg-red-600 text-white">
                       <tr>
                         <th>SNo</th>
                         <th>Details</th>
                         <th>Total</th>
-                        <th>FY 1</th>
-                        <th>FY 2</th>
+                        <th>H1 FY 1</th>
+                        <th>H2 FY 1</th>
+                        <th>H1 FY 2</th>
+                        <th>H2 FY 2</th>
                         <th>FY 3</th>
                         <th>FY 4</th>
                         <th>FY 5</th>
@@ -734,8 +748,18 @@ const AFCCSheet = () => {
                           <td className="border">{index + 1}</td>
                           <td className="border">{row.departmentName}</td>
                           <td className="border">{getAmount(row.total)}</td>
-                          <td className="border">{getAmount(row.fy1)}</td>
-                          <td className="border">{getAmount(row.fy2)}</td>
+                          <td className="border">
+                            {getAmount(row.capexH1FY1)}
+                          </td>
+                          <td className="border">
+                            {getAmount(row.capexH2FY1)}
+                          </td>
+                          <td className="border">
+                            {getAmount(row.capexH1FY2)}
+                          </td>
+                          <td className="border">
+                            {getAmount(row.capexH2FY2)}
+                          </td>
                           <td className="border">{getAmount(row.fy3)}</td>
                           <td className="border">{getAmount(row.fy4)}</td>
                           <td className="border">{getAmount(row.fy5)}</td>
@@ -753,12 +777,34 @@ const AFCCSheet = () => {
                         </td>
                         <td className="border">
                           {getAmount(
-                            breakupTotal(afccData?.capexBreakup || [], "fy1"),
+                            breakupTotal(
+                              afccData?.capexBreakup || [],
+                              "capexH1FY1",
+                            ),
                           )}
                         </td>
                         <td className="border">
                           {getAmount(
-                            breakupTotal(afccData?.capexBreakup || [], "fy2"),
+                            breakupTotal(
+                              afccData?.capexBreakup || [],
+                              "capexH2FY1",
+                            ),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(
+                              afccData?.capexBreakup || [],
+                              "capexH1FY2",
+                            ),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(
+                              afccData?.capexBreakup || [],
+                              "capexH2FY2",
+                            ),
                           )}
                         </td>
                         <td className="border">
@@ -782,19 +828,21 @@ const AFCCSheet = () => {
                 </div>
 
                 {/* REVENUE BREAKUP */}
-                <div className="mt-4">
+                <div className="mt-4 overflow-x-scroll">
                   <div className="font-bold border px-2 py-1 bg-white">
-                    6. Revenue Breakup
+                    7. Revenue Breakup
                   </div>
 
-                  <table className="table table-xs w-full">
+                  <table className="table table-xs w-full ">
                     <thead className="bg-red-600 text-white">
                       <tr>
                         <th>S</th>
                         <th>Details</th>
                         <th>Total</th>
-                        <th>FY 1</th>
-                        <th>FY 2</th>
+                        <th>H1 FY 1</th>
+                        <th>H2 FY 1</th>
+                        <th>H1 FY 2</th>
+                        <th>H2 FY 2</th>
                         <th>FY 3</th>
                         <th>FY 4</th>
                         <th>FY 5</th>
@@ -807,8 +855,18 @@ const AFCCSheet = () => {
                           <td className="border">{index + 1}</td>
                           <td className="border">{row.departmentName}</td>
                           <td className="border">{getAmount(row.total)}</td>
-                          <td className="border">{getAmount(row.fy1)}</td>
-                          <td className="border">{getAmount(row.fy2)}</td>
+                          <td className="border">
+                            {getAmount(row.revexH1FY1)}
+                          </td>
+                          <td className="border">
+                            {getAmount(row.revexH2FY1)}
+                          </td>
+                          <td className="border">
+                            {getAmount(row.revexH1FY2)}
+                          </td>
+                          <td className="border">
+                            {getAmount(row.revexH2FY2)}
+                          </td>
                           <td className="border">{getAmount(row.fy3)}</td>
                           <td className="border">{getAmount(row.fy4)}</td>
                           <td className="border">{getAmount(row.fy5)}</td>
@@ -829,14 +887,37 @@ const AFCCSheet = () => {
                         </td>
                         <td className="border">
                           {getAmount(
-                            breakupTotal(afccData?.revenueBreakup || [], "fy1"),
+                            breakupTotal(
+                              afccData?.revenueBreakup || [],
+                              "revexH1FY1",
+                            ),
                           )}
                         </td>
                         <td className="border">
                           {getAmount(
-                            breakupTotal(afccData?.revenueBreakup || [], "fy2"),
+                            breakupTotal(
+                              afccData?.revenueBreakup || [],
+                              "revexH2FY1",
+                            ),
                           )}
                         </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(
+                              afccData?.revenueBreakup || [],
+                              "revexH1FY2",
+                            ),
+                          )}
+                        </td>
+                        <td className="border">
+                          {getAmount(
+                            breakupTotal(
+                              afccData?.revenueBreakup || [],
+                              "revexH1FY2",
+                            ),
+                          )}
+                        </td>
+
                         <td className="border">
                           {getAmount(
                             breakupTotal(afccData?.revenueBreakup || [], "fy3"),

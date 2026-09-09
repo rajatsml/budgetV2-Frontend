@@ -75,8 +75,10 @@ type CarryForwardFormData = {
   wbsId: string;
   wbsDescription: string;
   fyYear: string;
-  commitmentAmt: string;
-  cashFlowAmt: string;
+  commitmentCapex: string;
+  commitmentRevex: string;
+  cashFlowCapex: string;
+  cashFlowRevex: string;
 };
 
 // ─────────────────────────────────────────────────────────
@@ -128,8 +130,10 @@ const initialCarryForwardForm: CarryForwardFormData = {
   wbsId: "",
   wbsDescription: "",
   fyYear: "",
-  commitmentAmt: "",
-  cashFlowAmt: "",
+  commitmentCapex: "",
+  commitmentRevex: "",
+  cashFlowCapex: "",
+  cashFlowRevex: "",
 };
 
 const financialFields: (keyof FinancialValues)[] = [
@@ -753,11 +757,25 @@ const PDProjectDetail = () => {
   // ─────────────────────────────────────────────────────────
 
   const handleCarryForwardSave = async () => {
-    const { wbsId, wbsDescription, fyYear, commitmentAmt, cashFlowAmt } =
-      carryForwardForm;
+    const {
+      wbsId,
+      wbsDescription,
+      fyYear,
+      commitmentCapex,
+      commitmentRevex,
+      cashFlowCapex,
+      cashFlowRevex,
+    } = carryForwardForm;
 
-    if (!wbsId || !fyYear || !commitmentAmt || !cashFlowAmt) {
-      alert("Please select a WBS and financial year, then enter both amounts.");
+    if (
+      !wbsId ||
+      !fyYear ||
+      !commitmentCapex ||
+      !commitmentRevex ||
+      !cashFlowCapex ||
+      !cashFlowRevex
+    ) {
+      alert("Please select a WBS and financial year, then enter amounts.");
       return;
     }
 
@@ -769,8 +787,10 @@ const PDProjectDetail = () => {
         deptId: data?.deptID?.toString(),
         wbsId,
         wbsDescription,
-        commitmentAmt,
-        cashFlowAmt,
+        commitmentCapex,
+        commitmentRevex,
+        cashFlowCapex,
+        cashFlowRevex,
         fyYear,
       });
       await fetchCarryForwardRows();
@@ -785,8 +805,10 @@ const PDProjectDetail = () => {
       wbsId: String(row.wbsId ?? row.WBSId ?? ""),
       wbsDescription: String(row.wbsDescription ?? row.WBSDescription ?? ""),
       fyYear: String(row.fyYear ?? row.FyYear ?? ""),
-      commitmentAmt: String(row.commitmentAmt ?? row.CommitmentAmt ?? ""),
-      cashFlowAmt: String(row.cashFlowAmt ?? row.CashFlowAmt ?? ""),
+      commitmentCapex: String(row.commitmentCapex ?? row.CommitmentCapex ?? ""),
+      commitmentRevex: String(row.commitmentRevex ?? row.CommitmentRevex ?? ""),
+      cashFlowCapex: String(row.cashFlowCapex ?? row.CashFlowCapex ?? ""),
+      cashFlowRevex: String(row.cashFlowRevex ?? row.CashFlowRevex ?? ""),
     });
     setEditingCarryForwardId(Number(row.id ?? row.Id));
   };
@@ -1795,13 +1817,22 @@ const PDProjectDetail = () => {
               <th className="border border-red-400">WBS Description</th>
               <th className="border border-red-400">Financial Year</th>
               <th className="border border-red-400 text-right">
-                Commitment Amount (Cr.)
+                Commitment Capex (Cr.)
               </th>
               <th className="border border-red-400 text-right">
-                Cashflow Amount (Cr.)
+                Commitment Revex (Cr.)
               </th>
               <th className="border border-red-400 text-right">
-                Actual Spent (Cr.)
+                Cash Flow Capex (Cr.)
+              </th>
+              <th className="border border-red-400 text-right">
+                Cash Flow Revex (Cr.)
+              </th>
+              <th className="border border-red-400 text-right">
+                Actual Spent Capex (Cr.)
+              </th>
+              <th className="border border-red-400 text-right">
+                Actual Spent Revex (Cr.)
               </th>
             </tr>
           </thead>
@@ -1835,15 +1866,42 @@ const PDProjectDetail = () => {
                   {row.fyYear ?? row.FyYear ?? "-"}
                 </td>
                 <td className="border border-slate-300 text-right">
-                  {row.commitmentAmt ?? row.CommitmentAmt ?? "0"}
-                </td>
-                <td className="border border-slate-300 text-right">
-                  {row.cashFlowAmt ?? row.CashFlowAmt ?? "0"}
-                </td>
-                <td className="border border-slate-300 text-right">
-                  {isNaN(Number(row.actualSpent ?? row.ActualSpent))
+                  {isNaN(Number(row.commitmentCapex ?? row.CommitmentCapex))
                     ? "0.0"
-                    : Number(row.actualSpent ?? row.ActualSpent).toFixed(1)}
+                    : Number(
+                        row.commitmentCapex ?? row.CommitmentCapex,
+                      ).toFixed(2)}
+                </td>
+                <td className="border border-slate-300 text-right">
+                  {isNaN(Number(row.commitmentRevex ?? row.CommitmentRevex))
+                    ? "0.0"
+                    : Number(
+                        row.commitmentRevex ?? row.CommitmentRevex,
+                      ).toFixed(2)}
+                </td>
+                <td className="border border-slate-300 text-right">
+                  {isNaN(Number(row.cashFlowCapex ?? row.CashFlowCapex))
+                    ? "0.0"
+                    : Number(row.cashFlowCapex ?? row.CashFlowCapex).toFixed(2)}
+                </td>
+                <td className="border border-slate-300 text-right">
+                  {isNaN(Number(row.cashFlowRevex ?? row.CashFlowRevex))
+                    ? "0.0"
+                    : Number(row.cashFlowRevex ?? row.CashFlowRevex).toFixed(2)}
+                </td>
+                <td className="border border-slate-300 text-right">
+                  {isNaN(Number(row.actualSpentCapex ?? row.ActualSpentCapex))
+                    ? "0.0"
+                    : Number(
+                        row.actualSpentCapex ?? row.ActualSpentCapex,
+                      ).toFixed(2)}
+                </td>
+                <td className="border border-slate-300 text-right">
+                  {isNaN(Number(row.actualSpentRevex ?? row.ActualSpentRevex))
+                    ? "0.0"
+                    : Number(
+                        row.actualSpentRevex ?? row.ActualSpentRevex,
+                      ).toFixed(2)}
                 </td>
               </tr>
             ))}
@@ -2112,8 +2170,10 @@ const PDProjectDetail = () => {
                               <th>WBS Element</th>
                               <th>WBS Description</th>
                               <th>Financial Year</th>
-                              <th>Commitment Amount (Cr.)</th>
-                              <th>Cashflow Amount (Cr.)</th>
+                              <th>Commitment Capex (Cr.)</th>
+                              <th>Commitment Revex (Cr.)</th>
+                              <th>Cash Flow Capex (Cr.)</th>
+                              <th>Cash Flow Revex (Cr.)</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2181,7 +2241,7 @@ const PDProjectDetail = () => {
                                   min="0"
                                   step="any"
                                   className="input input-bordered input-xs w-full"
-                                  value={carryForwardForm.commitmentAmt}
+                                  value={carryForwardForm.commitmentCapex}
                                   onChange={(event) => {
                                     const value = event.target.value;
 
@@ -2192,7 +2252,7 @@ const PDProjectDetail = () => {
 
                                     setCarryForwardForm((previous) => ({
                                       ...previous,
-                                      commitmentAmt: value,
+                                      commitmentCapex: value,
                                     }));
                                   }}
                                 />
@@ -2204,7 +2264,7 @@ const PDProjectDetail = () => {
                                   min="0"
                                   step="any"
                                   className="input input-bordered input-xs w-full"
-                                  value={carryForwardForm.cashFlowAmt}
+                                  value={carryForwardForm.commitmentRevex}
                                   onChange={(event) => {
                                     const value = event.target.value;
 
@@ -2215,7 +2275,53 @@ const PDProjectDetail = () => {
 
                                     setCarryForwardForm((previous) => ({
                                       ...previous,
-                                      cashFlowAmt: value,
+                                      commitmentRevex: value,
+                                    }));
+                                  }}
+                                />
+                              </td>
+                              <td className="min-w-45">
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  min="0"
+                                  step="any"
+                                  className="input input-bordered input-xs w-full"
+                                  value={carryForwardForm.cashFlowCapex}
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+
+                                    if (!isValidNumber(value)) {
+                                      alert("Enter a valid amount");
+                                      return;
+                                    }
+
+                                    setCarryForwardForm((previous) => ({
+                                      ...previous,
+                                      cashFlowCapex: value,
+                                    }));
+                                  }}
+                                />
+                              </td>
+                              <td className="min-w-45">
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  min="0"
+                                  step="any"
+                                  className="input input-bordered input-xs w-full"
+                                  value={carryForwardForm.cashFlowRevex}
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+
+                                    if (!isValidNumber(value)) {
+                                      alert("Enter a valid amount");
+                                      return;
+                                    }
+
+                                    setCarryForwardForm((previous) => ({
+                                      ...previous,
+                                      cashFlowRevex: value,
                                     }));
                                   }}
                                 />
@@ -2230,8 +2336,10 @@ const PDProjectDetail = () => {
               )}
             </>
 
-            <p className="text-sm text-error self-center font-semibold">
-              Please fill the entries in Crores only
+            <p className="text-sm text-white self-center bg-red-500 p-2 rounded font-semibold">
+              {canEdit
+                ? "NOTE - Please fill the entries in Crores only without GST"
+                : "NOTE - Entered values are without GST"}
             </p>
           </div>
         }

@@ -483,6 +483,10 @@ const PDApprover = () => {
                 {tab}
               </button>
             ))}
+
+            <p className="text-sm text-white self-center bg-red-500 p-2 rounded font-semibold">
+              NOTE - Entered values are without GST and are in Cr.
+            </p>
           </div>
 
           {activeTab === "Summary" && (
@@ -498,18 +502,18 @@ const PDApprover = () => {
                         Basis
                       </th>
                       <th className="border border-red-400 text-center">
-                        Commitment <br /> (Capex + Revex)
+                        Project Commitment <br /> (Capex + Revex)
                       </th>
                       <th className="border border-red-400 text-center">
-                        Commitment FY1 <br /> (Capex + Revex)
+                        Project Commitment FY1 <br /> (Capex + Revex)
                       </th>
                       <th className="border border-red-400 text-center">
-                        Cash Flow <br /> (Capex + Revex)
+                        Project Cash Flow <br /> (Capex + Revex)
                       </th>
                       <th className="border border-red-400 text-center">
-                        Cash Flow FY1 <br /> (Capex + Revex)
+                        Project Cash Flow FY1 <br /> (Capex + Revex)
                       </th>
-                      <th className="border border-red-400 text-center">
+                      {/* <th className="border border-red-400 text-center">
                         Commitment <br /> H1 FY1
                       </th>
                       <th className="border border-red-400 text-center">
@@ -520,7 +524,7 @@ const PDApprover = () => {
                       </th>
                       <th className="border border-red-400 text-center">
                         Cash Flow <br /> H2 FY1
-                      </th>
+                      </th> */}
                     </tr>
                   </thead>
                   <tbody>
@@ -547,7 +551,7 @@ const PDApprover = () => {
                           <td className="border border-slate-200 text-right">
                             {values.cashFlowFY1.toFixed(2)}
                           </td>
-                          <td className="border border-slate-200 text-right">
+                          {/* <td className="border border-slate-200 text-right">
                             {values.commitmentH1FY1.toFixed(2)}
                           </td>
                           <td className="border border-slate-200 text-right">
@@ -558,7 +562,7 @@ const PDApprover = () => {
                           </td>
                           <td className="border border-slate-200 text-right">
                             {values.cashH2FY1.toFixed(2)}
-                          </td>
+                          </td> */}
                         </tr>
                       );
                     })}
@@ -580,7 +584,7 @@ const PDApprover = () => {
                       <th colSpan={2} className="text-center border">
                         Total
                       </th>
-                      <th colSpan={24} className="text-center border">
+                      <th colSpan={22} className="text-center border">
                         Commitment Capex
                       </th>
                       <th colSpan={24} className="text-center border">
@@ -595,10 +599,10 @@ const PDApprover = () => {
                         Basis
                       </th>
                       <th className="border border-slate-300 font-medium">
-                        Total Value
+                        Total Commitment Capex
                       </th>
                       <th className="border border-slate-300 font-medium">
-                        Total FY1
+                        Total Commitment Capex FY1
                       </th>
                       {subCols.map((col) => (
                         <th
@@ -725,7 +729,7 @@ const PDApprover = () => {
                       <th colSpan={2} className="text-center border">
                         Total
                       </th>
-                      <th colSpan={24} className="text-center border">
+                      <th colSpan={22} className="text-center border">
                         Cash Flow Capex
                       </th>
                       <th colSpan={24} className="text-center border">
@@ -740,10 +744,10 @@ const PDApprover = () => {
                         Basis
                       </th>
                       <th className="border border-slate-300 font-medium">
-                        Total Value
+                        Total Cash Flow Capex
                       </th>
                       <th className="border border-slate-300 font-medium">
-                        Total FY1
+                        Total Cash Flow Capex FY1
                       </th>
                       {subCols.map((col) => (
                         <th
@@ -755,10 +759,10 @@ const PDApprover = () => {
                       ))}
 
                       <th className="border border-slate-300 font-medium">
-                        Total CashFlow <br /> Revex
+                        Total Cash Flow <br /> Revex
                       </th>
                       <th className="border border-slate-300 font-medium">
-                        Total CashFlow <br /> Revex FY1
+                        Total Cash Flow <br /> Revex FY1
                       </th>
                       {subCols.map((col) => (
                         <th
@@ -875,13 +879,22 @@ const PDApprover = () => {
                         Financial Year
                       </th>
                       <th className="border border-red-400 text-center">
-                        Commitment Amount (Cr.)
+                        Commitment Capex (Cr.)
                       </th>
                       <th className="border border-red-400 text-center">
-                        Cashflow Amount (Cr.)
+                        Commitment Revex (Cr.)
                       </th>
                       <th className="border border-red-400 text-center">
-                        Actual Spent (Cr.)
+                        Cashflow Capex (Cr.)
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Cashflow Revex (Cr.)
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Actual Capex (Cr.)
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Actual Revex (Cr.)
                       </th>
                     </tr>
                   </thead>
@@ -898,18 +911,67 @@ const PDApprover = () => {
                           <td className="border border-slate-200">
                             {row.fyYear ?? row.FyYear ?? "-"}
                           </td>
-                          <td className="border border-slate-200 text-right">
-                            {row.commitmentAmt ?? row.CommitmentAmt ?? "0"}
-                          </td>
-                          <td className="border border-slate-200 text-right">
-                            {row.cashFlowAmt ?? row.CashFlowAmt ?? "0"}
-                          </td>
                           <td className="border border-slate-300 text-right">
-                            {isNaN(Number(row.actualSpent ?? row.ActualSpent))
+                            {isNaN(
+                              Number(
+                                row.commitmentCapex ?? row.CommitmentCapex,
+                              ),
+                            )
                               ? "0.0"
                               : Number(
-                                  row.actualSpent ?? row.ActualSpent,
-                                ).toFixed(1)}
+                                  row.commitmentCapex ?? row.CommitmentCapex,
+                                ).toFixed(2)}
+                          </td>
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(
+                                row.commitmentRevex ?? row.CommitmentRevex,
+                              ),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.commitmentRevex ?? row.CommitmentRevex,
+                                ).toFixed(2)}
+                          </td>
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(row.cashFlowCapex ?? row.CashFlowCapex),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.cashFlowCapex ?? row.CashFlowCapex,
+                                ).toFixed(2)}
+                          </td>
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(row.cashFlowRevex ?? row.CashFlowRevex),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.cashFlowRevex ?? row.CashFlowRevex,
+                                ).toFixed(2)}
+                          </td>
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(
+                                row.actualSpentCapex ?? row.ActualSpentCapex,
+                              ),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.actualSpentCapex ?? row.ActualSpentCapex,
+                                ).toFixed(2)}
+                          </td>
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(
+                                row.actualSpentRevex ?? row.ActualSpentRevex,
+                              ),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.actualSpentRevex ?? row.ActualSpentRevex,
+                                ).toFixed(2)}
                           </td>
                         </tr>
                       ))
@@ -939,7 +1001,9 @@ const PDApprover = () => {
                               (sum, row) =>
                                 sum +
                                 Number(
-                                  row.commitmentAmt ?? row.CommitmentAmt ?? 0,
+                                  row.commitmentCapex ??
+                                    row.CommitmentCapex ??
+                                    0,
                                 ),
                               0,
                             )
@@ -950,7 +1014,11 @@ const PDApprover = () => {
                             .reduce(
                               (sum, row) =>
                                 sum +
-                                Number(row.cashFlowAmt ?? row.CashFlowAmt ?? 0),
+                                Number(
+                                  row.commitmentRevex ??
+                                    row.CommitmentRevex ??
+                                    0,
+                                ),
                               0,
                             )
                             .toFixed(2)}
@@ -960,10 +1028,48 @@ const PDApprover = () => {
                             .reduce(
                               (sum, row) =>
                                 sum +
-                                (Number(row.actualSpent ?? row.ActualSpent) ||
-                                  0),
+                                Number(
+                                  row.cashFlowCapex ?? row.CashFlowCapex ?? 0,
+                                ),
                               0,
                             )
+                            .toFixed(2)}
+                        </td>
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce(
+                              (sum, row) =>
+                                sum +
+                                Number(
+                                  row.cashFlowRevex ?? row.CashFlowRevex ?? 0,
+                                ),
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce((sum, row) => {
+                              const value = Number(
+                                row.actualSpentCapex ??
+                                  row.ActualSpentCapex ??
+                                  0,
+                              );
+                              return sum + (Number.isNaN(value) ? 0 : value);
+                            }, 0)
+                            .toFixed(2)}
+                        </td>
+
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce((sum, row) => {
+                              const value = Number(
+                                row.actualSpentRevex ??
+                                  row.ActualSpentRevex ??
+                                  0,
+                              );
+                              return sum + (Number.isNaN(value) ? 0 : value);
+                            }, 0)
                             .toFixed(2)}
                         </td>
                       </tr>

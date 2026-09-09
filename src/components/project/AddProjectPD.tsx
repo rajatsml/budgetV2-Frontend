@@ -122,7 +122,7 @@ const AddProjectPD = () => {
         years.push(currentFY + i);
       }
     } else {
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 0; i <= 5; i++) {
         years.push(currentFY + i);
       }
     }
@@ -569,6 +569,24 @@ const AddProjectPD = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Project Objective */}
+              <div className="form-control w-full">
+                <label className="label py-1 flex items-center gap-1.5">
+                  <Target size={13} className="text-slate-400" />
+                  <span className="label-text text-xs font-semibold text-slate-600">
+                    Project Objective
+                  </span>
+                </label>
+                <textarea
+                  rows={4}
+                  className="textarea textarea-bordered w-full text-sm rounded focus:textarea-error transition-all bg-slate-50/30 resize-none leading-relaxed"
+                  placeholder="State the measurable objective and core business targets..."
+                  value={projectObjective}
+                  onChange={(e) => setProjectObjective(e.target.value)}
+                  disabled={!canEdit}
+                />
+              </div>
+
               {/* Project Scope */}
               <div className="form-control w-full">
                 <label className="label py-1 flex items-center gap-1.5">
@@ -596,7 +614,7 @@ const AddProjectPD = () => {
                     title="Key Assumptions / Application Model / Activities Currently Undertaken"
                   >
                     Key Assumptions / Change Scope / Activities Currently
-                    Undertaken
+                    Undertaken / Model
                   </span>
                 </label>
                 <textarea
@@ -605,24 +623,6 @@ const AddProjectPD = () => {
                   placeholder="Detail high-level assumptions, operating dependencies or current work state..."
                   value={keyAssumptions}
                   onChange={(e) => setKeyAssumptions(e.target.value)}
-                  disabled={!canEdit}
-                />
-              </div>
-
-              {/* Project Objective */}
-              <div className="form-control w-full">
-                <label className="label py-1 flex items-center gap-1.5">
-                  <Target size={13} className="text-slate-400" />
-                  <span className="label-text text-xs font-semibold text-slate-600">
-                    Project Objective
-                  </span>
-                </label>
-                <textarea
-                  rows={4}
-                  className="textarea textarea-bordered w-full text-sm rounded focus:textarea-error transition-all bg-slate-50/30 resize-none leading-relaxed"
-                  placeholder="State the measurable objective and core business targets..."
-                  value={projectObjective}
-                  onChange={(e) => setProjectObjective(e.target.value)}
                   disabled={!canEdit}
                 />
               </div>

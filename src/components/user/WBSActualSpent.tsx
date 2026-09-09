@@ -52,10 +52,17 @@ const WBSActualSpent = () => {
     }
   };
 
-  const handleActualSpentChange = (id: number, value: string) => {
+  const handleActualSpentCapexChange = (id: number, value: string) => {
     setCarryForwardRows((prev) =>
       prev.map((row) =>
-        (row.id ?? row.Id) === id ? { ...row, actualSpent: value } : row,
+        (row.id ?? row.Id) === id ? { ...row, actualSpentCapex: value } : row,
+      ),
+    );
+  };
+  const handleActualSpentRevexChange = (id: number, value: string) => {
+    setCarryForwardRows((prev) =>
+      prev.map((row) =>
+        (row.id ?? row.Id) === id ? { ...row, actualSpentRevex: value } : row,
       ),
     );
   };
@@ -69,12 +76,15 @@ const WBSActualSpent = () => {
         deptId: data?.deptID?.toString(),
         wbsId: row.wbsId ?? row.WBSId,
         wbsDescription: row.wbsDescription ?? row.WBSDescription,
-        commitmentAmt: row.commitmentAmt ?? row.CommitmentAmt,
-        cashFlowAmt: row.cashFlowAmt ?? row.CashFlowAmt,
+        commitmentCapex: row.commitmentCapex ?? row.CommitmentCapex,
+        commitmentRevex: row.commitmentRevex ?? row.CommitmentRevex,
+        cashFlowCapex: row.cashFlowCapex ?? row.CashFlowCapex,
+        cashFlowRevex: row.cashFlowRevex ?? row.CashFlowRevex,
         fyYear: row.fyYear ?? row.FyYear,
 
         // new field
-        actualSpent: row.actualSpent,
+        actualSpentCapex: row.actualSpentCapex ?? row.ActualSpentCapex,
+        actualSpentRevex: row.actualSpentRevex ?? row.ActualSpentRevex,
       });
 
       alert("Actual Spent updated successfully.");
@@ -98,7 +108,11 @@ const WBSActualSpent = () => {
       setCarryForwardRows(
         items.map((item: any) => ({
           ...item,
-          actualSpent: item.actualSpent ?? item.ActualSpent ?? "",
+          // actualSpent: item.actualSpent ?? item.ActualSpent ?? "",
+          actualSpentCapex:
+            item.actualSpentCapex ?? item.ActualSpentCapex ?? "",
+          actualSpentRevex:
+            item.actualSpentRevex ?? item.ActualSpentRevex ?? "",
         })),
       );
     } catch (error) {
@@ -180,11 +194,12 @@ const WBSActualSpent = () => {
       getTotal("CashRevex_H1FY1") +
       getTotal("CashRevex_H2FY1"),
     carryForwardCommitment: carryForwardRows.reduce(
-      (sum, row) => sum + Number(row.commitmentAmt ?? row.CommitmentAmt ?? 0),
+      (sum, row) =>
+        sum + Number(row.commitmentCapex ?? row.CommitmentCapex ?? 0),
       0,
     ),
     carryForwardCashFlow: carryForwardRows.reduce(
-      (sum, row) => sum + Number(row.cashFlowAmt ?? row.CashFlowAmt ?? 0),
+      (sum, row) => sum + Number(row.cashFlowCapex ?? row.CashFlowCapex ?? 0),
       0,
     ),
   };
@@ -486,13 +501,25 @@ const WBSActualSpent = () => {
                         Financial Year
                       </th>
                       <th className="border border-red-400 text-center">
-                        Commitment Amount (Cr.)
+                        Commitment Capex (Cr.)
                       </th>
                       <th className="border border-red-400 text-center">
-                        Cashflow Amount (Cr.)
+                        Commitment Revex (Cr.)
                       </th>
                       <th className="border border-red-400 text-center">
-                        Actual Spent (Cr.)
+                        Cashflow Capex (Cr.)
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Cashflow Revex (Cr.)
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Actual Capex (Cr.)
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Actual Revex (Cr.)
+                      </th>
+                      <th className="border border-red-400 text-center">
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -509,35 +536,86 @@ const WBSActualSpent = () => {
                           <td className="border border-slate-200">
                             {row.fyYear ?? row.FyYear ?? "-"}
                           </td>
-                          <td className="border border-slate-200 text-right">
-                            {row.commitmentAmt ?? row.CommitmentAmt ?? "0"}
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(
+                                row.commitmentCapex ?? row.CommitmentCapex,
+                              ),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.commitmentCapex ?? row.CommitmentCapex,
+                                ).toFixed(2)}
                           </td>
-                          <td className="border border-slate-200 text-right">
-                            {row.cashFlowAmt ?? row.CashFlowAmt ?? "0"}
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(
+                                row.commitmentRevex ?? row.CommitmentRevex,
+                              ),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.commitmentRevex ?? row.CommitmentRevex,
+                                ).toFixed(2)}
+                          </td>
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(row.cashFlowCapex ?? row.CashFlowCapex),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.cashFlowCapex ?? row.CashFlowCapex,
+                                ).toFixed(2)}
+                          </td>
+                          <td className="border border-slate-300 text-right">
+                            {isNaN(
+                              Number(row.cashFlowRevex ?? row.CashFlowRevex),
+                            )
+                              ? "0.0"
+                              : Number(
+                                  row.cashFlowRevex ?? row.CashFlowRevex,
+                                ).toFixed(2)}
                           </td>
                           <td className="border border-slate-200">
                             <div className="flex items-center gap-2 ">
                               <input
                                 type="number"
                                 step="0.01"
-                                value={row.actualSpent ?? ""}
+                                value={row.actualSpentCapex ?? ""}
                                 className="input input-xs w-full"
                                 onChange={(e) =>
-                                  handleActualSpentChange(
+                                  handleActualSpentCapexChange(
                                     row.id ?? row.Id,
                                     e.target.value,
                                   )
                                 }
                               />
-
-                              <button
-                                type="button"
-                                className="btn btn-xs bg-red-500 text-white hover:bg-red-600"
-                                onClick={() => handleActualSpentSave(row)}
-                              >
-                                Save
-                              </button>
                             </div>
+                          </td>
+                          <td className="border border-slate-200">
+                            <div className="flex items-center gap-2 ">
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={row.actualSpentRevex ?? ""}
+                                className="input input-xs w-full"
+                                onChange={(e) =>
+                                  handleActualSpentRevexChange(
+                                    row.id ?? row.Id,
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </div>
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn btn-xs bg-red-500 text-white hover:bg-red-600"
+                              onClick={() => handleActualSpentSave(row)}
+                            >
+                              Save
+                            </button>
                           </td>
                         </tr>
                       ))
@@ -568,7 +646,9 @@ const WBSActualSpent = () => {
                               (sum, row) =>
                                 sum +
                                 Number(
-                                  row.commitmentAmt ?? row.CommitmentAmt ?? 0,
+                                  row.commitmentCapex ??
+                                    row.CommitmentCapex ??
+                                    0,
                                 ),
                               0,
                             )
@@ -580,7 +660,23 @@ const WBSActualSpent = () => {
                             .reduce(
                               (sum, row) =>
                                 sum +
-                                Number(row.cashFlowAmt ?? row.CashFlowAmt ?? 0),
+                                Number(
+                                  row.commitmentRevex ??
+                                    row.commitmentRevex ??
+                                    0,
+                                ),
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce(
+                              (sum, row) =>
+                                sum +
+                                Number(
+                                  row.cashFlowCapex ?? row.CashFlowCapex ?? 0,
+                                ),
                               0,
                             )
                             .toFixed(2)}
@@ -591,8 +687,35 @@ const WBSActualSpent = () => {
                             .reduce(
                               (sum, row) =>
                                 sum +
-                                (Number(row.actualSpent ?? row.ActualSpent) ||
-                                  0),
+                                Number(
+                                  row.cashFlowRevex ?? row.CashFlowRevex ?? 0,
+                                ),
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce(
+                              (sum, row) =>
+                                sum +
+                                (Number(
+                                  row.actualSpentCapex ?? row.ActualSpentCapex,
+                                ) || 0),
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+
+                        <td className="border border-slate-300 text-right">
+                          {carryForwardRows
+                            .reduce(
+                              (sum, row) =>
+                                sum +
+                                (Number(
+                                  row.actualSpentRevex ?? row.ActualSpentRevex,
+                                ) || 0),
                               0,
                             )
                             .toFixed(2)}

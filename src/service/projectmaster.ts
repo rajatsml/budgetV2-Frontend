@@ -423,11 +423,25 @@ export interface AFCCSheetSummary {
   askForCurrentYear: number;
 }
 
-export interface AFCCBreakupEntry {
+export interface AFCCCapexBreakupEntry {
   deptId: string | number;
   departmentName: string;
-  fy1: number;
-  fy2: number;
+  capexH1FY1: number;
+  capexH1FY2: number;
+  capexH2FY1: number;
+  capexH2FY2: number;
+  fy3: number;
+  fy4: number;
+  fy5: number;
+  total: number;
+}
+export interface AFCCRevexBreakupEntry {
+  deptId: string | number;
+  departmentName: string;
+  revexH1FY1: number;
+  revexH1FY2: number;
+  revexH2FY1: number;
+  revexH2FY2: number;
   fy3: number;
   fy4: number;
   fy5: number;
@@ -436,8 +450,8 @@ export interface AFCCBreakupEntry {
 
 export interface AFCCSheetResponse {
   afccSheet: AFCCSheetSummary;
-  capexBreakup: AFCCBreakupEntry[];
-  revenueBreakup: AFCCBreakupEntry[];
+  capexBreakup: AFCCCapexBreakupEntry[];
+  revenueBreakup: AFCCRevexBreakupEntry[];
 }
 
 export interface AFCCSummaryEntry {
@@ -451,7 +465,7 @@ export interface AFCCSummaryEntry {
   overallOutlay: number;
 }
 
-const getResponseItems = <T,>(data: unknown): T[] => {
+const getResponseItems = <T>(data: unknown): T[] => {
   if (Array.isArray(data)) {
     return data.flatMap((value) => getResponseItems<T>(value));
   }
@@ -477,13 +491,29 @@ const getField = (row: Record<string, unknown>, field: string) => {
 
 const toNumber = (value: unknown) => Number(value ?? 0);
 
-const mapAFCCBreakupEntry = (
+const mapAFCCCapexBreakupEntry = (
   row: Record<string, unknown>,
-): AFCCBreakupEntry => ({
+): AFCCCapexBreakupEntry => ({
   deptId: (getField(row, "deptId") ?? "") as string | number,
   departmentName: String(getField(row, "departmentName") ?? ""),
-  fy1: toNumber(getField(row, "fy1")),
-  fy2: toNumber(getField(row, "fy2")),
+  capexH1FY1: toNumber(getField(row, "capexH1FY1")),
+  capexH2FY1: toNumber(getField(row, "capexH2FY1")),
+  capexH1FY2: toNumber(getField(row, "capexH1FY2")),
+  capexH2FY2: toNumber(getField(row, "capexH2FY2")),
+  fy3: toNumber(getField(row, "fy3")),
+  fy4: toNumber(getField(row, "fy4")),
+  fy5: toNumber(getField(row, "fy5")),
+  total: toNumber(getField(row, "total")),
+});
+const mapAFCCRevexBreakupEntry = (
+  row: Record<string, unknown>,
+): AFCCRevexBreakupEntry => ({
+  deptId: (getField(row, "deptId") ?? "") as string | number,
+  departmentName: String(getField(row, "departmentName") ?? ""),
+  revexH1FY1: toNumber(getField(row, "revexH1FY1")),
+  revexH2FY1: toNumber(getField(row, "revexH2FY1")),
+  revexH1FY2: toNumber(getField(row, "revexH1FY2")),
+  revexH2FY2: toNumber(getField(row, "revexH2FY2")),
   fy3: toNumber(getField(row, "fy3")),
   fy4: toNumber(getField(row, "fy4")),
   fy5: toNumber(getField(row, "fy5")),
@@ -522,10 +552,10 @@ const GetAFCCSheetEntries = async (
       },
       capexBreakup: getResponseItems<Record<string, unknown>>(
         data.capexBreakup,
-      ).map(mapAFCCBreakupEntry),
+      ).map(mapAFCCCapexBreakupEntry),
       revenueBreakup: getResponseItems<Record<string, unknown>>(
         data.revenueBreakup,
-      ).map(mapAFCCBreakupEntry),
+      ).map(mapAFCCRevexBreakupEntry),
     };
   } catch (error) {
     console.error("Error fetching AFCC sheet entries:", error);
