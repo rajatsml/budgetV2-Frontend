@@ -467,7 +467,7 @@ const AddProjectPD = () => {
               <div className="form-control w-full custom-datepicker-container">
                 <label className="label py-1">
                   <span className="label-text text-xs font-semibold text-slate-600">
-                    Start Date
+                    Start Date (PO / P1 / PPRF Approval Date)
                   </span>
                 </label>
                 <div className="relative">

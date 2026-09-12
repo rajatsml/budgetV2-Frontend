@@ -5,6 +5,80 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/AFCC-budgeted/ManageAFCCBudgeted": {
+      "post": {
+        "tags": [
+          "AFCCBudgeted"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AFCCBudgetedModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AFCCBudgetedModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AFCCBudgetedModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AFCC-budgeted/dashboard/{projectId}": {
+      "get": {
+        "tags": [
+          "AFCCBudgeted"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AFCC-budgeted/AFCCSummary": {
+      "get": {
+        "tags": [
+          "AFCCBudgeted"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Auth/login": {
       "post": {
         "tags": [
@@ -29,6 +103,80 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/BudgetDashboard/summary/{financialYear}": {
+      "get": {
+        "tags": [
+          "BudgetDashboard"
+        ],
+        "parameters": [
+          {
+            "name": "financialYear",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/BudgetDashboard/hierarchy/{projectId}": {
+      "get": {
+        "tags": [
+          "BudgetDashboard"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/BudgetDashboard/details/{projectId}/{deptId}": {
+      "get": {
+        "tags": [
+          "BudgetDashboard"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deptId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -279,6 +427,27 @@
               "type": "string"
             }
           },
+          {
+            "name": "deptId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/NonPDMaster/records": {
+      "get": {
+        "tags": [
+          "NonPDMaster"
+        ],
+        "parameters": [
           {
             "name": "deptId",
             "in": "query",
@@ -637,10 +806,126 @@
           }
         }
       }
+    },
+    "/api/Projects/GetUserProjects": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Projects/GetBudgetManagerProjects": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ProjectWBS/ManageProjectWBS": {
+      "post": {
+        "tags": [
+          "ProjectWBS"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectWBSModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectWBSModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectWBSModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AFCCBudgetedModel": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "budgetedId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "projectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "budgeted": {
+            "type": "string",
+            "nullable": true
+          },
+          "fy3": {
+            "type": "string",
+            "nullable": true
+          },
+          "fy4": {
+            "type": "string",
+            "nullable": true
+          },
+          "fy5": {
+            "type": "string",
+            "nullable": true
+          },
+          "fy6": {
+            "type": "string",
+            "nullable": true
+          },
+          "fy7": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "LoginRequest": {
         "type": "object",
         "properties": {
@@ -675,10 +960,6 @@
             "type": "string",
             "nullable": true
           },
-          "id": {
-            "type": "string",
-            "nullable": true
-          },
           "division": {
             "type": "string",
             "nullable": true
@@ -687,7 +968,7 @@
             "type": "string",
             "nullable": true
           },
-          "groupName": {
+          "group": {
             "type": "string",
             "nullable": true
           },
@@ -696,6 +977,10 @@
             "nullable": true
           },
           "projectUnit": {
+            "type": "string",
+            "nullable": true
+          },
+          "itemDescription": {
             "type": "string",
             "nullable": true
           },
@@ -723,7 +1008,7 @@
             "type": "string",
             "nullable": true
           },
-          "capex_Revenue": {
+          "expenditureType": {
             "type": "string",
             "nullable": true
           },
@@ -735,7 +1020,23 @@
             "type": "string",
             "nullable": true
           },
+          "vital": {
+            "type": "string",
+            "nullable": true
+          },
+          "essential": {
+            "type": "string",
+            "nullable": true
+          },
+          "desirable": {
+            "type": "string",
+            "nullable": true
+          },
           "quantity": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitOfMeasure": {
             "type": "string",
             "nullable": true
           },
@@ -767,176 +1068,204 @@
             "type": "string",
             "nullable": true
           },
-          "h1PR": {
-            "type": "string",
+          "aprCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "h2PR": {
-            "type": "string",
+          "mayCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "total1": {
-            "type": "string",
+          "junCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "year2": {
-            "type": "string",
+          "julCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "h1CF": {
-            "type": "string",
+          "augCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "h2CF": {
-            "type": "string",
+          "sepCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "total2": {
-            "type": "string",
+          "octCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "remarks": {
-            "type": "string",
+          "novCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "proposedQty": {
-            "type": "string",
+          "decCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "proposedBudget": {
-            "type": "string",
+          "janCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "remark": {
-            "type": "string",
+          "febCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "contingencyFactor": {
-            "type": "string",
+          "marCommitment": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "vital": {
-            "type": "string",
+          "commitment_Fy2H1": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "essential": {
-            "type": "string",
+          "commitment_Fy2H2": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "desirable": {
-            "type": "string",
+          "commitment_Fy3H1": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "aprNetCF": {
-            "type": "string",
+          "commitment_Fy3H2": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "mayNetCF": {
-            "type": "string",
+          "commitment_Fy4H1": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "junNetCF": {
-            "type": "string",
+          "commitment_Fy4H2": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "julNetCF": {
-            "type": "string",
+          "commitment_Fy5H1": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "augNetCF": {
-            "type": "string",
+          "commitment_Fy5H2": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "sepNetCF": {
-            "type": "string",
+          "aprCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "octNetCF": {
-            "type": "string",
+          "mayCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "novNetCF": {
-            "type": "string",
+          "junCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "decNetCF": {
-            "type": "string",
+          "julCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "janNetCF": {
-            "type": "string",
+          "augCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "febNetCF": {
-            "type": "string",
+          "sepCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "marNetCF": {
-            "type": "string",
+          "octCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "pR_Fy1H1": {
-            "type": "string",
+          "novCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "pR_Fy1H2": {
-            "type": "string",
+          "decCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "pR_Fy2H1": {
-            "type": "string",
+          "janCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "pR_Fy2H2": {
-            "type": "string",
+          "febCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "pR_Fy3H1": {
-            "type": "string",
+          "marCashFlow": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "pR_Fy3H2": {
-            "type": "string",
+          "cashFlow_Fy2H1": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "pR_Fy4H1": {
-            "type": "string",
+          "cashFlow_Fy2H2": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "pR_Fy4H2": {
-            "type": "string",
+          "cashFlow_Fy3H1": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "cF_Fy1H1": {
-            "type": "string",
+          "cashFlow_Fy3H2": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "cF_Fy1H2": {
-            "type": "string",
+          "cashFlow_Fy4H1": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "cF_Fy2H1": {
-            "type": "string",
+          "cashFlow_Fy4H2": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "cF_Fy2H2": {
-            "type": "string",
+          "cashFlow_Fy5H1": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
-          "cF_Fy3H1": {
-            "type": "string",
-            "nullable": true
-          },
-          "cF_Fy3H2": {
-            "type": "string",
-            "nullable": true
-          },
-          "cF_Fy4H1": {
-            "type": "string",
-            "nullable": true
-          },
-          "cF_Fy4H2": {
-            "type": "string",
+          "cashFlow_Fy5H2": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
           "userId": {
@@ -945,11 +1274,6 @@
           },
           "fyYear": {
             "type": "string",
-            "nullable": true
-          },
-          "categoryId": {
-            "type": "integer",
-            "format": "int32",
             "nullable": true
           },
           "draftStatus": {
@@ -995,151 +1319,375 @@
             "type": "string",
             "nullable": true
           },
-          "capexDescription": {
+          "description": {
             "type": "string",
             "nullable": true
           },
-          "capexRemarks": {
+          "basis": {
             "type": "string",
             "nullable": true
           },
-          "capexAmount": {
+          "commCapex_AprFY1": {
             "type": "string",
             "nullable": true
           },
-          "capexTotalPR": {
+          "commCapex_MayFY1": {
             "type": "string",
             "nullable": true
           },
-          "capexH1Fy1": {
+          "commCapex_JunFY1": {
             "type": "string",
             "nullable": true
           },
-          "capexH2Fy1": {
+          "commCapex_JulFY1": {
             "type": "string",
             "nullable": true
           },
-          "capexFy2": {
+          "commCapex_AugFY1": {
             "type": "string",
             "nullable": true
           },
-          "capexFy3": {
+          "commCapex_SepFY1": {
             "type": "string",
             "nullable": true
           },
-          "revenueDescription": {
+          "commCapex_OctFY1": {
             "type": "string",
             "nullable": true
           },
-          "revenueRemarks": {
+          "commCapex_NovFY1": {
             "type": "string",
             "nullable": true
           },
-          "revenueAmount": {
+          "commCapex_DecFY1": {
             "type": "string",
             "nullable": true
           },
-          "revenueTotalPR": {
+          "commCapex_JanFY1": {
             "type": "string",
             "nullable": true
           },
-          "revenueH1Fy1": {
+          "commCapex_FebFY1": {
             "type": "string",
             "nullable": true
           },
-          "revenueH2Fy1": {
+          "commCapex_MarFY1": {
             "type": "string",
             "nullable": true
           },
-          "revenueFy2": {
+          "commCapex_H1FY1": {
             "type": "string",
             "nullable": true
           },
-          "revenueFy3": {
+          "commCapex_H2FY1": {
             "type": "string",
             "nullable": true
           },
-          "carryForward": {
+          "commCapex_H1FY2": {
             "type": "string",
             "nullable": true
           },
-          "actualRevex": {
+          "commCapex_H2FY2": {
             "type": "string",
             "nullable": true
           },
-          "actualCapex": {
+          "commCapex_H1FY3": {
             "type": "string",
             "nullable": true
           },
-          "fundFlowCapH1": {
+          "commCapex_H2FY3": {
             "type": "string",
             "nullable": true
           },
-          "fundFlowCapH2": {
+          "commCapex_H1FY4": {
             "type": "string",
             "nullable": true
           },
-          "fundFlowRevH1": {
+          "commCapex_H2FY4": {
             "type": "string",
             "nullable": true
           },
-          "fundFlowRevH2": {
+          "commCapex_H1FY5": {
             "type": "string",
             "nullable": true
           },
-          "fundFlowH1": {
+          "commCapex_H2FY5": {
             "type": "string",
             "nullable": true
           },
-          "fundFlowH2": {
+          "commRevex_AprFY1": {
             "type": "string",
             "nullable": true
           },
-          "fundFlowTotal": {
+          "commRevex_MayFY1": {
             "type": "string",
             "nullable": true
           },
-          "fundFlow2": {
+          "commRevex_JunFY1": {
             "type": "string",
             "nullable": true
           },
-          "fundFlow3": {
+          "commRevex_JulFY1": {
             "type": "string",
             "nullable": true
           },
-          "fundFlow4": {
+          "commRevex_AugFY1": {
             "type": "string",
             "nullable": true
           },
-          "fundFlow5": {
+          "commRevex_SepFY1": {
             "type": "string",
             "nullable": true
           },
-          "cfCapH1": {
+          "commRevex_OctFY1": {
             "type": "string",
             "nullable": true
           },
-          "cfCapH2": {
+          "commRevex_NovFY1": {
             "type": "string",
             "nullable": true
           },
-          "cfRevH1": {
+          "commRevex_DecFY1": {
             "type": "string",
             "nullable": true
           },
-          "cfRevH2": {
+          "commRevex_JanFY1": {
             "type": "string",
             "nullable": true
           },
-          "cfH1": {
+          "commRevex_FebFY1": {
             "type": "string",
             "nullable": true
           },
-          "cfH2": {
+          "commRevex_MarFY1": {
             "type": "string",
             "nullable": true
           },
-          "cfTotal": {
+          "commRevex_H1FY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H2FY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H1FY2": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H2FY2": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H1FY3": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H2FY3": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H1FY4": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H2FY4": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H1FY5": {
+            "type": "string",
+            "nullable": true
+          },
+          "commRevex_H2FY5": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_AprFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_MayFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_JunFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_JulFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_AugFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_SepFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_OctFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_NovFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_DecFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_JanFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_FebFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_MarFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H1FY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H2FY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H1FY2": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H2FY2": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H1FY3": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H2FY3": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H1FY4": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H2FY4": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H1FY5": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashCapex_H2FY5": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_AprFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_MayFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_JunFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_JulFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_AugFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_SepFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_OctFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_NovFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_DecFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_JanFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_FebFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_MarFY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H1FY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H2FY1": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H1FY2": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H2FY2": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H1FY3": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H2FY3": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H1FY4": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H2FY4": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H1FY5": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashRevex_H2FY5": {
+            "type": "string",
+            "nullable": true
+          },
+          "carryForwardWBS": {
+            "type": "string",
+            "nullable": true
+          },
+          "carryForwardDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "carryForwardFYYear": {
             "type": "string",
             "nullable": true
           },
@@ -1179,45 +1727,6 @@
         },
         "additionalProperties": false
       },
-      "ProjectDepartment": {
-        "type": "object",
-        "properties": {
-          "departmentId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "departmentName": {
-            "type": "string",
-            "nullable": true
-          },
-          "hierarchy": {
-            "$ref": "#/components/schemas/ProjectHierarchy"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ProjectHierarchy": {
-        "type": "object",
-        "properties": {
-          "makerId": {
-            "type": "string",
-            "nullable": true
-          },
-          "approver1": {
-            "type": "string",
-            "nullable": true
-          },
-          "approver2": {
-            "type": "string",
-            "nullable": true
-          },
-          "approver3": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "ProjectMaster": {
         "type": "object",
         "properties": {
@@ -1245,6 +1754,29 @@
             "type": "string",
             "nullable": true
           },
+          "projectOwner": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectOwnerID": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectCategoryType": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectCategoryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectObjective": {
+            "type": "string",
+            "nullable": true
+          },
+          "isOngoing": {
+            "type": "boolean"
+          },
           "startDate": {
             "type": "string",
             "format": "date-time",
@@ -1269,6 +1801,10 @@
             "type": "string",
             "nullable": true
           },
+          "createdByDept": {
+            "type": "string",
+            "nullable": true
+          },
           "status": {
             "type": "string",
             "nullable": true
@@ -1277,31 +1813,6 @@
             "type": "boolean"
           },
           "projectTypeDesc": {
-            "type": "string",
-            "nullable": true
-          },
-          "makerId": {
-            "type": "string",
-            "nullable": true
-          },
-          "approver1": {
-            "type": "string",
-            "nullable": true
-          },
-          "approver2": {
-            "type": "string",
-            "nullable": true
-          },
-          "approver3": {
-            "type": "string",
-            "nullable": true
-          },
-          "deptId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "departmentName": {
             "type": "string",
             "nullable": true
           },
@@ -1317,11 +1828,79 @@
             "type": "string",
             "nullable": true
           },
-          "departments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProjectDepartment"
-            },
+          "departmentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "departmentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "makerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "checkerId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectWBSModel": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "projectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "deptId": {
+            "type": "string",
+            "nullable": true
+          },
+          "wbsId": {
+            "type": "string",
+            "nullable": true
+          },
+          "wbsDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "commitmentCapex": {
+            "type": "string",
+            "nullable": true
+          },
+          "commitmentRevex": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashFlowCapex": {
+            "type": "string",
+            "nullable": true
+          },
+          "cashFlowRevex": {
+            "type": "string",
+            "nullable": true
+          },
+          "actualSpentCapex": {
+            "type": "string",
+            "nullable": true
+          },
+          "actualSpentRevex": {
+            "type": "string",
+            "nullable": true
+          },
+          "fyYear": {
+            "type": "string",
             "nullable": true
           }
         },
