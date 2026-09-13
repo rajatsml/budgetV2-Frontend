@@ -11,14 +11,15 @@ import MyProjects from "./components/user/MyProjects";
 import PDProjectDetail from "./components/user/PDProjectDetail";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import PDApprover from "./components/user/PDApprover";
-// import NonPDProjectDetail from "./components/user/NonPDProjectDetail";
-// import NonPDApprover from "./components/user/NonPDApprover";
+import NonPDApprover from "./components/user/NonPDApprover";
 import ProjectDetails from "./components/dashboard/ProjectDetails";
 import AddProjectPD from "./components/project/AddProjectPD";
 // import PDInputs from "./components/user/PDInputs";
 import PostedProjects from "./components/user/PostedProjects";
 import WBSProjects from "./components/user/WBSProjects";
 import WBSActualSpent from "./components/user/WBSActualSpent";
+import NonPDRecords from "./components/user/NonPDRecords";
+import NonPDInput from "./components/user/NonPDInput";
 import AFCCSheet from "./components/dashboard/AFCCSheet";
 import AFCCSummary from "./components/dashboard/AFCCSummary";
 
@@ -91,6 +92,26 @@ function App() {
             </RoleProtectedRoute>
           }
         />
+        <Route
+          path="/nonpd-records"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <NonPDRecords />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/nonpd-project"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <NonPDInput />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
 
         <Route
           path="/pd-project"
@@ -108,6 +129,16 @@ function App() {
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <PDApprover />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/nonpd-project-approver"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <NonPDApprover />
               <Footer />
             </RoleProtectedRoute>
           }

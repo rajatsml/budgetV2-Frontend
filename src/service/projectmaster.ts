@@ -273,16 +273,36 @@ const UpdateNonPDMaster = async (
   }
 };
 
-const GetNonPDMaster = async (projectID: string, deptId: any) => {
+const GetNonPDMaster = async (
+  projectID: string | undefined,
+  deptId: any,
+  recordId?: string | number,
+) => {
   try {
     const response = await api.get(
-      `${import.meta.env.VITE_API_URL}/api/NonPDMaster?projectId=${projectID}&deptId=${deptId}`,
+      `${import.meta.env.VITE_API_URL}/api/NonPDMaster`,
+      {
+        params: {
+          ...(projectID ? { projectId: projectID } : {}),
+          ...(recordId ? { recordId } : {}),
+          deptId,
+        },
+      },
     );
     return response.data || [];
   } catch (error) {
     console.error("Error fetching NonPD Master:", error);
     return [];
   }
+};
+
+/** Master records used by the non-PD input list. */
+const GetNonPDRecords = async (deptId: string | number) => {
+  const response = await api.get(
+    `${import.meta.env.VITE_API_URL}/api/NonPDMaster/records`,
+    { params: { deptId } },
+  );
+  return response.data?.items || response.data || [];
 };
 
 const DeleteNonPDMaster = async (nonPDDetailId: number) => {
@@ -656,6 +676,7 @@ export {
   SaveNonPDMaster,
   UpdateNonPDMaster,
   GetNonPDMaster,
+  GetNonPDRecords,
   DeleteNonPDMaster,
   UpdateNonPDStatus,
   GetNonPDApprovalHistory,

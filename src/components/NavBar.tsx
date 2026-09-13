@@ -116,6 +116,10 @@ const NavBar = () => {
                   <FolderKanban size={16} />
                   Budget Inputs
                 </Link>
+                <Link to="/nonpd-records" className={navLinkClass("/nonpd-records")}>
+                  <FolderKanban size={16} />
+                  Budget Inputs Non PD
+                </Link>
                 {user?.isBudgetManager && (
                   <Link
                     to="/pd-budget-manager-projects"
