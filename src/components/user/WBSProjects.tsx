@@ -137,7 +137,7 @@ const WBSProjects = () => {
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">My Projects</h1>
+          <h1 className="text-3xl font-bold">Actual Spent</h1>
 
           <p className="text-sm opacity-70 mt-1">
             Total Projects: {filteredProjects.length}

@@ -118,7 +118,7 @@ const AddProjectPD = () => {
     const currentFY = getCurrentFinancialYear();
     let years: number[] = [];
     if (projectType === "ONGOING") {
-      for (let i = -1; i <= 5; i++) {
+      for (let i = -4; i <= 5; i++) {
         years.push(currentFY + i);
       }
     } else {
@@ -307,7 +307,7 @@ const AddProjectPD = () => {
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <span className="w-1.5 h-3.5 bg-error rounded-full"></span>
               <h3 className="font-bold text-xs uppercase tracking-wider text-base-content/70">
-                General Meta
+                General
               </h3>
             </div>
 
@@ -467,7 +467,7 @@ const AddProjectPD = () => {
               <div className="form-control w-full custom-datepicker-container">
                 <label className="label py-1">
                   <span className="label-text text-xs font-semibold text-slate-600">
-                    Start Date (PO / P1 / PPRF Approval Date)
+                    Start Date (Date of P0 / PPRF)
                   </span>
                 </label>
                 <div className="relative">
@@ -503,7 +503,7 @@ const AddProjectPD = () => {
               <div className="form-control w-full custom-datepicker-container">
                 <label className="label py-1">
                   <span className="label-text text-xs font-semibold text-slate-600">
-                    End Date
+                    End Date (Expected SOP)
                   </span>
                 </label>
                 <div className="relative">

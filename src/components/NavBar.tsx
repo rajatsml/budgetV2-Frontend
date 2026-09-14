@@ -71,6 +71,21 @@ const NavBar = () => {
                   <LayoutDashboard size={16} />
                   Dashboard
                 </Link>
+                <Link
+                  to="/add-project-pd"
+                  className={navLinkClass("/add-project-pd")}
+                >
+                  <PlusSquare size={16} />
+                  Add PD Project
+                </Link>
+                <Link
+                  to="/posted-projects"
+                  className={navLinkClass("/posted-projects")}
+                >
+                  <FolderKanban size={16} />
+                  Posted Projects
+                </Link>
+
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setShowProjectsMenu(!showProjectsMenu)}
@@ -114,9 +129,12 @@ const NavBar = () => {
                 </Link>
                 <Link to="/myprojects" className={navLinkClass("/myprojects")}>
                   <FolderKanban size={16} />
-                  Budget Inputs
+                  Budget Inputs PD
                 </Link>
-                <Link to="/nonpd-records" className={navLinkClass("/nonpd-records")}>
+                <Link
+                  to="/nonpd-records"
+                  className={navLinkClass("/nonpd-records")}
+                >
                   <FolderKanban size={16} />
                   Budget Inputs Non PD
                 </Link>
@@ -129,22 +147,6 @@ const NavBar = () => {
                     Actual Spent Projects
                   </Link>
                 )}
-
-                <Link
-                  to="/posted-projects"
-                  className={navLinkClass("/posted-projects")}
-                >
-                  <FolderKanban size={16} />
-                  Posted Projects
-                </Link>
-
-                <Link
-                  to="/add-project-pd"
-                  className={navLinkClass("/add-project-pd")}
-                >
-                  <PlusSquare size={16} />
-                  Add PD Project
-                </Link>
               </>
             )}
           </div>

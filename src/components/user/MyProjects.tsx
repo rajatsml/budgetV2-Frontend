@@ -63,6 +63,11 @@ const MyProjects = () => {
     );
   }, [projects, searchText]);
 
+  const handleProjectDetailNavigation = (projectId: string) => {
+    console.log(projectId);
+    navigate(`/add-project-pd/${projectId}`);
+  };
+
   const handleNavigation = async (
     // projectTypeDesc: string,
     projectID: string,
@@ -240,7 +245,7 @@ const MyProjects = () => {
                 <th>Project</th>
                 <th>Duration</th>
                 <th>Project Status</th>
-                {/* <th>Pending With</th> */}
+                <th>Project Details</th>
                 {/* <th>Created By</th> */}
                 <th>Action</th>
               </tr>
@@ -322,7 +327,16 @@ const MyProjects = () => {
                     </div>
                   </td> */}
 
-                  {/* <td>{project.createdBy}</td> */}
+                  <td>
+                    <button
+                      onClick={() => {
+                        handleProjectDetailNavigation(project?.projectId);
+                      }}
+                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600"
+                    >
+                      Project Details
+                    </button>
+                  </td>
 
                   <td>
                     <button

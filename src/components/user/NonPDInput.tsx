@@ -176,12 +176,12 @@ const NonPDInput = () => {
     user?.deptCode ||
     "";
 
-  const load = async () => {
-    if (!deptId || !masterRecordId) return;
+  const load = async (recordId = masterRecordId) => {
+    if (!deptId || !recordId) return;
     const result = await GetNonPDMaster(
-      projectId || masterRecordId,
+      projectId || undefined,
       deptId,
-      masterRecordId,
+      recordId,
     );
     const list = Array.isArray(result) ? result : result?.items || [];
     setRows(list);
@@ -565,7 +565,7 @@ const NonPDInput = () => {
         if (!recordId) throw new Error("Initialize did not return RecordId");
         setMasterRecordId(recordId);
       }
-      await (editingDetailId
+      const saved = await (editingDetailId
         ? UpdateNonPDMaster(
             {
               ...generalPayload,
@@ -585,7 +585,33 @@ const NonPDInput = () => {
             UserId: user?.userId,
             DraftStatus: "COMPLETE",
           }));
-      await load();
+      const savedRow = {
+        ...generalPayload,
+        ProjectId: projectId,
+        RecordId: recordId,
+        DeptId: String(deptId),
+        UserId: user?.userId,
+        DraftStatus: "COMPLETE",
+        ...(saved && typeof saved === "object" ? saved : {}),
+      };
+      const savedDetailId = String(
+        savedRow.NonPDDetailId ??
+          savedRow.nonPDDetailId ??
+          editingDetailId ??
+          "",
+      );
+      setRows((previous) => {
+        if (!savedDetailId) return [...previous, savedRow];
+        const index = previous.findIndex(
+          (row) =>
+            String(row.NonPDDetailId ?? row.nonPDDetailId) === savedDetailId,
+        );
+        if (index < 0) return [...previous, savedRow];
+        return previous.map((row, rowIndex) =>
+          rowIndex === index ? savedRow : row,
+        );
+      });
+      if (projectId) await load(recordId);
       setForm({ NRTaxPercentage: "18" });
       setEditingDetailId("");
     } catch (error) {

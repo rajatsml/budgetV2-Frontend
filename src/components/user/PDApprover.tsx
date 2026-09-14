@@ -20,7 +20,7 @@ const PDApprover = () => {
   const [rows, setRows] = useState<any[]>([]);
   const [carryForwardRows, setCarryForwardRows] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
-    "Summary" | "Commitments" | "Cashflow" | "Carry Forward"
+    "Summary" | "Commitments" | "Cashflow" | "Carry Forward / Actual Spent"
   >("Summary");
 
   const isPendingWithCurrentUser =
@@ -345,14 +345,37 @@ const PDApprover = () => {
     );
   };
 
+  const getFYTotal = (row: any, prefix: string, fiscalYear: number) => {
+    return (
+      Number(row[`${prefix}_H1FY${fiscalYear}`] || 0) +
+      Number(row[`${prefix}_H2FY${fiscalYear}`] || 0)
+    );
+  };
+
   const getRowSummary = (row: any) => ({
     commitmentTotal:
       getGrandTotal(row, "CommCapex") + getGrandTotal(row, "CommRevex"),
     commitmentFY1:
       getFY1Total(row, "CommCapex") + getFY1Total(row, "CommRevex"),
+    commitmentFY2:
+      getFYTotal(row, "CommCapex", 2) + getFYTotal(row, "CommRevex", 2),
+    commitmentFY3:
+      getFYTotal(row, "CommCapex", 3) + getFYTotal(row, "CommRevex", 3),
+    commitmentFY4:
+      getFYTotal(row, "CommCapex", 4) + getFYTotal(row, "CommRevex", 4),
+    commitmentFY5:
+      getFYTotal(row, "CommCapex", 5) + getFYTotal(row, "CommRevex", 5),
     cashFlowTotal:
       getGrandTotal(row, "CashCapex") + getGrandTotal(row, "CashRevex"),
     cashFlowFY1: getFY1Total(row, "CashCapex") + getFY1Total(row, "CashRevex"),
+    cashFlowFY2:
+      getFYTotal(row, "CashCapex", 2) + getFYTotal(row, "CashRevex", 2),
+    cashFlowFY3:
+      getFYTotal(row, "CashCapex", 3) + getFYTotal(row, "CashRevex", 3),
+    cashFlowFY4:
+      getFYTotal(row, "CashCapex", 4) + getFYTotal(row, "CashRevex", 4),
+    cashFlowFY5:
+      getFYTotal(row, "CashCapex", 5) + getFYTotal(row, "CashRevex", 5),
     commitmentH1FY1:
       Number(row.CommCapex_H1FY1 || 0) + Number(row.CommRevex_H1FY1 || 0),
     commitmentH2FY1:
@@ -363,8 +386,9 @@ const PDApprover = () => {
       Number(row.CashCapex_H2FY1 || 0) + Number(row.CashRevex_H2FY1 || 0),
   });
 
-  const tabs: Array<"Summary" | "Commitments" | "Cashflow" | "Carry Forward"> =
-    ["Summary", "Commitments", "Cashflow", "Carry Forward"];
+  const tabs: Array<
+    "Summary" | "Commitments" | "Cashflow" | "Carry Forward / Actual Spent"
+  > = ["Summary", "Commitments", "Cashflow", "Carry Forward / Actual Spent"];
 
   return (
     <div className="p-4 space-y-4">
@@ -513,6 +537,25 @@ const PDApprover = () => {
                       <th className="border border-red-400 text-center">
                         Project Cash Flow FY1 <br /> (Capex + Revex)
                       </th>
+                      {[2, 3, 4, 5].map((fiscalYear) => (
+                        <th
+                          key={`commitment-fy${fiscalYear}`}
+                          className="border border-red-400 text-center"
+                        >
+                          Project Commitment FY{fiscalYear} <br /> (Capex +
+                          Revex)
+                        </th>
+                      ))}
+
+                      {[2, 3, 4, 5].map((fiscalYear) => (
+                        <th
+                          key={`cash-flow-fy${fiscalYear}`}
+                          className="border border-red-400 text-center"
+                        >
+                          Project Cash Flow FY{fiscalYear} <br /> (Capex +
+                          Revex)
+                        </th>
+                      ))}
                       {/* <th className="border border-red-400 text-center">
                         Commitment <br /> H1 FY1
                       </th>
@@ -551,6 +594,35 @@ const PDApprover = () => {
                           <td className="border border-slate-200 text-right">
                             {values.cashFlowFY1.toFixed(2)}
                           </td>
+                          {[2, 3, 4, 5].map((fiscalYear) => (
+                            <td
+                              key={`commitment-fy${fiscalYear}`}
+                              className="border border-slate-200 text-right"
+                            >
+                              {values[
+                                `commitmentFY${fiscalYear}` as
+                                  | "commitmentFY2"
+                                  | "commitmentFY3"
+                                  | "commitmentFY4"
+                                  | "commitmentFY5"
+                              ].toFixed(2)}
+                            </td>
+                          ))}
+
+                          {[2, 3, 4, 5].map((fiscalYear) => (
+                            <td
+                              key={`cash-flow-fy${fiscalYear}`}
+                              className="border border-slate-200 text-right"
+                            >
+                              {values[
+                                `cashFlowFY${fiscalYear}` as
+                                  | "cashFlowFY2"
+                                  | "cashFlowFY3"
+                                  | "cashFlowFY4"
+                                  | "cashFlowFY5"
+                              ].toFixed(2)}
+                            </td>
+                          ))}
                           {/* <td className="border border-slate-200 text-right">
                             {values.commitmentH1FY1.toFixed(2)}
                           </td>
@@ -863,7 +935,7 @@ const PDApprover = () => {
             </div>
           )}
 
-          {activeTab === "Carry Forward" && (
+          {activeTab === "Carry Forward / Actual Spent" && (
             <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
               <div className="max-h-175 overflow-auto">
                 <table className="table table-zebra table-xs w-full text-[11px]">
@@ -1082,6 +1154,33 @@ const PDApprover = () => {
         </div>
       )}
 
+      {/* ── Approver Actions ───────────────────────────── */}
+      {isPendingWithCurrentUser && (
+        <div className="mt-4 border border-slate-200 rounded p-4 bg-white  mx-auto">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Remarks
+          </label>
+          <textarea
+            rows={1}
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+            placeholder="Enter your remarks..."
+            className="textarea text-xs textarea-bordered w-full rounded"
+          />
+          <div className="flex gap-3 mt-4">
+            <button
+              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+              onClick={handleApprove}
+            >
+              Approve
+            </button>
+            <button className="btn btn-sm" onClick={handleReviewBack}>
+              Review Back
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Approval History ───────────────────────────── */}
       {approvalHistory.length > 0 && (
         <div className="mt-6 border border-slate-200 rounded bg-white overflow-hidden">
@@ -1119,33 +1218,6 @@ const PDApprover = () => {
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-      )}
-
-      {/* ── Approver Actions ───────────────────────────── */}
-      {isPendingWithCurrentUser && (
-        <div className="mt-4 border border-slate-200 rounded p-4 bg-white max-w-2xl mx-auto">
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Remarks
-          </label>
-          <textarea
-            rows={1}
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-            placeholder="Enter your remarks..."
-            className="textarea text-xs textarea-bordered w-full rounded-xl"
-          />
-          <div className="flex gap-3 mt-4">
-            <button
-              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
-              onClick={handleApprove}
-            >
-              Approve
-            </button>
-            <button className="btn btn-sm" onClick={handleReviewBack}>
-              Review Back
-            </button>
           </div>
         </div>
       )}

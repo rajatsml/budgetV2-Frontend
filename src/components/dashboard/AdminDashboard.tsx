@@ -59,10 +59,15 @@ const AdminDashboard = () => {
 
       // Temporary fallback until dropdown API is plugged in
       setFinancialYears([
-        { id: 1, name: "2025-26" },
-        { id: 2, name: "2026-27" },
-        { id: 3, name: "2027-28" },
-        { id: 4, name: "2028-29" },
+        { id: 1, name: "2022-23" },
+        { id: 2, name: "2023-24" },
+        { id: 3, name: "2024-25" },
+        { id: 4, name: "2025-26" },
+        { id: 5, name: "2026-27" },
+        { id: 6, name: "2027-28" },
+        { id: 7, name: "2028-29" },
+        { id: 8, name: "2029-30" },
+        { id: 9, name: "2030-31" },
       ]);
     } catch (error) {
       console.error("Error loading financial years", error);

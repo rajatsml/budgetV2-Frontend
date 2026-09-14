@@ -2159,7 +2159,7 @@ const PDProjectDetail = () => {
                     className={`tab ${activeTab === 2 ? "font-semibold bg-red-500 text-white" : "text-gray-900 bg-white border shadow-sm border-gray-300"}`}
                     checked={activeTab === 2}
                     onClick={() => changeTab(2)}
-                    aria-label="Carry Forward"
+                    aria-label="Carry Forward/Actual Spent"
                   />
                   {canEdit && (
                     <div className="tab-content border-base-300 bg-base-100 p-4">

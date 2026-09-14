@@ -83,6 +83,38 @@ function App() {
         />
 
         <Route
+          path="/posted-projects"
+          element={
+            <RoleProtectedRoute allowedRoles={["Admin"]}>
+              <NavBar />
+              <PostedProjects />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-project-pd"
+          element={
+            <RoleProtectedRoute allowedRoles={["Admin"]}>
+              <NavBar />
+              <AddProjectPD />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/add-project-pd/:projectId?"
+          element={
+            <RoleProtectedRoute allowedRoles={["Admin", "User"]}>
+              <NavBar />
+              <AddProjectPD />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
           path="/myprojects"
           element={
             <RoleProtectedRoute allowedRoles={["User"]}>
@@ -159,38 +191,6 @@ function App() {
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <WBSActualSpent />
-              <Footer />
-            </RoleProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/posted-projects"
-          element={
-            <RoleProtectedRoute allowedRoles={["User"]}>
-              <NavBar />
-              <PostedProjects />
-              <Footer />
-            </RoleProtectedRoute>
-          }
-        />
-        <Route
-          path="/add-project-pd"
-          element={
-            <RoleProtectedRoute allowedRoles={["User"]}>
-              <NavBar />
-              <AddProjectPD />
-              <Footer />
-            </RoleProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/add-project-pd/:projectId?"
-          element={
-            <RoleProtectedRoute allowedRoles={["User"]}>
-              <NavBar />
-              <AddProjectPD />
               <Footer />
             </RoleProtectedRoute>
           }

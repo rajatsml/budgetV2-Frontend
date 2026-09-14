@@ -177,10 +177,12 @@ const ProjectDetails = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="table table-zebra w-full">
+            <table className="table table-zebra w-full border-collapse">
               <thead>
                 <tr>
                   <th>Department</th>
+                  <th>Total Commitment (5 Yrs)</th>
+                  <th>Total CashFlow (5 Yrs)</th>
                   <th>Status</th>
                   <th>Pending With</th>
                 </tr>
@@ -190,6 +192,8 @@ const ProjectDetails = () => {
                 {departmentData.map((dept: any, index: number) => (
                   <tr key={index}>
                     <td className="font-medium">{dept.deptName}</td>
+                    <td className="font-medium">{dept.totalCommitment}</td>
+                    <td className="font-medium">{dept.totalCashFlow}</td>
 
                     <td>
                       <span

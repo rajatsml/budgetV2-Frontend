@@ -19,9 +19,9 @@ const WBSActualSpent = () => {
 
   const [rows, setRows] = useState<any[]>([]);
   const [carryForwardRows, setCarryForwardRows] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"Carry Forward" | "Summary">(
-    "Carry Forward",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "Carry Forward / Actual Spent" | "Summary"
+  >("Carry Forward / Actual Spent");
 
   const isPendingWithCurrentUser =
     data?.status === "PENDING WITH BUDGET MANAGER" &&
@@ -281,7 +281,10 @@ const WBSActualSpent = () => {
       Number(row.CashCapex_H2FY1 || 0) + Number(row.CashRevex_H2FY1 || 0),
   });
 
-  const tabs: Array<"Summary" | "Carry Forward"> = ["Summary", "Carry Forward"];
+  const tabs: Array<"Summary" | "Carry Forward / Actual Spent"> = [
+    "Summary",
+    "Carry Forward / Actual Spent",
+  ];
 
   return (
     <div className="p-4 space-y-4">
@@ -485,7 +488,7 @@ const WBSActualSpent = () => {
             </div>
           )}
 
-          {activeTab === "Carry Forward" && (
+          {activeTab === "Carry Forward / Actual Spent" && (
             <div className="border border-slate-300 bg-white overflow-hidden rounded text-xs">
               <div className="max-h-175 overflow-auto">
                 <table className="table table-zebra table-xs w-full text-[11px]">
@@ -730,6 +733,33 @@ const WBSActualSpent = () => {
         </div>
       )}
 
+      {/* ── Approver Actions ───────────────────────────── */}
+      {isPendingWithCurrentUser && (
+        <div className="mt-4 border border-slate-200 rounded p-4 bg-white mx-auto">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Remarks
+          </label>
+          <textarea
+            rows={1}
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+            placeholder="Enter your remarks..."
+            className="textarea text-xs textarea-bordered w-full rounded"
+          />
+          <div className="flex gap-3 mt-4">
+            <button
+              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
+              onClick={handleApprove}
+            >
+              Approve
+            </button>
+            <button className="btn btn-sm" onClick={handleReviewBack}>
+              Review Back
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Approval History ───────────────────────────── */}
       {approvalHistory.length > 0 && (
         <div className="mt-6 border border-slate-200 rounded bg-white overflow-hidden">
@@ -767,33 +797,6 @@ const WBSActualSpent = () => {
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-      )}
-
-      {/* ── Approver Actions ───────────────────────────── */}
-      {isPendingWithCurrentUser && (
-        <div className="mt-4 border border-slate-200 rounded p-4 bg-white max-w-2xl mx-auto">
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Remarks
-          </label>
-          <textarea
-            rows={1}
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-            placeholder="Enter your remarks..."
-            className="textarea text-xs textarea-bordered w-full rounded-xl"
-          />
-          <div className="flex gap-3 mt-4">
-            <button
-              className="btn btn-sm bg-red-500 text-white border-red-500 hover:bg-red-600"
-              onClick={handleApprove}
-            >
-              Approve
-            </button>
-            <button className="btn btn-sm" onClick={handleReviewBack}>
-              Review Back
-            </button>
           </div>
         </div>
       )}
