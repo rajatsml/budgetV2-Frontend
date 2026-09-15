@@ -46,9 +46,9 @@ const NavBar = () => {
   }, []);
 
   const navLinkClass = (path: string) =>
-    `flex items-center gap-2 rounded px-4 py-2 text-sm font-medium transition-all duration-200 ${
+    `flex items-center gap-2 rounded px-4 py-2 text-xs font-medium transition-all duration-200 ${
       location.pathname === path
-        ? "bg-rose-50 text-rose-600 shadow-sm border border-rose-100"
+        ? "bg-rose-50 text-rose-600 shadow-xs border border-rose-100"
         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
     }`;
 
@@ -59,7 +59,7 @@ const NavBar = () => {
         <div className="flex items-center gap-8">
           <Link
             to="/home"
-            className="text-lg font-bold tracking-tight text-rose-600 hover:opacity-90"
+            className="text-xs font-bold tracking-tight text-rose-600 hover:opacity-90"
           >
             SML Mahindra Limited
           </Link>
@@ -89,7 +89,7 @@ const NavBar = () => {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setShowProjectsMenu(!showProjectsMenu)}
-                    className=" hover:cursor-pointer flex items-center gap-2 rounded px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    className=" hover:cursor-pointer flex items-center gap-2 rounded px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   >
                     <FolderKanban size={16} />
                     Project Views
@@ -101,17 +101,17 @@ const NavBar = () => {
                   </button>
 
                   {showProjectsMenu && (
-                    <div className="absolute left-0 top-full mt-2 w-40 rounded border border-slate-200 bg-white shadow-lg z-50 p-2">
+                    <div className="absolute left-0 top-full mt-2 w-40 rounded border border-slate-200 bg-white shadow-xs z-50 p-2">
                       <Link
                         to="/afcc"
-                        className="block px-4 py-2 text-sm hover:bg-slate-100"
+                        className="block px-4 py-2 text-xs hover:bg-slate-100"
                       >
                         AFCC Sheet
                       </Link>
 
                       <Link
                         to="/afcc-summary"
-                        className="block px-4 py-2 text-sm hover:bg-slate-100"
+                        className="block px-4 py-2 text-xs hover:bg-slate-100"
                       >
                         AFCC Summary
                       </Link>
@@ -159,7 +159,7 @@ const NavBar = () => {
             <UserCircle2 size={36} className="text-slate-400 shrink-0" />
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-slate-800 max-w-100 truncate">
+                <span className="text-xs font-semibold text-slate-800 max-w-100 truncate">
                   {user?.employeeName || "Guest"}
                   {user?.userId && (
                     <span className="ml-1 text-xs font-normal text-slate-500">
@@ -184,7 +184,7 @@ const NavBar = () => {
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-slate-800 hover:shadow-sm"
+            className="flex items-center gap-2 rounded bg-slate-900 px-4 py-2 text-xs font-medium text-white transition-all duration-200 hover:bg-slate-800 hover:shadow-xs"
           >
             <LogOut size={16} />
             Logout

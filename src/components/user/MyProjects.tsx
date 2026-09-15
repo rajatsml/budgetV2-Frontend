@@ -201,13 +201,13 @@ const MyProjects = () => {
     }
   };
   return (
-    <div className="p-6 min-h-screen">
+    <div className="ui-screen min-h-screen p-6">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">My Projects</h1>
+          <h1 className="text-sm font-bold">My Projects</h1>
 
-          <p className="text-sm opacity-70 mt-1">
+          <p className="mt-1 text-xs opacity-70">
             Total Projects: {filteredProjects.length}
           </p>
         </div>
@@ -215,7 +215,7 @@ const MyProjects = () => {
         <input
           type="text"
           placeholder="Search Project..."
-          className="input input-bordered w-full max-w-md"
+          className="input input-bordered input-sm w-full max-w-md"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
@@ -232,7 +232,7 @@ const MyProjects = () => {
         </div>
       ) : (
         <div className="overflow-x-auto rounded border border-base-300 bg-base-100 shadow">
-          <table className="table table-zebra table-pin-rows">
+          <table className="table table-xs table-zebra min-w-max">
             <thead>
               <tr>
                 <th>#</th>
@@ -331,7 +331,7 @@ const MyProjects = () => {
                       onClick={() => {
                         handleProjectDetailNavigation(project?.projectId);
                       }}
-                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600"
+                      className="btn btn-sm "
                     >
                       Project Details
                     </button>

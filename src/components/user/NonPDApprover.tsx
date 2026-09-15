@@ -153,7 +153,7 @@ const NonPDApprover = () => {
   }
 
   return (
-    <main className="space-y-4 p-4">
+    <main className="ui-screen space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Non-PD Approval</h1>
         <span className="font-semibold">
@@ -178,9 +178,6 @@ const NonPDApprover = () => {
             {tab}
           </button>
         ))}
-        <p className="rounded bg-red-500 p-2 text-sm font-semibold text-white">
-          NOTE - Entered values are without GST and are in Cr.
-        </p>
       </div>
 
       <div className="max-h-[70vh] overflow-auto rounded border border-slate-300">

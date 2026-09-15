@@ -97,15 +97,15 @@ const NonPDRecords = () => {
   };
 
   return (
-    <main className="min-h-screen p-6">
+    <main className="ui-screen min-h-screen p-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Budget Inputs Non PD</h1>
-          <p className="mt-1 text-sm opacity-70">Saved non-PD budget records</p>
+          <h1 className="text-sm font-bold">Budget Inputs Non PD</h1>
+          <p className="mt-1 text-xs opacity-70">Saved non-PD budget records</p>
         </div>
         {nonPDMakerRole && (
           <button
-            className="btn bg-red-500 text-white hover:bg-red-600"
+            className="btn btn-sm bg-red-500 text-white hover:bg-red-600"
             onClick={() => open()}
           >
             Add New
@@ -113,7 +113,7 @@ const NonPDRecords = () => {
         )}
       </div>
       <input
-        className="input input-bordered mb-4 w-full max-w-md"
+        className="input input-bordered input-sm mb-4 w-full max-w-md"
         placeholder="Search records..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
@@ -124,7 +124,7 @@ const NonPDRecords = () => {
         </div>
       ) : (
         <div className="overflow-x-auto rounded border border-base-300 bg-base-100 shadow">
-          <table className="table table-zebra min-w-max">
+          <table className="table table-xs table-zebra min-w-max">
             <thead>
               <tr>
                 <th>#</th>

@@ -98,8 +98,36 @@ const derivedBudgetFields: Field[] = [
 ];
 
 const numberValue = (value: unknown) => Number(value || 0);
+const amountValue = (value: unknown) => numberValue(value).toFixed(2);
 const totalOf = (values: unknown[]): number =>
   values.reduce<number>((total, value) => total + numberValue(value), 0);
+const detailId = (row: Record<string, unknown>) => {
+  const key = Object.keys(row).find(
+    (candidate) => candidate.toLowerCase() === "nonpddetailid",
+  );
+  return key ? String(row[key] ?? "") : "";
+};
+
+const findSavedRow = (value: unknown): Record<string, unknown> => {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const match = findSavedRow(item);
+      if (detailId(match)) return match;
+    }
+    return {};
+  }
+  if (!value || typeof value !== "object") return {};
+
+  const object = value as Record<string, unknown>;
+  if (detailId(object)) return object;
+
+  for (const nested of Object.values(object)) {
+    const match = findSavedRow(nested);
+    if (detailId(match)) return match;
+  }
+
+  return {};
+};
 
 const dropdownTypes: Record<string, string> = {
   Division: "8",
@@ -177,20 +205,23 @@ const NonPDInput = () => {
     "";
 
   const load = async (recordId = masterRecordId) => {
-    if (!deptId || !recordId) return;
+    if (!deptId || !recordId) return [];
     const result = await GetNonPDMaster(
       projectId || undefined,
       deptId,
       recordId,
     );
     const list = Array.isArray(result) ? result : result?.items || [];
-    setRows(list);
+    if (list.length > 0) {
+      setRows(list);
+    }
     if (editingDetailId) {
       const row = list.find(
-        (item: any) => String(item.NonPDDetailId) === editingDetailId,
+        (item: any) => String(detailId(item)) === editingDetailId,
       );
       if (row) setForm(row);
     }
+    return list;
   };
 
   const submitForApproval = async () => {
@@ -498,19 +529,36 @@ const NonPDInput = () => {
     );
   };
 
-  const financialTotal = (prefix: "Commitment" | "CashFlow") =>
+  const financialTotalFor = (
+    values: Record<string, any>,
+    prefix: "Commitment" | "CashFlow",
+  ) =>
     totalOf([
-      totalOf(months.slice(0, 6).map(([key]) => budgetForm[`${key}${prefix}`])),
-      totalOf(months.slice(6).map(([key]) => budgetForm[`${key}${prefix}`])),
-      ...halfYears.map(([key]) => budgetForm[`${prefix}_${key}`]),
+      totalOf(months.slice(0, 6).map(([key]) => values[`${key}${prefix}`])),
+      totalOf(months.slice(6).map(([key]) => values[`${key}${prefix}`])),
+      ...halfYears.map(([key]) => values[`${prefix}_${key}`]),
     ]);
+  const financialFy1For = (
+    values: Record<string, any>,
+    prefix: "Commitment" | "CashFlow",
+  ) =>
+    totalOf(months.map(([key]) => values[`${key}${prefix}`]));
+  const financialFy1H1For = (
+    values: Record<string, any>,
+    prefix: "Commitment" | "CashFlow",
+  ) => totalOf(months.slice(0, 6).map(([key]) => values[`${key}${prefix}`]));
+  const financialFy1H2For = (
+    values: Record<string, any>,
+    prefix: "Commitment" | "CashFlow",
+  ) => totalOf(months.slice(6).map(([key]) => values[`${key}${prefix}`]));
+  const financialTotal = (prefix: "Commitment" | "CashFlow") =>
+    financialTotalFor(budgetForm, prefix);
   const financialFy1 = (prefix: "Commitment" | "CashFlow") =>
-    totalOf(months.slice(0, 6).map(([key]) => budgetForm[`${key}${prefix}`])) +
-    totalOf(months.slice(6).map(([key]) => budgetForm[`${key}${prefix}`]));
+    financialFy1For(budgetForm, prefix);
   const financialFy1H1 = (prefix: "Commitment" | "CashFlow") =>
-    totalOf(months.slice(0, 6).map(([key]) => budgetForm[`${key}${prefix}`]));
+    financialFy1H1For(budgetForm, prefix);
   const financialFy1H2 = (prefix: "Commitment" | "CashFlow") =>
-    totalOf(months.slice(6).map(([key]) => budgetForm[`${key}${prefix}`]));
+    financialFy1H2For(budgetForm, prefix);
   const savedHalfYearValue = (
     row: Record<string, any>,
     prefix: "Commitment" | "CashFlow",
@@ -539,7 +587,7 @@ const NonPDInput = () => {
     }
     setSaving(true);
     try {
-      const generalPayload = {
+      const generalPayload: Record<string, unknown> = {
         ...form,
         NRTaxPercentage:
           form.NRTaxPercentage === "" || form.NRTaxPercentage == null
@@ -585,6 +633,7 @@ const NonPDInput = () => {
             UserId: user?.userId,
             DraftStatus: "COMPLETE",
           }));
+      const responseRow = findSavedRow(saved);
       const savedRow = {
         ...generalPayload,
         ProjectId: projectId,
@@ -592,26 +641,37 @@ const NonPDInput = () => {
         DeptId: String(deptId),
         UserId: user?.userId,
         DraftStatus: "COMPLETE",
-        ...(saved && typeof saved === "object" ? saved : {}),
+        ...responseRow,
       };
-      const savedDetailId = String(
-        savedRow.NonPDDetailId ??
-          savedRow.nonPDDetailId ??
-          editingDetailId ??
-          "",
-      );
+      let savedDetailId = detailId(savedRow) || editingDetailId;
+
+      if (!savedDetailId) {
+        const refreshedRows = await load(recordId);
+        const matchingRow = refreshedRows.find(
+          (row: any) =>
+            row.RecordId === recordId &&
+            row.ProjectName === generalPayload.ProjectName &&
+            row.ItemDescription === generalPayload.ItemDescription,
+        );
+        if (matchingRow) {
+          Object.assign(savedRow, matchingRow);
+          savedDetailId = detailId(savedRow);
+        }
+      }
+
       setRows((previous) => {
         if (!savedDetailId) return [...previous, savedRow];
         const index = previous.findIndex(
-          (row) =>
-            String(row.NonPDDetailId ?? row.nonPDDetailId) === savedDetailId,
+          (row) => detailId(row) === savedDetailId,
         );
         if (index < 0) return [...previous, savedRow];
         return previous.map((row, rowIndex) =>
           rowIndex === index ? savedRow : row,
         );
       });
-      if (projectId) await load(recordId);
+      if (savedDetailId) {
+        await load(recordId);
+      }
       setForm({ NRTaxPercentage: "18" });
       setEditingDetailId("");
     } catch (error) {
@@ -623,7 +683,13 @@ const NonPDInput = () => {
   };
 
   const selectBudgetRow = (row: any) => {
-    const id = String(row.NonPDDetailId);
+    const id = String(detailId(row));
+    if (!id) {
+      alert(
+        "The saved general row has no detail ID. Please refresh and try again.",
+      );
+      return;
+    }
     setSelectedRowId(id);
     setBudgetForm(row);
   };
@@ -645,9 +711,10 @@ const NonPDInput = () => {
     }
     setSaving(true);
     try {
-      const row = rows.find(
-        (item) => String(item.NonPDDetailId) === selectedRowId,
-      );
+      const row = rows.find((item) => String(detailId(item)) === selectedRowId);
+      if (!row || !detailId(row)) {
+        throw new Error("Selected general row has no detail ID");
+      }
       await UpdateNonPDMaster(
         {
           ...row,
@@ -659,9 +726,25 @@ const NonPDInput = () => {
         },
         selectedRowId,
       );
+      const updatedValues = { ...row, ...budgetForm };
+      const updatedRow = {
+        ...updatedValues,
+        TotalCommitment: financialTotalFor(updatedValues, "Commitment"),
+        TotalCashFlow: financialTotalFor(updatedValues, "CashFlow"),
+        FY1Commitment: financialFy1For(updatedValues, "Commitment"),
+        FY1CashFlow: financialFy1For(updatedValues, "CashFlow"),
+        Commitment_Fy1H1: financialFy1H1For(updatedValues, "Commitment"),
+        CashFlow_Fy1H1: financialFy1H1For(updatedValues, "CashFlow"),
+        Commitment_Fy1H2: financialFy1H2For(updatedValues, "Commitment"),
+        CashFlow_Fy1H2: financialFy1H2For(updatedValues, "CashFlow"),
+      };
+      setRows((previous) =>
+        previous.map((item) =>
+          detailId(item) === selectedRowId ? updatedRow : item,
+        ),
+      );
       setBudgetForm({});
       setSelectedRowId("");
-      await load();
     } catch (error) {
       console.error("Non-PD budget save failed", error);
       alert("Unable to save the budget inputs.");
@@ -671,7 +754,7 @@ const NonPDInput = () => {
   };
 
   const editGeneral = (row: any) => {
-    setEditingDetailId(String(row.NonPDDetailId));
+    setEditingDetailId(String(detailId(row)));
     setForm(row);
     setTab(0);
   };
@@ -727,7 +810,7 @@ const NonPDInput = () => {
     return field.numeric ? value.toFixed(2) : "";
   };
   const savedGeneralRows = rows.map((row) => (
-    <tr key={row.NonPDDetailId}>
+    <tr key={detailId(row)}>
       <td>
         {!readOnly && (
           <>
@@ -739,7 +822,7 @@ const NonPDInput = () => {
             </button>
             <button
               className="btn btn-xs"
-              onClick={() => void remove(String(row.NonPDDetailId))}
+              onClick={() => void remove(String(detailId(row)))}
             >
               Delete
             </button>
@@ -787,7 +870,7 @@ const NonPDInput = () => {
     ]),
   ];
   const savedBudgetRows = rows.map((row) => (
-    <tr key={`budget-${row.NonPDDetailId}`}>
+    <tr key={`budget-${detailId(row)}`}>
       {budgetContextFields.map((field) => (
         <td key={field.key}>{row[field.key] ?? "-"}</td>
       ))}
@@ -839,7 +922,7 @@ const NonPDInput = () => {
       .toFixed(2);
 
   return (
-    <main className="min-h-screen space-y-4 p-4">
+    <main className="ui-screen min-h-screen space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Non PD Budget Inputs</h1>
@@ -986,7 +1069,7 @@ const NonPDInput = () => {
               </thead>
               <tbody>
                 {rows.map((row) => {
-                  const id = String(row.NonPDDetailId);
+                  const id = String(detailId(row));
                   return (
                     <tr
                       key={id}
@@ -1040,14 +1123,16 @@ const NonPDInput = () => {
                     <tr key={prefix}>
                       <td>{prefix === "CashFlow" ? "Cash Flow" : prefix}</td>
                       <td className="font-semibold">
-                        {financialTotal(prefix)}
-                      </td>
-                      <td className="font-semibold">{financialFy1(prefix)}</td>
-                      <td className="font-semibold">
-                        {financialFy1H1(prefix)}
+                        {amountValue(financialTotal(prefix))}
                       </td>
                       <td className="font-semibold">
-                        {financialFy1H2(prefix)}
+                        {amountValue(financialFy1(prefix))}
+                      </td>
+                      <td className="font-semibold">
+                        {amountValue(financialFy1H1(prefix))}
+                      </td>
+                      <td className="font-semibold">
+                        {amountValue(financialFy1H2(prefix))}
                       </td>
                       {months.map(([key]) => (
                         <td key={`${prefix}-${key}`}>

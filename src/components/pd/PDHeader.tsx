@@ -28,47 +28,47 @@ const PDHeader: React.FC<PDHeaderProps> = ({
     "w-full h-8 px-3 text-xs bg-white border border-slate-200 rounded outline-none transition-all focus:border-rose-500 focus:ring-2 focus:ring-rose-100";
 
   return (
-    <div className="rounded border border-slate-200 p-4 bg-gray-200 w-1/2">
-      <h3 className="mb-2 text-sm font-semibold text-slate-800">
+    <div className="w-full rounded border border-slate-200 bg-white p-4 shadow-sm">
+      <h3 className="mb-3 text-sm font-semibold text-slate-800">
         Project Information
       </h3>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-5 mb-4">
+      <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-5">
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-xs font-semibold text-slate-600">
             Project ID
           </label>
           <input value={projectID} readOnly className={inputStyle} />
         </div>
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-xs font-semibold text-slate-600">
             Department Name
           </label>
           <input value={deptName} readOnly className={inputStyle} />
         </div>
 
         {/* <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-xs font-semibold text-slate-600">
             Department ID
           </label>
           <input value={deptID} readOnly className={inputStyle} />
         </div> */}
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-xs font-semibold text-slate-600">
             Project Type
           </label>
           <input value={"PD"} readOnly className={inputStyle} />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-xs font-semibold text-slate-600">
             FY Year
           </label>
           <input value={fyYear} readOnly className={inputStyle} />
         </div>
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-xs font-semibold text-slate-600">
             New/Ongoing
           </label>
           <input
@@ -80,21 +80,21 @@ const PDHeader: React.FC<PDHeaderProps> = ({
       </div>
       {/* 
       <div className="mb-4">
-        <label className="mb-2 block text-sm font-medium text-slate-700">
+        <label className="mb-1 block text-xs font-semibold text-slate-600">
           Project Name
         </label>
         <input value={projectName} readOnly className={inputStyle} />
       </div> */}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-slate-600">
             Project Name
           </label>
           <input value={projectName} readOnly className={inputStyle} />
         </div>
-        <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium text-slate-700">
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-slate-600">
             Category
           </label>
           <input value={category} readOnly className={inputStyle} />

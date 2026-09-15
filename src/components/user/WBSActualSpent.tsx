@@ -288,6 +288,24 @@ const WBSActualSpent = () => {
 
   return (
     <div className="p-4 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-sm font-bold text-slate-800">Actual Spent</h1>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+            Status: {data?.status || "-"}
+          </span>
+        </div>
+        <button
+          className="btn btn-sm border border-slate-200 bg-white text-slate-700 shadow-sm"
+          onClick={() => navigate("/pd-budget-manager-projects")}
+        >
+          Back
+        </button>
+      </div>
+      <div className="rounded border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700">
+        Entered values are in Cr without GST
+      </div>
+
       {/* ── Header + Summary ───────────────────────────── */}
       <div className="flex gap-x-2">
         <PDHeader
@@ -302,12 +320,12 @@ const WBSActualSpent = () => {
         />
 
         {/* Summary panel — aligned with new model */}
-        <div className="border border-slate-200 rounded p-4 bg-gray-200 shadow-sm w-1/2">
+        <div className="border border-slate-200 rounded p-4 shadow-sm w-1/2">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Summary</h3>
           <div className="overflow-x-auto rounded border border-base-300 bg-white">
             <table className="table w-full table-xs text-[11px]">
-              <thead>
-                <tr className="bg-base-200 text-xs">
+              <thead className="bg-red-500 text-white">
+                <tr className=" text-xs">
                   <th className="border-r border-base-300 font-semibold text-center">
                     Commitments Capex Total
                   </th>
@@ -341,7 +359,7 @@ const WBSActualSpent = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="hover text-center font-bold text-sm text-slate-800 bg-slate-50">
+                <tr className="hover text-center font-bold text-slate-800 bg-slate-50 text-xs">
                   <td className="border-r border-base-300 py-3">
                     {summary.commCapex.toFixed(2)} Cr
                   </td>

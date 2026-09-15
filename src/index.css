@@ -9,3 +9,100 @@
 body {
   font-family: var(--font-jost);
 }
+
+/* Shared compact layout for budget input and approval screens. */
+.ui-screen {
+  color: #334155;
+}
+
+.ui-screen h1,
+.ui-screen h2,
+.ui-screen h3 {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.ui-screen input,
+.ui-screen select,
+.ui-screen textarea,
+.ui-screen .input,
+.ui-screen .select,
+.ui-screen .textarea {
+  font-size: 0.75rem;
+}
+
+.ui-screen button,
+.ui-screen .btn {
+  min-height: 2rem;
+  height: 2rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.ui-screen [role="tablist"] > button,
+.ui-screen > div > button[aria-selected] {
+  border-color: #fecaca;
+  background-color: #fff;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ui-screen [role="tablist"] > button[aria-selected="true"],
+.ui-screen > div > button[aria-selected="true"] {
+  border-color: #ef4444;
+  background-color: #ef4444;
+  color: #fff;
+}
+
+.ui-screen .tabs-box {
+  gap: 0.5rem;
+  border-color: #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.ui-screen input.tab {
+  height: 2rem;
+  min-height: 2rem;
+  border: 1px solid #cbd5e1;
+  background-color: #fff;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ui-screen input.tab:checked {
+  border-color: #ef4444;
+  background-color: #ef4444;
+  color: #fff;
+}
+
+.ui-screen table {
+  font-size: 0.75rem;
+}
+
+.ui-screen thead {
+  background-color: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+.ui-screen thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ui-screen tbody td,
+.ui-screen tfoot td {
+  font-size: 0.75rem;
+}
+
+.ui-screen .bg-red-500 {
+  background-color: #ef4444;
+}
+
+.ui-screen .hover\:bg-red-600:hover {
+  background-color: #dc2626;
+}
