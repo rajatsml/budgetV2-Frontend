@@ -64,8 +64,7 @@ const MyProjects = () => {
   }, [projects, searchText]);
 
   const handleProjectDetailNavigation = (projectId: string) => {
-    console.log(projectId);
-    navigate(`/add-project-pd/${projectId}`);
+    navigate(`/myprojects/${projectId}`);
   };
 
   const handleNavigation = async (

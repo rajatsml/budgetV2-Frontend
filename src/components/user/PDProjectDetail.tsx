@@ -1924,6 +1924,7 @@ const PDProjectDetail = () => {
           fyYear={data?.FyYear}
           pendingWith={data?.pendingWithUser}
           status={data?.status}
+          isOngoing={data?.isOngoing}
         />
 
         {/* Summary panel — live totals matching new model */}
@@ -2448,7 +2449,7 @@ const PDProjectDetail = () => {
                       </span>
                     </td>
                     <td>{item.Remarks || "-"}</td>
-                    <td>{new Date(item.TDate).toLocaleString()}</td>
+                    <td>{item.TDate}</td>
                   </tr>
                 ))}
               </tbody>

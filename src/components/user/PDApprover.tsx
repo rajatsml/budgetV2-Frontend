@@ -403,6 +403,7 @@ const PDApprover = () => {
           pendingWith={data?.pendingWithUser}
           status={data?.status}
           fyYear={data?.FyYear}
+          isOngoing={data?.isOngoing}
         />
 
         {/* Summary panel — aligned with new model */}
@@ -1213,7 +1214,7 @@ const PDApprover = () => {
                       </span>
                     </td>
                     <td>{item.Remarks || "-"}</td>
-                    <td>{new Date(item.TDate).toLocaleString()}</td>
+                    <td>{item.TDate}</td>
                   </tr>
                 ))}
               </tbody>

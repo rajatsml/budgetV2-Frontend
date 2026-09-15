@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import AllProjects from "./components/project/AllProjects";
 
 import MyProjects from "./components/user/MyProjects";
+import UserProjectDetails from "./components/user/UserProjectDetails";
 import PDProjectDetail from "./components/user/PDProjectDetail";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import PDApprover from "./components/user/PDApprover";
@@ -120,6 +121,16 @@ function App() {
             <RoleProtectedRoute allowedRoles={["User"]}>
               <NavBar />
               <MyProjects />
+              <Footer />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/myprojects/:projectId"
+          element={
+            <RoleProtectedRoute allowedRoles={["User"]}>
+              <NavBar />
+              <UserProjectDetails />
               <Footer />
             </RoleProtectedRoute>
           }
