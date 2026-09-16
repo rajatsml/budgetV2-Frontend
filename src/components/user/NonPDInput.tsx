@@ -22,7 +22,10 @@ const generalFields: Field[] = [
   { key: "Location", label: "Location" },
   { key: "ProjectUnit", label: "Project Unit" },
   { key: "ItemDescription", label: "Item Description" },
-  { key: "CurrentScenerioJustification", label: "Scenario / Justification" },
+  {
+    key: "CurrentScenerioJustification",
+    label: "Current Scenario / Justification for New Requirement",
+  },
   { key: "DeliverablesKPI", label: "Deliverables KPI" },
   { key: "BudgetBasedOn", label: "Budget Based On" },
   { key: "RequestFor", label: "Request For" },
@@ -31,17 +34,15 @@ const generalFields: Field[] = [
   { key: "ExpenditureType", label: "Expenditure Type" },
   { key: "TemplateCategory", label: "Template Category" },
   { key: "ProjectName", label: "Project Name" },
-  { key: "Vital", label: "Vital" },
-  { key: "Essential", label: "Essential" },
-  { key: "Desirable", label: "Desirable" },
+  { key: "Criticality", label: "Criticality" }, // ADDED NEW CATEGORY
   { key: "Quantity", label: "Quantity", numeric: true },
   { key: "UnitOfMeasure", label: "Unit Of Measure" },
-  { key: "UnitRate", label: "Unit Rate", numeric: true },
+  { key: "TypeOfPurchase", label: "Type Of Purchase" },
   { key: "Currency", label: "Currency" },
+  { key: "UnitRate", label: "Unit Rate", numeric: true },
   { key: "ExchangeRate", label: "Exchange Rate", numeric: true },
   { key: "BasicsInLac", label: "Basic In Lacs", numeric: true },
-  { key: "TypeOfPurchase", label: "Type Of Purchase" },
-  { key: "NRTaxPercentage", label: "NR Tax %", numeric: true },
+  { key: "NRTaxPercentage", label: "Tax %", numeric: true },
   { key: "NetCost", label: "Net Cost", numeric: true },
 ];
 
@@ -75,6 +76,28 @@ const fy1HalfYears = [
 ] as const;
 const budgetContextFields = generalFields.slice(0, 6);
 const derivedBudgetFields: Field[] = [
+  { key: "TotalCommitment", label: "Total Project Commitment", numeric: true },
+  { key: "TotalCashFlow", label: "Total Project Cash Flow", numeric: true },
+  { key: "FY1Commitment", label: "FY1 Commitment", numeric: true },
+  { key: "FY2Commitment", label: "FY2 Commitment", numeric: true },
+  { key: "FY3Commitment", label: "FY3 Commitment", numeric: true },
+  { key: "FY4Commitment", label: "FY4 Commitment", numeric: true },
+  { key: "FY5Commitment", label: "FY5 Commitment", numeric: true },
+  { key: "FY1CashFlow", label: "FY1 Cash Flow", numeric: true },
+  { key: "FY2CashFlow", label: "FY2 Cash Flow", numeric: true },
+  { key: "FY3CashFlow", label: "FY3 Cash Flow", numeric: true },
+  { key: "FY4CashFlow", label: "FY4 Cash Flow", numeric: true },
+  { key: "FY5CashFlow", label: "FY5 Cash Flow", numeric: true },
+  { key: "H1FY1Commitment", label: "H1 FY1 Commitment", numeric: true },
+  { key: "H2FY1Commitment", label: "H2 FY1 Commitment", numeric: true },
+  { key: "H1FY2Commitment", label: "H1 FY2 Commitment", numeric: true },
+  { key: "H2FY2Commitment", label: "H2 FY2 Commitment", numeric: true },
+  { key: "H1FY1CashFlow", label: "H1 FY1 Cash Flow", numeric: true },
+  { key: "H2FY1CashFlow", label: "H2 FY1 Cash Flow", numeric: true },
+  { key: "H1FY2CashFlow", label: "H1 FY2 Cash Flow", numeric: true },
+  { key: "H2FY2CashFlow", label: "H2 FY2 Cash Flow", numeric: true },
+];
+const summaryFields: Field[] = [
   { key: "TotalCommitment", label: "Total Project Commitment", numeric: true },
   { key: "TotalCashFlow", label: "Total Project Cash Flow", numeric: true },
   { key: "FY1Commitment", label: "FY1 Commitment", numeric: true },
@@ -144,13 +167,14 @@ const dropdownTypes: Record<string, string> = {
   TypeOfPurchase: "19",
   ExpenditureType: "20",
   ProjectName: "21",
+  Criticality: "22", //ADDED CRITCALITY
 };
 
 const NonPDInput = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const user = useUserStore((store: any) => store.user);
-  const [tab, setTab] = useState<0 | 1>(0);
+  const [tab, setTab] = useState<0 | 1 | 2>(1);
   const [form, setForm] = useState<Record<string, any>>({
     NRTaxPercentage: "18",
   });
@@ -214,6 +238,9 @@ const NonPDInput = () => {
     const list = Array.isArray(result) ? result : result?.items || [];
     if (list.length > 0) {
       setRows(list);
+      setTab(0);
+    } else {
+      setTab(1);
     }
     if (editingDetailId) {
       const row = list.find(
@@ -227,6 +254,40 @@ const NonPDInput = () => {
   const submitForApproval = async () => {
     if (readOnly || !rows.length) {
       alert("Please save at least one row before submitting for approval.");
+      return;
+    }
+    const projectCommitment = rows.reduce(
+      (total, row) =>
+        total +
+        numberValue(
+          row.TotalCommitment ??
+            totalOf([
+              row.FY1Commitment,
+              row.FY2Commitment,
+              row.FY3Commitment,
+              row.FY4Commitment,
+              row.FY5Commitment,
+            ]),
+        ),
+      0,
+    );
+    const projectCashFlow = rows.reduce(
+      (total, row) =>
+        total +
+        numberValue(
+          row.TotalCashFlow ??
+            totalOf([
+              row.FY1CashFlow,
+              row.FY2CashFlow,
+              row.FY3CashFlow,
+              row.FY4CashFlow,
+              row.FY5CashFlow,
+            ]),
+        ),
+      0,
+    );
+    if (projectCashFlow > projectCommitment + 0.000001) {
+      alert("Project CashFlow Cannot be geater than the Project Commitment");
       return;
     }
     setSaving(true);
@@ -541,8 +602,7 @@ const NonPDInput = () => {
   const financialFy1For = (
     values: Record<string, any>,
     prefix: "Commitment" | "CashFlow",
-  ) =>
-    totalOf(months.map(([key]) => values[`${key}${prefix}`]));
+  ) => totalOf(months.map(([key]) => values[`${key}${prefix}`]));
   const financialFy1H1For = (
     values: Record<string, any>,
     prefix: "Commitment" | "CashFlow",
@@ -756,7 +816,7 @@ const NonPDInput = () => {
   const editGeneral = (row: any) => {
     setEditingDetailId(String(detailId(row)));
     setForm(row);
-    setTab(0);
+    setTab(1);
   };
   const remove = async (id: string) => {
     if (readOnly) return;
@@ -809,6 +869,33 @@ const NonPDInput = () => {
     }, 0);
     return field.numeric ? value.toFixed(2) : "";
   };
+  const savedFieldValue = (row: any, field: Field) => {
+    if (field.key === "H1FY1Commitment") {
+      return savedHalfYearValue(row, "Commitment", "Fy1H1");
+    }
+    if (field.key === "H2FY1Commitment") {
+      return savedHalfYearValue(row, "Commitment", "Fy1H2");
+    }
+    if (field.key === "H1FY2Commitment") {
+      return savedHalfYearValue(row, "Commitment", "Fy2H1");
+    }
+    if (field.key === "H2FY2Commitment") {
+      return savedHalfYearValue(row, "Commitment", "Fy2H2");
+    }
+    if (field.key === "H1FY1CashFlow") {
+      return savedHalfYearValue(row, "CashFlow", "Fy1H1");
+    }
+    if (field.key === "H2FY1CashFlow") {
+      return savedHalfYearValue(row, "CashFlow", "Fy1H2");
+    }
+    if (field.key === "H1FY2CashFlow") {
+      return savedHalfYearValue(row, "CashFlow", "Fy2H1");
+    }
+    if (field.key === "H2FY2CashFlow") {
+      return savedHalfYearValue(row, "CashFlow", "Fy2H2");
+    }
+    return row[field.key] ?? "-";
+  };
   const savedGeneralRows = rows.map((row) => (
     <tr key={detailId(row)}>
       <td>
@@ -830,25 +917,7 @@ const NonPDInput = () => {
         )}
       </td>
       {generalFields.concat(derivedBudgetFields).map((field) => (
-        <td key={field.key}>
-          {field.key === "H1FY1Commitment"
-            ? savedHalfYearValue(row, "Commitment", "Fy1H1")
-            : field.key === "H2FY1Commitment"
-              ? savedHalfYearValue(row, "Commitment", "Fy1H2")
-              : field.key === "H1FY2Commitment"
-                ? savedHalfYearValue(row, "Commitment", "Fy2H1")
-                : field.key === "H2FY2Commitment"
-                  ? savedHalfYearValue(row, "Commitment", "Fy2H2")
-                  : field.key === "H1FY1CashFlow"
-                    ? savedHalfYearValue(row, "CashFlow", "Fy1H1")
-                    : field.key === "H2FY1CashFlow"
-                      ? savedHalfYearValue(row, "CashFlow", "Fy1H2")
-                      : field.key === "H1FY2CashFlow"
-                        ? savedHalfYearValue(row, "CashFlow", "Fy2H1")
-                        : field.key === "H2FY2CashFlow"
-                          ? savedHalfYearValue(row, "CashFlow", "Fy2H2")
-                          : (row[field.key] ?? "-")}
-        </td>
+        <td key={field.key}>{savedFieldValue(row, field)}</td>
       ))}
     </tr>
   ));
@@ -899,14 +968,22 @@ const NonPDInput = () => {
         if (key === "FY1" && prefix) {
           return (
             sum +
-            numberValue(row[`FY1${prefix}`] ?? financialRowFy1(row, prefix))
+            numberValue(
+              row[`FY1${prefix}`] ?? financialRowFy1(row, prefix).toFixed(2),
+            )
           );
         }
         if (key === "Fy1H1" && prefix) {
-          return sum + numberValue(savedHalfYearValue(row, prefix, "Fy1H1"));
+          return (
+            sum +
+            numberValue(savedHalfYearValue(row, prefix, "Fy1H1").toFixed(2))
+          );
         }
         if (key === "Fy1H2" && prefix) {
-          return sum + numberValue(savedHalfYearValue(row, prefix, "Fy1H2"));
+          return (
+            sum +
+            numberValue(savedHalfYearValue(row, prefix, "Fy1H2").toFixed(2))
+          );
         }
         return (
           sum +
@@ -952,30 +1029,82 @@ const NonPDInput = () => {
         <button
           type="button"
           aria-selected={tab === 0}
-          className={`rounded border px-4 py-2 text-sm font-medium shadow ${
+          className={`rounded border px-4 hover:cursor-pointer py-2 text-sm font-medium shadow ${
             tab === 0
               ? "border-red-500 bg-red-500 text-white"
               : "border-slate-300 bg-white text-slate-700"
           }`}
           onClick={() => setTab(0)}
         >
-          General
+          Summary
         </button>
         <button
           type="button"
           aria-selected={tab === 1}
-          className={`rounded border px-4 py-2 text-sm font-medium shadow ${
+          className={`rounded border hover:cursor-pointer px-4 py-2 text-sm font-medium shadow ${
             tab === 1
               ? "border-red-500 bg-red-500 text-white"
               : "border-slate-300 bg-white text-slate-700"
           }`}
           onClick={() => setTab(1)}
         >
+          Consolidated
+        </button>
+        <button
+          type="button"
+          aria-selected={tab === 2}
+          className={`rounded border hover:cursor-pointer px-4 py-2 text-sm font-medium shadow ${
+            tab === 2
+              ? "border-red-500 bg-red-500 text-white"
+              : "border-slate-300 bg-white text-slate-700"
+          }`}
+          onClick={() => setTab(2)}
+        >
           Budget Inputs
         </button>
       </div>
 
       {tab === 0 ? (
+        <div className="rounded border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-slate-700">
+            Project Summary
+          </h2>
+          <div className="overflow-x-auto rounded border border-slate-200">
+            <table className="table table-xs table-zebra min-w-max border border-slate-200 [&_td]:border [&_td]:border-slate-200 [&_th]:border [&_th]:border-slate-200">
+              <thead className="bg-red-500 text-xs text-white">
+                <tr>
+                  {summaryFields.map((field) => (
+                    <th key={field.key}>{field.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={`summary-${detailId(row)}`}>
+                    {summaryFields.map((field) => (
+                      <td key={field.key}>{savedFieldValue(row, field)}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="bg-slate-200 text-xs">
+                <tr className="font-semibold">
+                  {summaryFields.map((field) => (
+                    <td key={`summary-total-${field.key}`}>
+                      {savedGeneralTotal(field)}
+                    </td>
+                  ))}
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          {!rows.length && (
+            <p className="mt-4 text-xs text-slate-500">
+              Save consolidated inputs to view the project summary.
+            </p>
+          )}
+        </div>
+      ) : tab === 1 ? (
         <>
           {!readOnly && (
             <div className="overflow-x-auto rounded border border-base-300">
@@ -1140,7 +1269,7 @@ const NonPDInput = () => {
                             <input
                               type="number"
                               step="any"
-                              className="input input-bordered input-xs min-w-24"
+                              className="input input-bordered input-xs w-16"
                               value={budgetForm[`${key}${prefix}`] ?? ""}
                               onChange={(event) =>
                                 setBudgetValue(
@@ -1159,7 +1288,7 @@ const NonPDInput = () => {
                             <input
                               type="number"
                               step="any"
-                              className="input input-bordered input-xs min-w-24"
+                              className="input input-bordered input-xs w-16"
                               value={budgetForm[`${prefix}_${key}`] ?? ""}
                               onChange={(event) =>
                                 setBudgetValue(

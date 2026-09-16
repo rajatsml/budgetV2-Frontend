@@ -103,7 +103,7 @@ const PostedProjects = () => {
                 <th>Project Name</th>
                 <th>Status</th>
                 <th>Financial Year</th>
-                <th>Duration</th>
+                <th>Duration (Estimated)</th>
                 <th>Creation Date</th>
                 <th>Modification Date</th>
                 <th>View</th>

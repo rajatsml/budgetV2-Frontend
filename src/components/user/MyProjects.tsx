@@ -242,7 +242,7 @@ const MyProjects = () => {
                 <th>Financial Year</th>
                 <th>Dept</th>
                 <th>Project</th>
-                <th>Duration</th>
+                <th>Duration (Estimated)</th>
                 <th>Project Status</th>
                 <th>Project Details</th>
                 {/* <th>Created By</th> */}

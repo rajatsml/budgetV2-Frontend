@@ -314,6 +314,64 @@ const PDProjectDetail = () => {
     ).toFixed(2);
   };
 
+  const getTotal = (field: string) =>
+    rows.reduce((sum, row) => sum + Number(row[field] || 0), 0);
+
+  const summaryTotals = {
+    commitmentTotal:
+      getTotal("CommCapex_H1FY1") +
+      getTotal("CommCapex_H2FY1") +
+      getTotal("CommCapex_H1FY2") +
+      getTotal("CommCapex_H2FY2") +
+      getTotal("CommCapex_H1FY3") +
+      getTotal("CommCapex_H2FY3") +
+      getTotal("CommCapex_H1FY4") +
+      getTotal("CommCapex_H2FY4") +
+      getTotal("CommCapex_H1FY5") +
+      getTotal("CommCapex_H2FY5") +
+      getTotal("CommRevex_H1FY1") +
+      getTotal("CommRevex_H2FY1") +
+      getTotal("CommRevex_H1FY2") +
+      getTotal("CommRevex_H2FY2") +
+      getTotal("CommRevex_H1FY3") +
+      getTotal("CommRevex_H2FY3") +
+      getTotal("CommRevex_H1FY4") +
+      getTotal("CommRevex_H2FY4") +
+      getTotal("CommRevex_H1FY5") +
+      getTotal("CommRevex_H2FY5"),
+    cashFlowTotal:
+      getTotal("CashCapex_H1FY1") +
+      getTotal("CashCapex_H2FY1") +
+      getTotal("CashCapex_H1FY2") +
+      getTotal("CashCapex_H2FY2") +
+      getTotal("CashCapex_H1FY3") +
+      getTotal("CashCapex_H2FY3") +
+      getTotal("CashCapex_H1FY4") +
+      getTotal("CashCapex_H2FY4") +
+      getTotal("CashCapex_H1FY5") +
+      getTotal("CashCapex_H2FY5") +
+      getTotal("CashRevex_H1FY1") +
+      getTotal("CashRevex_H2FY1") +
+      getTotal("CashRevex_H1FY2") +
+      getTotal("CashRevex_H2FY2") +
+      getTotal("CashRevex_H1FY3") +
+      getTotal("CashRevex_H2FY3") +
+      getTotal("CashRevex_H1FY4") +
+      getTotal("CashRevex_H2FY4") +
+      getTotal("CashRevex_H1FY5") +
+      getTotal("CashRevex_H2FY5"),
+    commitmentFY1:
+      getTotal("CommCapex_H1FY1") +
+      getTotal("CommCapex_H2FY1") +
+      getTotal("CommRevex_H1FY1") +
+      getTotal("CommRevex_H2FY1"),
+    cashFlowFY1:
+      getTotal("CashCapex_H1FY1") +
+      getTotal("CashCapex_H2FY1") +
+      getTotal("CashRevex_H1FY1") +
+      getTotal("CashRevex_H2FY1"),
+  };
+
   const hasCashFlowValues = (row: any) =>
     Number(getCashFlowTotal(row, "CashCapex")) +
       Number(getCashFlowTotal(row, "CashRevex")) >
@@ -322,8 +380,6 @@ const PDProjectDetail = () => {
   // Live computed totals for the summary panel
   const commCapexTotals = calculateRowTotals(formData.commitmentCapex);
   const commRevexTotals = calculateRowTotals(formData.commitmentRevex);
-  const cfCapexTotals = calculateRowTotals(formData.cashCapex);
-  const cfRevexTotals = calculateRowTotals(formData.cashRevex);
   const hasSavedCashFlow = rows.some(hasCashFlowValues);
   const editableCashFlowRows = rows.filter(
     (row) => !hasCashFlowValues(row) || selectedCashFlowRows[row.PDDetailId],
@@ -767,15 +823,44 @@ const PDProjectDetail = () => {
       cashFlowRevex,
     } = carryForwardForm;
 
-    if (
-      !wbsId ||
-      !fyYear ||
-      !commitmentCapex ||
-      !commitmentRevex ||
-      !cashFlowCapex ||
-      !cashFlowRevex
-    ) {
+    if (!wbsId || !fyYear) {
       alert("Please select a WBS and financial year, then enter amounts.");
+      return;
+    }
+
+    const carryForwardTotal = (row: {
+      commitmentCapex?: unknown;
+      CommitmentCapex?: unknown;
+      commitmentRevex?: unknown;
+      CommitmentRevex?: unknown;
+      cashFlowCapex?: unknown;
+      CashFlowCapex?: unknown;
+      cashFlowRevex?: unknown;
+      CashFlowRevex?: unknown;
+    }) =>
+      Number(row.commitmentCapex ?? row.CommitmentCapex ?? 0) +
+      Number(row.commitmentRevex ?? row.CommitmentRevex ?? 0) +
+      Number(row.cashFlowCapex ?? row.CashFlowCapex ?? 0) +
+      Number(row.cashFlowRevex ?? row.CashFlowRevex ?? 0);
+
+    const existingCarryForwardTotal = carryForwardRows
+      .filter((row) => Number(row.id ?? row.Id) !== editingCarryForwardId)
+      .reduce((total, row) => total + carryForwardTotal(row), 0);
+    const requestedCarryForwardTotal =
+      existingCarryForwardTotal +
+      carryForwardTotal({
+        commitmentCapex,
+        commitmentRevex,
+        cashFlowCapex,
+        cashFlowRevex,
+      });
+    const availableCarryForward =
+      summaryTotals.commitmentTotal - summaryTotals.cashFlowTotal;
+
+    if (requestedCarryForwardTotal > availableCarryForward + 0.000001) {
+      alert(
+        `Carry Forward cannot exceed Project Commitment - Project Cash Flow (${availableCarryForward.toFixed(2)} Cr).`,
+      );
       return;
     }
 
@@ -1947,7 +2032,7 @@ const PDProjectDetail = () => {
           isOngoing={data?.isOngoing}
         />
 
-        {/* Summary panel — live totals matching new model */}
+        {/* Summary panel — live totals matching the saved PD rows */}
         <div className="w-full rounded border border-slate-200 bg-white p-4 shadow-sm xl:w-1/2">
           <h3 className="mb-3 text-sm font-semibold text-slate-700">Summary</h3>
           <div className="overflow-x-auto rounded border border-slate-200">
@@ -1955,32 +2040,32 @@ const PDProjectDetail = () => {
               <thead className="bg-red-500 text-xs">
                 <tr className=" text-xs">
                   <th className="border-r border-base-300 font-semibold text-center">
-                    Commitments Capex Total
+                    Project Commitment Total
                   </th>
                   <th className="border-r border-base-300 font-semibold text-center">
-                    Commitments Revex Total
+                    Project Cash Flow Total
                   </th>
                   <th className="border-r border-base-300 font-semibold text-center">
-                    Cash Flow Capex Total
+                    Project Commitment FY1
                   </th>
                   <th className="border-r border-base-300 font-semibold text-center">
-                    Cash Flow Revex Total
+                    Project Cash Flow FY1
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="text-center font-semibold text-xs text-slate-800">
                   <td className="border-r border-base-300 py-3">
-                    {cfCapexTotals.valueTotal} Cr
+                    {summaryTotals.commitmentTotal.toFixed(2)} Cr
                   </td>
                   <td className="border-r border-base-300 py-3">
-                    {cfRevexTotals.valueTotal} Cr
+                    {summaryTotals.cashFlowTotal.toFixed(2)} Cr
                   </td>
                   <td className="border-r border-base-300 py-3">
-                    {cfCapexTotals.valueTotal} Cr
+                    {summaryTotals.commitmentFY1.toFixed(2)} Cr
                   </td>
                   <td className="border-r border-base-300 py-3">
-                    {cfRevexTotals.valueTotal} Cr
+                    {summaryTotals.cashFlowFY1.toFixed(2)} Cr
                   </td>
                 </tr>
               </tbody>

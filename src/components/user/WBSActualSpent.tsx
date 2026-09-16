@@ -209,6 +209,10 @@ const WBSActualSpent = () => {
   // ─────────────────────────────────────────────────────────
 
   const handleApprove = async () => {
+    if (!remarks.trim()) {
+      alert("Please Enter Remarks");
+      return;
+    }
     if (!isPendingWithCurrentUser) return;
     try {
       const response = await UpdatePDStatus({
@@ -226,6 +230,11 @@ const WBSActualSpent = () => {
   };
 
   const handleReviewBack = async () => {
+    if (!remarks.trim()) {
+      alert("Please Enter Remarks");
+      return;
+    }
+
     if (!isPendingWithCurrentUser) return;
     try {
       const response = await UpdatePDStatus({

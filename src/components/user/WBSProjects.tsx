@@ -174,7 +174,7 @@ const WBSProjects = () => {
                 <th>Financial Year</th>
                 <th>Dept</th>
                 <th>Project</th>
-                <th>Duration</th>
+                <th>Duration (Estimated)</th>
                 <th>Project Status</th>
                 {/* <th>Pending With</th> */}
                 {/* <th>Created By</th> */}

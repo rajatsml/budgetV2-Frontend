@@ -141,11 +141,17 @@ const PDApprover = () => {
       getTotal("CashRevex_H1FY1") +
       getTotal("CashRevex_H2FY1"),
     carryForwardCommitment: carryForwardRows.reduce(
-      (sum, row) => sum + Number(row.commitmentAmt ?? row.CommitmentAmt ?? 0),
+      (sum, row) =>
+        sum +
+        Number(row.commitmentCapex ?? row.CommitmentCapex ?? 0) +
+        Number(row.commitmentRevex ?? row.CommitmentRevex ?? 0),
       0,
     ),
     carryForwardCashFlow: carryForwardRows.reduce(
-      (sum, row) => sum + Number(row.cashFlowAmt ?? row.CashFlowAmt ?? 0),
+      (sum, row) =>
+        sum +
+        Number(row.cashFlowCapex ?? row.CashFlowCapex ?? 0) +
+        Number(row.cashFlowRevex ?? row.CashFlowRevex ?? 0),
       0,
     ),
   };
@@ -155,6 +161,10 @@ const PDApprover = () => {
   // ─────────────────────────────────────────────────────────
 
   const handleApprove = async () => {
+    if (!remarks.trim()) {
+      alert("Please Enter Remarks");
+      return;
+    }
     if (!isPendingWithCurrentUser) return;
     try {
       const response = await UpdatePDStatus({
@@ -172,6 +182,10 @@ const PDApprover = () => {
   };
 
   const handleReviewBack = async () => {
+    if (!remarks.trim()) {
+      alert("Please Enter Remarks");
+      return;
+    }
     if (!isPendingWithCurrentUser) return;
     try {
       const response = await UpdatePDStatus({
